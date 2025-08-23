@@ -1,4 +1,4 @@
-import React from "react";
+
 
 const VisionMision = () => (
   <section id="vision" className="py-16 px-4 md:px-16 bg-gradient-to-br from-[#E6E8F5] via-[#F3F4FB] to-[#fff] min-h-[60vh]">

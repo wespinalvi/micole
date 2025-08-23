@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,7 +62,7 @@ export default function EditarDatosButton({
   alumnoData
 }: EditarDatosButtonProps) {
   const { token } = useAuth();
-  const [datosAlumno, setDatosAlumno] = useState<DatosAlumno | null>(null);
+  const [, setDatosAlumno] = useState<DatosAlumno | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{

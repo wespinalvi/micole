@@ -667,11 +667,11 @@ export default function RegisterStudent() {
                       type="checkbox"
                       id="todas_cuotas"
                       checked={Object.values(formData)
-                        .filter((value, index) => 
+                        .filter((_, index) => 
                           index >= Object.keys(formData).indexOf('c1') && 
                           index <= Object.keys(formData).indexOf('c10')
                         )
-                        .every(value => Number(value) > 0)}
+                        .every((value) => Number(value) > 0)}
                       onChange={(e) => {
                         const checked = e.target.checked;
                         setFormData(prev => {
@@ -737,11 +737,11 @@ export default function RegisterStudent() {
                     Total a Pagar: S/. {(
                       Number(formData.matricula_precio) + 
                       Object.values(formData)
-                        .filter((value, index) => 
+                        .filter((_, index) => 
                           index >= Object.keys(formData).indexOf('c1') && 
                           index <= Object.keys(formData).indexOf('c10')
                         )
-                        .map(value => Number(value))
+                        .map((value) => Number(value))
                         .reduce((sum, value) => sum + value, 0)
                     ).toFixed(2)}
                   </p>
