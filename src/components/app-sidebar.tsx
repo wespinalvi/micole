@@ -30,7 +30,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     try {
       const token = localStorage.getItem('token'); // O donde tengas almacenado el token
       
-      const response = await fetch('https://nodejsback-7gv3.onrender.com/api/auth/logout', {
+      const response = await fetch('https://nodejsback-production.up.railway.app/api/auth/logout', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

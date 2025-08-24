@@ -12,7 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 
 // Configuración de axios
 const apiClient = axios.create({
-  baseURL: 'https://nodejsback-7gv3.onrender.com',
+  baseURL: 'https://nodejsback-production.up.railway.app',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

@@ -7,7 +7,7 @@ const Body = () => {
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-4xl md:text-5xl font-extrabold text-[#3E328C] mb-4">Bienvenidos al Colegio Crayon's</h1>
           <p className="text-lg md:text-xl text-[#2B2461] mb-6">Formando líderes con valores, creatividad y excelencia académica.</p>
-          <a href="#contacto" className="inline-block bg-[#F26513] hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold shadow transition-colors duration-200">Solicita información</a>
+          <a href="https://wa.me/51914791640" className="inline-block bg-[#F26513] hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold shadow transition-colors duration-200">Solicita información</a>
         </div>
         <div className="flex-1 flex justify-center">
           <img src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=500&q=80" alt="Estudiantes felices" className="rounded-2xl shadow-lg w-full max-w-md" />
@@ -45,8 +45,8 @@ const Body = () => {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Preescolar */}
           <div className="bg-[#E6E8F5] rounded-xl p-6 text-center flex flex-col items-center">
-            <img src="https://img.icons8.com/color/96/000000/abc.png" alt="Preescolar" className="mx-auto mb-4" />
-            <h3 className="font-bold text-[#F26513] mb-1 text-xl">Preescolar</h3>
+            <img src="https://img.icons8.com/color/96/000000/abc.png" alt="Inicial" className="mx-auto mb-4" />
+            <h3 className="font-bold text-[#F26513] mb-1 text-xl">Inicial</h3>
             <span className="text-[#3E328C] font-semibold mb-2">3-5 años</span>
             <p className="mb-3">Desarrollo de habilidades básicas a través del juego y la exploración.</p>
             <ul className="text-left text-[#2B2461] mb-4 list-disc list-inside">
@@ -54,71 +54,48 @@ const Body = () => {
               <li>Desarrollo psicomotor</li>
               <li>Socialización</li>
             </ul>
-            <a href="#" className="mt-auto bg-[#F26513] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow transition-colors duration-200">Más Información</a>
+            <a href="https://wa.me/51914791640" className="mt-auto bg-[#F26513] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow transition-colors duration-200">Más Información</a>
           </div>
           {/* Primaria */}
           <div className="bg-[#E6E8F5] rounded-xl p-6 text-center flex flex-col items-center">
             <img src="https://img.icons8.com/color/96/000000/school.png" alt="Primaria" className="mx-auto mb-4" />
             <h3 className="font-bold text-[#F26513] mb-1 text-xl">Primaria</h3>
-            <span className="text-[#3E328C] font-semibold mb-2">6-11 años</span>
+            <span className="text-[#3E328C] font-semibold mb-2">6-12 años</span>
             <p className="mb-3">Formación integral con énfasis en lectoescritura y matemáticas.</p>
             <ul className="text-left text-[#2B2461] mb-4 list-disc list-inside">
               <li>Metodología activa</li>
               <li>Inglés intensivo</li>
               <li>Valores ciudadanos</li>
             </ul>
-            <a href="#" className="mt-auto bg-[#F26513] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow transition-colors duration-200">Más Información</a>
+            <a href="https://wa.me/51914791640" className="mt-auto bg-[#F26513] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow transition-colors duration-200">Más Información</a>
           </div>
           {/* Secundaria */}
           <div className="bg-[#E6E8F5] rounded-xl p-6 text-center flex flex-col items-center">
             <img src="https://img.icons8.com/color/96/000000/graduation-cap.png" alt="Secundaria" className="mx-auto mb-4" />
             <h3 className="font-bold text-[#F26513] mb-1 text-xl">Secundaria</h3>
-            <span className="text-[#3E328C] font-semibold mb-2">12-16 años</span>
+            <span className="text-[#3E328C] font-semibold mb-2">12-18 años</span>
             <p className="mb-3">Preparación académica sólida con orientación vocacional.</p>
             <ul className="text-left text-[#2B2461] mb-4 list-disc list-inside">
               <li>Laboratorios equipados</li>
               <li>Proyectos de investigación</li>
               <li>Liderazgo estudiantil</li>
             </ul>
-            <a href="#" className="mt-auto bg-[#F26513] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow transition-colors duration-200">Más Información</a>
+            <a href="https://wa.me/51914791640" className="mt-auto bg-[#F26513] hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow transition-colors duration-200">Más Información</a>
           </div>
         </div>
       </section>
 
-      {/* Noticias/Eventos */}
-      <section className="py-16 px-6 md:px-12 bg-white max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-[#3E328C] mb-8 text-center">Noticias y Eventos</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div className="bg-[#E6E8F5] rounded-xl p-6 shadow-lg">
-            <div className="bg-[#F26513] text-white text-sm px-3 py-1 rounded-full inline-block mb-3">Evento</div>
-            <h3 className="font-bold text-[#3E328C] mb-2 text-lg">Feria de Ciencias 2025</h3>
-            <p className="text-[#2B2461] mb-3">Nuestros estudiantes presentarán proyectos innovadores en la Feria de Ciencias anual. Una oportunidad para mostrar el talento y la creatividad de nuestros jóvenes científicos.</p>
-            <span className="text-[#F26513] font-semibold">15 de Marzo, 2025</span>
-          </div>
-          <div className="bg-[#E6E8F5] rounded-xl p-6 shadow-lg">
-            <div className="bg-[#3E328C] text-white text-sm px-3 py-1 rounded-full inline-block mb-3">Noticia</div>
-            <h3 className="font-bold text-[#3E328C] mb-2 text-lg">Nuevo Laboratorio de Tecnología</h3>
-            <p className="text-[#2B2461] mb-3">Hemos inaugurado nuestro moderno laboratorio de tecnología con equipos de última generación para potenciar el aprendizaje digital de nuestros estudiantes.</p>
-            <span className="text-[#F26513] font-semibold">Recién inaugurado</span>
-          </div>
-          <div className="bg-[#E6E8F5] rounded-xl p-6 shadow-lg">
-            <div className="bg-green-600 text-white text-sm px-3 py-1 rounded-full inline-block mb-3">Logro</div>
-            <h3 className="font-bold text-[#3E328C] mb-2 text-lg">Campeones en Olimpiadas Matemáticas</h3>
-            <p className="text-[#2B2461] mb-3">Nuestro equipo de matemáticas obtuvo el primer lugar en las Olimpiadas Regionales, demostrando la excelencia académica de nuestra institución.</p>
-            <span className="text-[#F26513] font-semibold">Diciembre, 2024</span>
-          </div>
-        </div>
-      </section>
+   
 
       {/* Galería de fotos */}
       <section className="py-16 px-6 md:px-12 bg-white max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-[#3E328C] mb-8 text-center">Galería</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Imágenes de ejemplo, reemplaza por tus propias fotos */}
-          <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Galería 1" className="rounded-lg h-40 w-full object-cover" />
-          <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=400&q=80" alt="Galería 2" className="rounded-lg h-40 w-full object-cover" />
-          <img src="https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=400&q=80" alt="Galería 3" className="rounded-lg h-40 w-full object-cover" />
-          <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80" alt="Galería 4" className="rounded-lg h-40 w-full object-cover" />
+          <img src="https://res.cloudinary.com/dykfhtdsz/image/upload/v1755996947/01_oa8rts.jpg" alt="Galería 1" className="rounded-lg h-40 w-full object-cover" />
+          <img src="https://res.cloudinary.com/dykfhtdsz/image/upload/v1755996947/04_txhnvz.jpg" alt="Galería 2" className="rounded-lg h-40 w-full object-cover" />
+          <img src="https://res.cloudinary.com/dykfhtdsz/image/upload/v1755996946/03_uigsf1.jpg" alt="Galería 3" className="rounded-lg h-40 w-full object-cover" />
+          <img src="https://res.cloudinary.com/dykfhtdsz/image/upload/v1755996946/02_jsrlhx.jpg" alt="Galería 4" className="rounded-lg h-40 w-full object-cover" />
         </div>
       </section>
 
@@ -152,7 +129,7 @@ const Body = () => {
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <h3 className="font-bold text-[#3E328C] mb-2">Áreas Deportivas</h3>
-            <p className="text-[#2B2461] text-sm">Canchas de fútbol, básquet y vóley, además de un gimnasio para actividades físicas y deportivas.</p>
+            <p className="text-[#2B2461] text-sm">Canchas de fútbol, básquet y vóley, para actividades físicas y deportivas.</p>
           </div>
         </div>
       </section>
@@ -221,17 +198,17 @@ const Body = () => {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Ejemplo de personal, reemplaza por tu equipo real */}
           <div className="flex flex-col items-center bg-[#E6E8F5] rounded-xl p-6">
-            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Directora" className="rounded-full h-24 w-24 mb-4 object-cover" />
-            <h3 className="font-bold text-[#F26513]">Lic. María Pérez</h3>
-            <span className="text-[#2B2461]">Directora</span>
+            <img src="https://res.cloudinary.com/dykfhtdsz/image/upload/v1755997152/icon-7797704_640_nqtyoo.png" alt="Directora" className="rounded-full h-24 w-24 mb-4 object-cover" />
+            <h3 className="font-bold text-[#F26513]">Pedro Vilcapoma Malpartida</h3>
+            <span className="text-[#2B2461]">Director</span>
           </div>
           <div className="flex flex-col items-center bg-[#E6E8F5] rounded-xl p-6">
-            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profesor" className="rounded-full h-24 w-24 mb-4 object-cover" />
+            <img src="https://res.cloudinary.com/dykfhtdsz/image/upload/v1755997152/icon-7797704_640_nqtyoo.png" alt="Profesor" className="rounded-full h-24 w-24 mb-4 object-cover" />
             <h3 className="font-bold text-[#F26513]">Prof. Juan López</h3>
             <span className="text-[#2B2461]">Profesor de Matemática</span>
           </div>
           <div className="flex flex-col items-center bg-[#E6E8F5] rounded-xl p-6">
-            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Profesora" className="rounded-full h-24 w-24 mb-4 object-cover" />
+            <img src="https://res.cloudinary.com/dykfhtdsz/image/upload/v1755997152/icon-7797704_640_nqtyoo.png" alt="Profesora" className="rounded-full h-24 w-24 mb-4 object-cover" />
             <h3 className="font-bold text-[#F26513]">Prof. Ana Torres</h3>
             <span className="text-[#2B2461]">Profesora de Inicial</span>
           </div>
@@ -245,7 +222,8 @@ const Body = () => {
           {/* Puedes reemplazar el iframe por un componente de mapa más avanzado si lo deseas */}
           <iframe
             title="Mapa Colegio Crayon's"
-            src="https://www.google.com/maps?q=JR.+JOSE+PARDO+NRO.+181+JUNIN+-+SATIPO&output=embed"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3920.547317541468!2d-74.6466083!3d-11.258158!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x910bc110abf95455%3A0xdd33d47930091cf9!2sI.E.P.%20CRAYOLITAS%20-%20CRAYONS!5e0!3m2!1ses!2spe!4v1724260000000!5m2!1ses!2spe"
+            
             width="100%"
             height="300"
             className="rounded-xl border-0 shadow w-full max-w-2xl"
@@ -262,21 +240,21 @@ const Body = () => {
         <div className="grid md:grid-cols-4 gap-8">
           <div className="text-center">
             <div className="bg-[#3E328C] text-white p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl font-bold">25+</span>
+              <span className="text-3xl font-bold">13+</span>
             </div>
             <h3 className="font-bold text-[#3E328C] mb-2">Años de Experiencia</h3>
-            <p className="text-[#2B2461] text-sm">Formando generaciones con excelencia educativa desde 1999</p>
+            <p className="text-[#2B2461] text-sm">Formando generaciones con excelencia educativa desde 2011</p>
           </div>
           <div className="text-center">
             <div className="bg-[#F26513] text-white p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl font-bold">500+</span>
+              <span className="text-3xl font-bold">300+</span>
             </div>
             <h3 className="font-bold text-[#3E328C] mb-2">Estudiantes</h3>
             <p className="text-[#2B2461] text-sm">Alumnos activos en todos los niveles educativos</p>
           </div>
           <div className="text-center">
             <div className="bg-[#3E328C] text-white p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl font-bold">45+</span>
+              <span className="text-3xl font-bold">25+</span>
             </div>
             <h3 className="font-bold text-[#3E328C] mb-2">Docentes</h3>
             <p className="text-[#2B2461] text-sm">Profesionales calificados y comprometidos</p>
@@ -292,7 +270,7 @@ const Body = () => {
         
         <div className="mt-12 bg-[#E6E8F5] rounded-xl p-8 text-center">
           <h3 className="text-2xl font-bold text-[#3E328C] mb-4">Reconocimientos y Certificaciones</h3>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 justify-center">
             <div className="bg-white rounded-lg p-4">
               <div className="bg-[#F26513] text-white p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
@@ -307,13 +285,7 @@ const Body = () => {
               <h4 className="font-bold text-[#3E328C] mb-2">Premio a la Excelencia</h4>
               <p className="text-[#2B2461] text-sm">Reconocimiento por la calidad educativa 2023</p>
             </div>
-            <div className="bg-white rounded-lg p-4">
-              <div className="bg-[#F26513] text-white p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-              </div>
-              <h4 className="font-bold text-[#3E328C] mb-2">Acreditación Internacional</h4>
-              <p className="text-[#2B2461] text-sm">Programa de intercambio estudiantil con colegios extranjeros</p>
-            </div>
+            
           </div>
         </div>
       </section>
@@ -341,8 +313,8 @@ const Body = () => {
             <div className="mt-6">
               <h4 className="font-bold text-[#3E328C] mb-3">Horarios de Clases:</h4>
               <p className="text-[#2B2461] mb-2"><span className="font-semibold">Inicial:</span> 8:00 AM - 12:00 PM</p>
-              <p className="text-[#2B2461] mb-2"><span className="font-semibold">Primaria:</span> 7:30 AM - 2:30 PM</p>
-              <p className="text-[#2B2461]"><span className="font-semibold">Secundaria:</span> 7:00 AM - 3:00 PM</p>
+              <p className="text-[#2B2461] mb-2"><span className="font-semibold">Primaria:</span> 8:00 AM - 1:00 PM</p>
+              <p className="text-[#2B2461]"><span className="font-semibold">Secundaria:</span> 8:00 AM - 2:00 PM</p>
             </div>
           </div>
           
@@ -364,7 +336,7 @@ const Body = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-[#3E328C]">Teléfono</p>
-                  <p className="text-[#2B2461]">+51 64 123 456<br />+51 64 123 457</p>
+                  <p className="text-[#2B2461]">+51 974 958 865</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -373,7 +345,7 @@ const Body = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-[#3E328C]">Email</p>
-                  <p className="text-[#2B2461]">info@colegiocrayons.edu.pe<br />admision@colegiocrayons.edu.pe</p>
+                  <p className="text-[#2B2461]">pvilcapoma2022@gmail.com</p>
                 </div>
               </div>
             </div>

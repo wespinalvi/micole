@@ -194,7 +194,7 @@ export default function RegisterStudent() {
     const fetchGrados = async () => {
       try {
         const response = await axios.get(
-          "https://nodejsback-7gv3.onrender.com/api/grado/lista-grado"
+          "https://nodejsback-production.up.railway.app/api/grado/lista-grado"
         );
         setGrados(response.data.data);
       } catch {
@@ -250,7 +250,7 @@ export default function RegisterStudent() {
   const obtenerCostosAnio = async (anio: string) => {
     try {
       setLoading(true);
-      const response = await axios.get(`https://nodejsback-7gv3.onrender.com/api/cuotas/anio/${anio}`);
+      const response = await axios.get(`https://nodejsback-production.up.railway.app/api/cuotas/anio/${anio}`);
       if (response.data.success) {
         setFormData(prev => ({
           ...prev,
@@ -338,7 +338,7 @@ export default function RegisterStudent() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `https://nodejsback-7gv3.onrender.com/api/dni/buscar-dni/${formData.alumno_dni}`
+        `https://nodejsback-production.up.railway.app/api/dni/buscar-dni/${formData.alumno_dni}`
       );
 
       if (response.data.status) {
@@ -379,7 +379,7 @@ export default function RegisterStudent() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `https://nodejsback-7gv3.onrender.com/api/dni/buscar-dni/${formData.apoderado_dni}`
+        `https://nodejsback-production.up.railway.app/api/dni/buscar-dni/${formData.apoderado_dni}`
       );
 
       if (response.data.status) {
@@ -440,7 +440,7 @@ export default function RegisterStudent() {
     try {
       setLoading(true);
       const response = await axios.post(
-        "https://nodejsback-7gv3.onrender.com/api/das/matricula",
+        "https://nodejsback-production.up.railway.app/api/das/matricula",
         formData
       );
 

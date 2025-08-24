@@ -101,7 +101,7 @@ export default function EditarDatosButton({
         setMessage({ text: "Datos cargados correctamente", isError: false });
       } else {
         // Si no, hacemos la llamada a la API para obtener datos del alumno logueado
-        response = await axios.get("https://nodejsback-7gv3.onrender.com/api/alumno/mis-datos", {
+        response = await axios.get("https://nodejsback-production.up.railway.app/api/alumno/mis-datos", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -159,8 +159,8 @@ export default function EditarDatosButton({
 
       // Usar el endpoint correcto con el ID del alumno
       const endpoint = alumnoId 
-        ? `https://nodejsback-7gv3.onrender.com/api/alumno/estudiante/${alumnoId}`
-        : "https://nodejsback-7gv3.onrender.com/api/alumno/mis-datos";
+        ? `https://nodejsback-production.up.railway.app/api/alumno/estudiante/${alumnoId}`
+        : "https://nodejsback-production.up.railway.app/api/alumno/mis-datos";
         
       const response = await axios.put(endpoint, dataToSend, {
         headers: {

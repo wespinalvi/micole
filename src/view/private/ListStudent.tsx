@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectTrigger,
@@ -38,8 +39,10 @@ type Student = {
 export default function ListStudent() {
   const [year, setYear] = useState("2025");
   const [grade, setGrade] = useState("3");
+  const [dniSearch, setDniSearch] = useState("");
   const [showParent, setShowParent] = useState<number | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<{
     text: string;
@@ -75,6 +78,18 @@ export default function ListStudent() {
     }, 2000);
   };
 
+  // Filtrar estudiantes por DNI
+  useEffect(() => {
+    if (dniSearch.trim() === "") {
+      setFilteredStudents(students);
+    } else {
+      const filtered = students.filter(student =>
+        student.alumno_dni.toLowerCase().includes(dniSearch.toLowerCase())
+      );
+      setFilteredStudents(filtered);
+    }
+  }, [dniSearch, students]);
+
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -85,11 +100,12 @@ export default function ListStudent() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `https://nodejsback-7gv3.onrender.com/api/alumno/lista-alumnos/${year}/${grade}`
+        `https://nodejsback-production.up.railway.app/api/alumno/lista-alumnos/${year}/${grade}`
       );
       console.log("Respuesta de la API:", response.data);
       if (response.data) {
         setStudents(response.data);
+        setFilteredStudents(response.data);
       }
     } catch (error) {
       console.error("Error al cargar estudiantes:", error);
@@ -130,6 +146,16 @@ export default function ListStudent() {
             </SelectContent>
           </Select>
         </div>
+        <div>
+          <label className="text-sm font-medium">Buscar por DNI</label>
+          <Input
+            type="text"
+            placeholder="Ingrese DNI..."
+            value={dniSearch}
+            onChange={(e) => setDniSearch(e.target.value)}
+            className="w-48"
+          />
+        </div>
         <Button className="mt-2" onClick={fetchStudents} disabled={loading}>
           {loading ? "Cargando..." : "Buscar"}
         </Button>
@@ -146,6 +172,14 @@ export default function ListStudent() {
         </div>
       )}
 
+      {/* Información de resultados */}
+      {dniSearch.trim() !== "" && (
+        <div className="text-sm text-gray-600">
+          Mostrando {filteredStudents.length} de {students.length} estudiantes
+          {dniSearch.trim() !== "" && ` (filtrados por DNI: ${dniSearch})`}
+        </div>
+      )}
+
       {/* Tabla */}
       <div className="border rounded-md overflow-x-auto">
         <Table>
@@ -159,14 +193,17 @@ export default function ListStudent() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.length === 0 ? (
+            {filteredStudents.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
-                  No hay estudiantes registrados
+                  {dniSearch.trim() !== "" 
+                    ? `No se encontraron estudiantes con DNI: ${dniSearch}`
+                    : "No hay estudiantes registrados"
+                  }
                 </TableCell>
               </TableRow>
             ) : (
-              students.map((student) => (
+              filteredStudents.map((student) => (
                 <>
                   <TableRow key={student.alumno_id}>
                     <TableCell>{student.alumno_dni}</TableCell>

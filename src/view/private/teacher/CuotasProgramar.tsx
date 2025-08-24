@@ -84,7 +84,7 @@ export default function CuotasProgramar() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('https://nodejsback-7gv3.onrender.com/api/cuotas/agregar-periodo', {
+      const response = await axios.post('https://nodejsback-production.up.railway.app/api/cuotas/agregar-periodo', {
         anio: parseInt(cuotaConfig.año),
         costo_matricula: cuotaConfig.costoMatricula,
         costo_cuotas: cuotaConfig.costoCuota

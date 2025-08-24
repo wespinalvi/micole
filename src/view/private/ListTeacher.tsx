@@ -40,7 +40,7 @@ export default function ListTeacher() {
       setLoading(true);
       try {
         const { data } = await axios.get<ApiResponse>(
-          `https://nodejsback-7gv3.onrender.com/api/docente/lista-docentes/${anioSeleccionado}`
+          `https://nodejsback-production.up.railway.app/api/docente/lista-docentes/${anioSeleccionado}`
         );
         if (data.success) {
           setDocentes(data.data);
@@ -67,7 +67,7 @@ export default function ListTeacher() {
   const handleExportar = async () => {
     try {
       const response = await axios.get(
-        `https://nodejsback-7gv3.onrender.com/api/docente/exportar/${anioSeleccionado}`,
+        `https://nodejsback-production.up.railway.app/api/docente/exportar/${anioSeleccionado}`,
         {
           responseType: 'blob',
           params: {
