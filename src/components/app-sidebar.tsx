@@ -98,20 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
          
         ],
       },
-      {
-        title: "Automatización con IA",
-        url: "#",
-        items: [
-          {
-            title: "Generación de Facturas con IA",
-            url: "#/facturas-ia",
-          },
-          {
-            title: "Resumen de Pagos Inteligente",
-            url: "#/resumen-pagos-ia",
-          },
-        ],
-      },
+     
     ],
   };
 
