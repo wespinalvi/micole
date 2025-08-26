@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import React from "react";
+import ChatBot from "@/components/ChatBot";
 
 export default function Page() {
   const location = useLocation();
@@ -55,6 +56,7 @@ export default function Page() {
         <main>
           <Outlet />
         </main>
+           <ChatBot />
       </SidebarInset>
     </SidebarProvider>
   );
