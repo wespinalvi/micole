@@ -25,7 +25,7 @@ export default function Login() {
       console.log("Enviando datos:", form);
 
       const response = await axios.post(
-        "https://nodejsback-production.up.railway.app/api/auth/login",
+        "http://localhost:3000/api/auth/login",
         form,
         {
           headers: { "Content-Type": "application/json" },

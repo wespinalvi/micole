@@ -21,6 +21,7 @@ import HistorialAsistencia from "@/view/private/teacher/HistorialAsistencia";
 import VisionMision from "@/view/public/VisionMision";
 import Body from "@/view/public/body";
 import CuotasDetalle from "@/view/private/CuotasDetalle";
+import DashboardHome from "@/view/private/DashboardHome";
 
 import JustificacionesDocente from "@/view/private/teacher/JustificacionesDocente";
 
@@ -48,7 +49,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      // { index: true, element: <ListStudent /> }, // Página por defecto del dashboard
+      { index: true, element: <DashboardHome /> }, // Página por defecto del dashboard
       { path: "register-student", element: <RegsiterStudent /> },
       { path: "list-student", element: <ListStudent /> },
       { path: "register-teacher", element: <RegisterTeacher /> },

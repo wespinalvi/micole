@@ -70,7 +70,7 @@ export default function RegisterTeacher() {
     try {
       console.log("Intentando buscar DNI:", dni);
       const response = await axios.get<DniResponse>(
-        `https://nodejsback-production.up.railway.app/api/dni/buscar-dni/${dni}`
+        `http://localhost:3000/api/dni/buscar-dni/${dni}`
       );
       console.log("Respuesta del servidor:", response.data);
 
@@ -142,7 +142,7 @@ export default function RegisterTeacher() {
       };
 
       const { data } = await axios.post<ApiResponse>(
-        "https://nodejsback-production.up.railway.app/api/docente/registrar-docente",
+        "http://localhost:3000/api/docente/registrar-docente",
         payload
       );
 

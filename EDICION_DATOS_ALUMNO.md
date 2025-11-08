@@ -13,8 +13,8 @@ Se ha implementado una funcionalidad completa para que los alumnos puedan editar
 
 ### ✅ Funcionalidades Implementadas
 
-- **GET** `https://nodejsback-production.up.railway.app/api/alumno/mis-datos` - Obtener datos del alumno
-- **PUT** `https://nodejsback-production.up.railway.app/api/alumno/mis-datos` - Actualizar datos del alumno
+- **GET** `http://localhost:3000/api/alumno/mis-datos` - Obtener datos del alumno
+- **PUT** `http://localhost:3000/api/alumno/mis-datos` - Actualizar datos del alumno
 - Modal de edición con formulario completo
 - Validación de campos
 - Mensajes de éxito/error
@@ -134,8 +134,8 @@ El botón se puede agregar fácilmente a cualquier tabla de estudiantes:
 ## Rutas
 
 - **GET** `/dashboard/editar-datos-alumno` - Página principal de edición
-- **GET** `https://nodejsback-production.up.railway.app/api/alumno/mis-datos` - API para obtener datos
-- **PUT** `https://nodejsback-production.up.railway.app/api/alumno/mis-datos` - API para actualizar datos
+- **GET** `http://localhost:3000/api/alumno/mis-datos` - API para obtener datos
+- **PUT** `http://localhost:3000/api/alumno/mis-datos` - API para actualizar datos
 
 ## Seguridad
 

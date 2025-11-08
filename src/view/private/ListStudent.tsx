@@ -100,7 +100,7 @@ export default function ListStudent() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `https://nodejsback-production.up.railway.app/api/alumno/lista-alumnos/${year}/${grade}`
+        `http://localhost:3000/api/alumno/lista-alumnos/${year}/${grade}`
       );
       console.log("Respuesta de la API:", response.data);
       if (response.data) {

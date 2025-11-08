@@ -30,7 +30,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     try {
       const token = localStorage.getItem('token'); // O donde tengas almacenado el token
       
-      const response = await fetch('https://nodejsback-production.up.railway.app/api/auth/logout', {
+      const response = await fetch('http://localhost:3000/api/auth/logout', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -54,6 +54,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const data = {
     versions: ["1.0.0"],
     navMain: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        items: [
+          {
+            title: "Resumen General",
+            url: "/dashboard",
+          },
+        ],
+      },
       {
         title: "Gestión de Alumnos",
         url: "#",
