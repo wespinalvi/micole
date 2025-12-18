@@ -19,6 +19,15 @@ import {
 import axios from "axios";
 import EditarDatosButton from "@/components/EditarDatosButton";
 
+type Apoderado = {
+  dni: string;
+  nombre: string;
+  apellido_paterno: string;
+  apellido_materno: string;
+  telefono: string | null;
+  parentesco: string;
+};
+
 type Student = {
   alumno_id: number;
   alumno_dni: string;
@@ -26,14 +35,9 @@ type Student = {
   alumno_apellido_paterno: string;
   alumno_apellido_materno: string;
   fecha_nacimiento: string;
-  apoderado_dni: string;
-  apoderado_nombre: string;
-  apoderado_apellido_paterno: string;
-  apoderado_apellido_materno: string;
-  telefono: string;
-  relacion: string;
   grado: string;
   fecha_matricula: string;
+  apoderados: Apoderado[];
 };
 
 export default function ListStudent() {
@@ -52,26 +56,26 @@ export default function ListStudent() {
   // Función para actualizar un estudiante específico en la lista
   const updateStudentInList = (updatedStudent: any) => {
     // Actualizar la lista inmediatamente
-    setStudents(prevStudents => 
-      prevStudents.map(student => 
-        student.alumno_id === updatedStudent.alumno_id 
+    setStudents(prevStudents =>
+      prevStudents.map(student =>
+        student.alumno_id === updatedStudent.alumno_id
           ? {
-              ...student,
-              alumno_nombre: updatedStudent.nombre,
-              alumno_apellido_paterno: updatedStudent.ap_p,
-              alumno_apellido_materno: updatedStudent.ap_m,
-              fecha_nacimiento: updatedStudent.fecha_nacimiento
-            }
+            ...student,
+            alumno_nombre: updatedStudent.nombre,
+            alumno_apellido_paterno: updatedStudent.ap_p,
+            alumno_apellido_materno: updatedStudent.ap_m,
+            fecha_nacimiento: updatedStudent.fecha_nacimiento
+          }
           : student
       )
     );
-    
+
     // Mostrar mensaje de éxito inmediatamente
     setUpdateMessage({
       text: `✅ Datos actualizados: ${updatedStudent.nombre} ${updatedStudent.ap_p}`,
       isSuccess: true
     });
-    
+
     // Ocultar mensaje después de 2 segundos (más rápido)
     setTimeout(() => {
       setUpdateMessage(null);
@@ -163,11 +167,10 @@ export default function ListStudent() {
 
       {/* Mensaje de actualización */}
       {updateMessage && (
-        <div className={`p-4 rounded-md mb-4 ${
-          updateMessage.isSuccess 
-            ? 'bg-green-100 text-green-700 border border-green-300' 
+        <div className={`p-4 rounded-md mb-4 ${updateMessage.isSuccess
+            ? 'bg-green-100 text-green-700 border border-green-300'
             : 'bg-red-100 text-red-700 border border-red-300'
-        }`}>
+          }`}>
           {updateMessage.text}
         </div>
       )}
@@ -196,7 +199,7 @@ export default function ListStudent() {
             {filteredStudents.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
-                  {dniSearch.trim() !== "" 
+                  {dniSearch.trim() !== ""
                     ? `No se encontraron estudiantes con DNI: ${dniSearch}`
                     : "No hay estudiantes registrados"
                   }
@@ -228,8 +231,8 @@ export default function ListStudent() {
                         }
                       >
                         {showParent === student.alumno_id
-                          ? "Ocultar Apoderado"
-                          : "Ver Apoderado"}
+                          ? "Ocultar Apoderados"
+                          : "Ver Apoderados"}
                       </Button>
                       <EditarDatosButton
                         variant="outline"
@@ -256,12 +259,30 @@ export default function ListStudent() {
                         colSpan={5}
                         className="bg-muted px-6 py-4 text-sm"
                       >
-                        <strong>Apoderado:</strong> {student.apoderado_nombre}{" "}
-                        {student.apoderado_apellido_paterno}{" "}
-                        {student.apoderado_apellido_materno} <br />
-                        <strong>DNI:</strong> {student.apoderado_dni} <br />
-                        <strong>Relación:</strong> {student.relacion} <br />
-                        <strong>Teléfono:</strong> {student.telefono}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-gray-700">Información de Apoderados:</h4>
+                          {student.apoderados && student.apoderados.length > 0 ? (
+                            <div className="grid gap-4 md:grid-cols-2">
+                              {student.apoderados.map((apoderado, index) => (
+                                <div key={index} className="bg-white p-3 rounded border shadow-sm">
+                                  <div className="font-medium text-primary mb-1">{apoderado.parentesco}</div>
+                                  <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
+                                    <span className="text-gray-500">Nombre:</span>
+                                    <span>{apoderado.nombre} {apoderado.apellido_paterno} {apoderado.apellido_materno}</span>
+
+                                    <span className="text-gray-500">DNI:</span>
+                                    <span>{apoderado.dni}</span>
+
+                                    <span className="text-gray-500">Teléfono:</span>
+                                    <span>{apoderado.telefono || "No registrado"}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-gray-500 italic">No hay apoderados registrados para este alumno.</div>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   )}

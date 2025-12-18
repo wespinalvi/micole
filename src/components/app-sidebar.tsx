@@ -29,7 +29,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('token'); // O donde tengas almacenado el token
-      
+
       const response = await fetch('http://localhost:3000/api/auth/logout', {
         method: 'POST',
         headers: {
@@ -76,6 +76,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Lista de Alumnos",
             url: "/dashboard/list-student",
           },
+          {
+            title: "Matrícula Masiva",
+            url: "/dashboard/bulk-enrollment",
+          },
 
         ],
       },
@@ -105,10 +109,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Cuotas",
             url: "/dashboard/cuotas-detalle",
           },
-         
+
         ],
       },
-     
+
     ],
   };
 
@@ -123,7 +127,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
-            <SidebarGroupLabel 
+            <SidebarGroupLabel
               onClick={() => toggleGroup(item.title)}
               className="cursor-pointer flex items-center justify-between"
             >
@@ -149,12 +153,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             )}
           </SidebarGroup>
         ))}
-        
+
         {/* Botón de cerrar sesión */}
         <div className="mt-auto p-4">
-          <Button 
+          <Button
             onClick={handleLogout}
-            variant="destructive" 
+            variant="destructive"
             className="w-full justify-start"
           >
             <LogOut className="mr-2 h-4 w-4" />

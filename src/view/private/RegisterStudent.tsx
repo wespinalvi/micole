@@ -132,7 +132,7 @@ export default function RegisterStudent() {
   const validateField = (name: string, value: string | number | boolean) => {
     // Convertir el valor a string para la validación
     const stringValue = value.toString();
-    
+
     switch (name) {
       case 'alumno_dni':
         if (!stringValue) return 'El DNI es obligatorio';
@@ -206,9 +206,9 @@ export default function RegisterStudent() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : 
-                    type === "number" ? Number(value) : value;
-    
+    const newValue = type === "checkbox" ? checked :
+      type === "number" ? Number(value) : value;
+
     setFormData(prev => {
       const newFormData = {
         ...prev,
@@ -345,9 +345,9 @@ export default function RegisterStudent() {
         // Autocompletar datos del alumno existente
         setFormData((prev) => ({
           ...prev,
-          alumno_nombre: response.data.data.nombres,
-          alumno_ap_p: response.data.data.apellidoPaterno,
-          alumno_ap_m: response.data.data.apellidoMaterno,
+          alumno_nombre: response.data.data.first_name || response.data.data.nombres,
+          alumno_ap_p: response.data.data.first_last_name || response.data.data.apellidoPaterno,
+          alumno_ap_m: response.data.data.second_last_name || response.data.data.apellidoMaterno,
         }));
 
         setMessage({
@@ -386,9 +386,9 @@ export default function RegisterStudent() {
         // Autocompletar datos del apoderado
         setFormData((prev) => ({
           ...prev,
-          apoderado_nombre: response.data.data.nombres,
-          apoderado_ap_p: response.data.data.apellidoPaterno,
-          apoderado_ap_m: response.data.data.apellidoMaterno,
+          apoderado_nombre: response.data.data.first_name,
+          apoderado_ap_p: response.data.data.first_last_name,
+          apoderado_ap_m: response.data.data.second_last_name,
         }));
 
         setMessage({
@@ -535,11 +535,10 @@ export default function RegisterStudent() {
       {/* Message display */}
       {message && (
         <div
-          className={`mb-4 p-3 rounded ${
-            message.isError
-              ? "bg-red-100 text-red-800"
-              : "bg-green-100 text-green-800"
-          }`}
+          className={`mb-4 p-3 rounded ${message.isError
+            ? "bg-red-100 text-red-800"
+            : "bg-green-100 text-green-800"
+            }`}
         >
           {message.text}
         </div>
@@ -648,13 +647,13 @@ export default function RegisterStudent() {
                 <div>
                   <div className="relative">
                     {renderInput("matricula_precio", "Precio Matrícula", "number", "0.00")}
-                  
+
                   </div>
                 </div>
                 <div>
                   <div className="relative">
                     {renderInput("costo_cuota", "Costo Cuota Mensual", "number", "0.00")}
-                   
+
                   </div>
                 </div>
               </div>
@@ -667,8 +666,8 @@ export default function RegisterStudent() {
                       type="checkbox"
                       id="todas_cuotas"
                       checked={Object.values(formData)
-                        .filter((_, index) => 
-                          index >= Object.keys(formData).indexOf('c1') && 
+                        .filter((_, index) =>
+                          index >= Object.keys(formData).indexOf('c1') &&
                           index <= Object.keys(formData).indexOf('c10')
                         )
                         .every((value) => Number(value) > 0)}
@@ -728,17 +727,17 @@ export default function RegisterStudent() {
                   <p>Matrícula: S/. {Number(formData.matricula_precio).toFixed(2)}</p>
                   <p>Cuota Mensual: S/. {Number(formData.costo_cuota).toFixed(2)}</p>
                   <p>Número de Cuotas: {Object.values(formData)
-                    .filter((value, index) => 
-                      index >= Object.keys(formData).indexOf('c1') && 
-                      index <= Object.keys(formData).indexOf('c10') && 
+                    .filter((value, index) =>
+                      index >= Object.keys(formData).indexOf('c1') &&
+                      index <= Object.keys(formData).indexOf('c10') &&
                       Number(value) > 0
                     ).length}</p>
                   <p className="font-medium pt-2">
                     Total a Pagar: S/. {(
-                      Number(formData.matricula_precio) + 
+                      Number(formData.matricula_precio) +
                       Object.values(formData)
-                        .filter((_, index) => 
-                          index >= Object.keys(formData).indexOf('c1') && 
+                        .filter((_, index) =>
+                          index >= Object.keys(formData).indexOf('c1') &&
                           index <= Object.keys(formData).indexOf('c10')
                         )
                         .map((value) => Number(value))

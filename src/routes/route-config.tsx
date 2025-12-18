@@ -22,6 +22,7 @@ import VisionMision from "@/view/public/VisionMision";
 import Body from "@/view/public/body";
 import CuotasDetalle from "@/view/private/CuotasDetalle";
 import DashboardHome from "@/view/private/DashboardHome";
+import BulkEnrollment from "@/view/private/BulkEnrollment";
 
 import JustificacionesDocente from "@/view/private/teacher/JustificacionesDocente";
 
@@ -56,6 +57,7 @@ const router = createBrowserRouter([
       { path: "list-teacher", element: <ListTeacher /> },
       { path: "programar-cuotas", element: <CuotasProgramar /> },
       { path: "cuotas-detalle", element: <CuotasDetalle /> },
+      { path: "bulk-enrollment", element: <BulkEnrollment /> },
 
     ],
   },
