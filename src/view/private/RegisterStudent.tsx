@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import clsx from "clsx";
 import axios, { AxiosError } from "axios";
+import { FileText, RefreshCw } from "lucide-react";
 
 const steps = [
   { id: 1, title: "Estudiante" },
@@ -25,9 +26,8 @@ const steps = [
 
 type Grado = {
   id: number;
+  grado: number;
   descripcion: string;
-  created_at: string;
-  updated_at: string;
 };
 
 interface FormData {
@@ -38,17 +38,41 @@ interface FormData {
   alumno_ap_m: string;
   alumno_fecha_nacimiento: string;
   alumno_email: string;
+  alumno_sexo: string;
+  alumno_lengua_materna: string;
   id_grado: string;
   tipo_ingreso: string;
 
-  // Apoderado
+  // Padre
+  padre_dni: string;
+  padre_nombre: string;
+  padre_ap_p: string;
+  padre_ap_m: string;
+  padre_fecha_nacimiento: string;
+  padre_telefono: string;
+  padre_email: string;
+  padre_ocupacion: string;
+
+  // Madre
+  madre_dni: string;
+  madre_nombre: string;
+  madre_ap_p: string;
+  madre_ap_m: string;
+  madre_fecha_nacimiento: string;
+  madre_telefono: string;
+  madre_email: string;
+  madre_ocupacion: string;
+
+  // Apoderado (Principal)
   apoderado_dni: string;
   apoderado_nombre: string;
   apoderado_ap_p: string;
   apoderado_ap_m: string;
   apoderado_fecha_nacimiento: string;
   apoderado_telefono: string;
+  apoderado_email: string;
   apoderado_relacion: string;
+  apoderado_ocupacion: string;
 
   // Documentos
   dni_entregado: boolean;
@@ -94,8 +118,30 @@ export default function RegisterStudent() {
     alumno_ap_m: "",
     alumno_fecha_nacimiento: "",
     alumno_email: "",
+    alumno_sexo: "",
+    alumno_lengua_materna: "",
     id_grado: "",
     tipo_ingreso: "",
+
+    // Padre
+    padre_dni: "",
+    padre_nombre: "",
+    padre_ap_p: "",
+    padre_ap_m: "",
+    padre_fecha_nacimiento: "",
+    padre_telefono: "",
+    padre_email: "",
+    padre_ocupacion: "",
+
+    // Madre
+    madre_dni: "",
+    madre_nombre: "",
+    madre_ap_p: "",
+    madre_ap_m: "",
+    madre_fecha_nacimiento: "",
+    madre_telefono: "",
+    madre_email: "",
+    madre_ocupacion: "",
 
     // Apoderado
     apoderado_dni: "",
@@ -104,7 +150,9 @@ export default function RegisterStudent() {
     apoderado_ap_m: "",
     apoderado_fecha_nacimiento: "",
     apoderado_telefono: "",
+    apoderado_email: "",
     apoderado_relacion: "",
+    apoderado_ocupacion: "",
 
     // Documentos
     dni_entregado: false,
@@ -128,6 +176,137 @@ export default function RegisterStudent() {
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isProcessingPdf, setIsProcessingPdf] = useState(false);
+
+  const formatDateForInput = (dateStr: string | undefined) => {
+    if (!dateStr) return "";
+    // Si ya está en formato YYYY-MM-DD, devolverlo
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Si está en formato DD/MM/YYYY, convertirlo
+    const parts = dateStr.split("/");
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    }
+    return dateStr;
+  };
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessingPdf(true);
+    setMessage({ text: "Procesando Ficha Única de Matrícula...", isError: false });
+
+    try {
+      const formDataPdf = new FormData();
+      formDataPdf.append('pdf', file);
+
+      const response = await fetch('http://localhost:3000/api/ocr/extraer-ficha', {
+        method: 'POST',
+        body: formDataPdf,
+      });
+
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
+
+      const data = await response.json();
+
+      if (data.success && data.datos) {
+        const ext = data.datos;
+        const student = ext.estudiante || {};
+        const padre = ext.padre || {};
+        const madre = ext.madre || {};
+
+        // Determinar quién será el apoderado (padre por defecto, si no madre)
+        const apoderado = padre.nombres ? padre : (madre.nombres ? madre : {});
+        const relacion = padre.nombres ? "padre" : (madre.nombres ? "madre" : "");
+
+        // Mapear datos al formulario
+        setFormData(prev => ({
+          ...prev,
+          // Alumno
+          alumno_dni: student.dni || prev.alumno_dni,
+          alumno_nombre: student.nombres || prev.alumno_nombre,
+          alumno_ap_p: student.apellido_paterno || prev.alumno_ap_p,
+          alumno_ap_m: student.apellido_materno || prev.alumno_ap_m,
+          alumno_fecha_nacimiento: formatDateForInput(student.fecha_nacimiento) || prev.alumno_fecha_nacimiento,
+          alumno_email: student.email || prev.alumno_email,
+          alumno_sexo: student.sexo || prev.alumno_sexo,
+          alumno_lengua_materna: student.lengua_materna || prev.alumno_lengua_materna,
+
+          // Padre
+          padre_dni: padre.dni || prev.padre_dni,
+          padre_nombre: padre.nombres || prev.padre_nombre,
+          padre_ap_p: padre.apellido_paterno || prev.padre_ap_p,
+          padre_ap_m: padre.apellido_materno || prev.padre_ap_m,
+          padre_fecha_nacimiento: formatDateForInput(padre.fecha_de_nacimiento) || prev.padre_fecha_nacimiento,
+          padre_ocupacion: padre.ocupacion || prev.padre_ocupacion,
+          padre_telefono: padre.telefono || prev.padre_telefono,
+          padre_email: padre.email || prev.padre_email,
+
+          // Madre
+          madre_dni: madre.dni || prev.madre_dni,
+          madre_nombre: madre.nombres || prev.madre_nombre,
+          madre_ap_p: madre.apellido_paterno || prev.madre_ap_p,
+          madre_ap_m: madre.apellido_materno || prev.madre_ap_m,
+          madre_fecha_nacimiento: formatDateForInput(madre.fecha_de_nacimiento) || prev.madre_fecha_nacimiento,
+          madre_ocupacion: madre.ocupacion || prev.madre_ocupacion,
+          madre_telefono: madre.telefono || prev.madre_telefono,
+          madre_email: madre.email || prev.madre_email,
+
+          // Apoderado (Principal)
+          apoderado_dni: apoderado.dni || prev.apoderado_dni,
+          apoderado_nombre: apoderado.nombres || prev.apoderado_nombre,
+          apoderado_ap_p: apoderado.apellido_paterno || prev.apoderado_ap_p,
+          apoderado_ap_m: apoderado.apellido_materno || prev.apoderado_ap_m,
+          apoderado_fecha_nacimiento: formatDateForInput(apoderado.fecha_de_nacimiento) || prev.apoderado_fecha_nacimiento,
+          apoderado_relacion: relacion || prev.apoderado_relacion,
+          apoderado_telefono: apoderado.telefono || prev.apoderado_telefono,
+          apoderado_email: apoderado.email || prev.apoderado_email,
+          apoderado_ocupacion: apoderado.ocupacion || prev.apoderado_ocupacion,
+
+          año_academico: new Date().getFullYear().toString(),
+        }));
+
+        // Intentar pre-seleccionar el grado basándose en el último registro del historial académico
+        const historial = ext.historial_academico || [];
+        const ultimoGradoTexto = historial.length > 0
+          ? historial[historial.length - 1].grado
+          : ext.grado_actual;
+
+        if (ultimoGradoTexto) {
+          const searchStr = ultimoGradoTexto.toString().toLowerCase().trim();
+          const gradoEncontrado = grados.find(g => {
+            const desc = g.descripcion.toLowerCase();
+            const gNum = g.grado?.toString();
+            return desc.includes(searchStr) ||
+              searchStr.includes(desc) ||
+              gNum === searchStr ||
+              (searchStr.includes("primero") && desc.includes("primero")) ||
+              (searchStr.includes("segundo") && desc.includes("segundo")) ||
+              (searchStr.includes("tercero") && desc.includes("tercero")) ||
+              (searchStr.includes("cuarto") && desc.includes("cuarto")) ||
+              (searchStr.includes("quinto") && desc.includes("quinto"));
+          });
+
+          if (gradoEncontrado) {
+            setFormData(prev => ({ ...prev, id_grado: gradoEncontrado.id.toString() }));
+          }
+        }
+
+
+        setMessage({ text: "Datos extraídos correctamente de la FUM", isError: false });
+      } else {
+        throw new Error("No se pudieron extraer datos del PDF");
+      }
+    } catch (error) {
+      console.error("Error PDF:", error);
+      setMessage({ text: "Error al procesar el PDF: " + (error instanceof Error ? error.message : "Error desconocido"), isError: true });
+    } finally {
+      setIsProcessingPdf(false);
+      if (e.target) e.target.value = '';
+    }
+  };
 
   const validateField = (name: string, value: string | number | boolean) => {
     // Convertir el valor a string para la validación
@@ -427,8 +606,31 @@ export default function RegisterStudent() {
       return;
     }
 
-    if (!formData.apoderado_dni) {
-      setMessage({ text: "Complete el DNI del apoderado", isError: true });
+    // Determinar apoderado automáticamente para el envío
+    const apoderadoData = formData.padre_dni ? {
+      apoderado_dni: formData.padre_dni,
+      apoderado_nombre: formData.padre_nombre,
+      apoderado_ap_p: formData.padre_ap_p,
+      apoderado_ap_m: formData.padre_ap_m,
+      apoderado_fecha_nacimiento: formData.padre_fecha_nacimiento,
+      apoderado_telefono: formData.padre_telefono,
+      apoderado_email: formData.padre_email,
+      apoderado_ocupacion: formData.padre_ocupacion,
+      apoderado_relacion: "padre"
+    } : {
+      apoderado_dni: formData.madre_dni,
+      apoderado_nombre: formData.madre_nombre,
+      apoderado_ap_p: formData.madre_ap_p,
+      apoderado_ap_m: formData.madre_ap_m,
+      apoderado_fecha_nacimiento: formData.madre_fecha_nacimiento,
+      apoderado_telefono: formData.madre_telefono,
+      apoderado_email: formData.madre_email,
+      apoderado_ocupacion: formData.madre_ocupacion,
+      apoderado_relacion: "madre"
+    };
+
+    if (!apoderadoData.apoderado_dni) {
+      setMessage({ text: "Debe ingresar al menos un padre o madre con DNI", isError: true });
       return;
     }
 
@@ -439,9 +641,10 @@ export default function RegisterStudent() {
 
     try {
       setLoading(true);
+      const payload = { ...formData, ...apoderadoData };
       const response = await axios.post(
         "http://localhost:3000/api/das/matricula",
-        formData
+        payload
       );
 
       setMessage({
@@ -466,14 +669,34 @@ export default function RegisterStudent() {
         alumno_ap_m: "",
         alumno_fecha_nacimiento: "",
         alumno_email: "",
+        alumno_sexo: "",
+        alumno_lengua_materna: "",
         id_grado: "",
+        padre_dni: "",
+        padre_nombre: "",
+        padre_ap_p: "",
+        padre_ap_m: "",
+        padre_fecha_nacimiento: "",
+        padre_telefono: "",
+        padre_email: "",
+        padre_ocupacion: "",
+        madre_dni: "",
+        madre_nombre: "",
+        madre_ap_p: "",
+        madre_ap_m: "",
+        madre_fecha_nacimiento: "",
+        madre_telefono: "",
+        madre_email: "",
+        madre_ocupacion: "",
         apoderado_dni: "",
         apoderado_nombre: "",
         apoderado_ap_p: "",
         apoderado_ap_m: "",
         apoderado_fecha_nacimiento: "",
         apoderado_telefono: "",
+        apoderado_email: "",
         apoderado_relacion: "",
+        apoderado_ocupacion: "",
         dni_entregado: false,
         certificado_estudios: false,
         matricula_precio: 0,
@@ -506,6 +729,10 @@ export default function RegisterStudent() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-slate-900">Matrícula con Ficha Única (FUM)</h1>
+        <p className="text-sm text-slate-500">Registra un nuevo estudiante manualmente o autocompleta con el PDF de la ficha.</p>
+      </div>
       {/* Stepper Header */}
       <div className="flex justify-between mb-6">
         {steps.map((s, idx) => (
@@ -545,8 +772,34 @@ export default function RegisterStudent() {
       )}
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle>{steps[step].title}</CardTitle>
+          {step === 0 && (
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                id="fum-upload"
+                className="hidden"
+                accept=".pdf"
+                onChange={handlePdfUpload}
+                disabled={isProcessingPdf}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100"
+                onClick={() => document.getElementById('fum-upload')?.click()}
+                disabled={isProcessingPdf}
+              >
+                {isProcessingPdf ? (
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <FileText className="mr-2 h-4 w-4" />
+                )}
+                {isProcessingPdf ? "Procesando..." : "Autocompletar con FUM"}
+              </Button>
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           {step === 0 && (
@@ -581,58 +834,66 @@ export default function RegisterStudent() {
                   {renderInput("alumno_ap_m", "Apellido Materno")}
                 </div>
                 <div>
+                  {renderInput("alumno_email", "Email", "email")}
+                </div>
+                <div>
+                  {renderSelect("alumno_sexo", "Sexo", [
+                    { value: "M", label: "Masculino" },
+                    { value: "F", label: "Femenino" },
+                  ])}
+                </div>
+                <div>
+                  {renderInput("alumno_lengua_materna", "Lengua Materna")}
+                </div>
+                <div>
                   {renderInput("alumno_fecha_nacimiento", "Fecha de Nacimiento", "date")}
                 </div>
                 <div>
-                  {renderSelect("id_grado", "Grado", grados.map((g) => ({ value: g.id.toString(), label: g.descripcion })))}
-                </div>
-                <div>
-                  {renderInput("alumno_email", "Email", "email")}
+                  {renderSelect("id_grado", "Grado", grados.map((g) => ({ value: g.id.toString(), label: `${g.grado}° ${g.descripcion}` })))}
                 </div>
               </div>
             </>
           )}
 
           {step === 1 && (
-            <>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  {renderInput("apoderado_dni", "DNI")}
-                </div>
-                <Button
-                  className="self-end"
-                  onClick={verificarApoderado}
-                  disabled={loading}
-                >
-                  {loading ? "Buscando..." : "Buscar"}
-                </Button>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  {renderInput("apoderado_nombre", "Nombre")}
-                </div>
-                <div>
-                  {renderInput("apoderado_ap_p", "Apellido Paterno")}
-                </div>
-                <div>
-                  {renderInput("apoderado_ap_m", "Apellido Materno")}
-                </div>
-                <div>
-                  {renderInput("apoderado_fecha_nacimiento", "Fecha de Nacimiento", "date")}
-                </div>
-                <div>
-                  {renderSelect("apoderado_relacion", "Relación", [
-                    { value: "padre", label: "Padre" },
-                    { value: "madre", label: "Madre" },
-                    { value: "hermano", label: "Hermano/a" },
-                    { value: "tutor", label: "Tutor" },
-                  ])}
-                </div>
-                <div>
-                  {renderInput("apoderado_telefono", "Teléfono", "tel")}
+            <div className="space-y-8">
+              {/* Sección del Padre */}
+              <div className="space-y-4 border-b pb-6">
+                <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                  <div className="w-2 h-6 bg-blue-500 rounded-full"></div>
+                  Datos del Padre
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInput("padre_dni", "DNI Padre")}
+                  {renderInput("padre_nombre", "Nombres")}
+                  {renderInput("padre_ap_p", "Apellido Paterno")}
+                  {renderInput("padre_ap_m", "Apellido Materno")}
+                  {renderInput("padre_fecha_nacimiento", "Fecha de Nacimiento", "date")}
+                  {renderInput("padre_telefono", "Teléfono")}
+                  {renderInput("padre_email", "Email", "email")}
+                  {renderInput("padre_ocupacion", "Ocupación")}
                 </div>
               </div>
-            </>
+
+              {/* Sección de la Madre */}
+              <div className="space-y-4 border-b pb-6">
+                <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                  <div className="w-2 h-6 bg-pink-500 rounded-full"></div>
+                  Datos de la Madre
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderInput("madre_dni", "DNI Madre")}
+                  {renderInput("madre_nombre", "Nombres")}
+                  {renderInput("madre_ap_p", "Apellido Paterno")}
+                  {renderInput("madre_ap_m", "Apellido Materno")}
+                  {renderInput("madre_fecha_nacimiento", "Fecha de Nacimiento", "date")}
+                  {renderInput("madre_telefono", "Teléfono")}
+                  {renderInput("madre_email", "Email", "email")}
+                  {renderInput("madre_ocupacion", "Ocupación")}
+                </div>
+              </div>
+
+            </div>
           )}
 
           {step === 2 && (
