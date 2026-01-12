@@ -21,6 +21,10 @@ export default function Page() {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
 
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -56,7 +60,7 @@ export default function Page() {
         <main>
           <Outlet />
         </main>
-           <ChatBot />
+        <ChatBot />
       </SidebarInset>
     </SidebarProvider>
   );

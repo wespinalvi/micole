@@ -1,33 +1,87 @@
+import { Target, Eye, ShieldCheck, Heart, Users, Star } from "lucide-react";
 
+const VisionMision = () => {
+  const values = [
+    { title: "Integridad", icon: <ShieldCheck className="w-6 h-6" />, desc: "Actuamos con honestidad y coherencia en cada paso." },
+    { title: "Respeto", icon: <Heart className="w-6 h-6" />, desc: "Valoramos la diversidad y la dignidad de cada persona." },
+    { title: "Excelencia", icon: <Star className="w-6 h-6" />, desc: "Buscamos siempre la mejor versión de nosotros mismos." },
+    { title: "Comunidad", icon: <Users className="w-6 h-6" />, desc: "Trabajamos unidos por un propósito común." }
+  ];
 
-const VisionMision = () => (
-  <section id="vision" className="py-16 px-4 md:px-16 bg-gradient-to-br from-[#E6E8F5] via-[#F3F4FB] to-[#fff] min-h-[60vh]">
-    <h2 className="text-3xl md:text-4xl font-extrabold text-[#3E328C] mb-12 text-center relative inline-block after:content-[''] after:block after:w-20 after:h-1 after:bg-[#F26513] after:mx-auto after:mt-2">
-      Nuestra Misión y Visión
-    </h2>
-    <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
-      {/* Misión */}
-      <div className="bg-white border-0 rounded-2xl p-8 shadow-xl flex flex-col items-center hover:scale-105 transition-transform duration-300">
-        <div className="bg-[#3E328C]/10 rounded-full p-4 mb-4">
-          <svg className="w-12 h-12 text-[#3E328C]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" /></svg>
+  return (
+    <div className="flex flex-col w-full">
+      {/* Page Header */}
+      <section className="relative py-16 bg-[#1e2a5a] text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center space-y-3">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight">Nuestra Identidad</h1>
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto font-light">
+            Conoce los cimientos que guían nuestra labor educativa y el futuro que construimos para nuestros estudiantes.
+          </p>
         </div>
-        <h3 className="text-2xl font-bold text-[#3E328C] mb-3 border-b-2 border-[#F26513] pb-1">Misión</h3>
-        <p className="text-[#2B2461] text-justify leading-relaxed">
-          Somos una Institución Educativa Privada que brinda una educación integral a través de los Compromisos de Gestión Escolar, basada en valores éticos, morales y cívicos, desarrollando y potenciando sus competencias y capacidades de los estudiantes hacia los niveles esperados según su grado, ciclo y nivel en el marco del CNEB puedan culminar la escolaridad de manera satisfactoria, orientados hacia la excelencia y alcanzando su desarrollo integral en espacios seguros, inclusivos, de sana convivencia y libres de violencia, afianzando permanentemente sus aprendizajes basados en los fines y principios de la Educación Peruana.
-        </p>
-      </div>
-      {/* Visión */}
-      <div className="bg-white border-0 rounded-2xl p-8 shadow-xl flex flex-col items-center hover:scale-105 transition-transform duration-300">
-        <div className="bg-[#F26513]/10 rounded-full p-4 mb-4">
-          <svg className="w-12 h-12 text-[#F26513]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" /></svg>
+      </section>
+
+      {/* Mission & Vision Grid */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Misión */}
+            <div className="group p-8 rounded-[2rem] bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-2xl transition-all duration-500">
+              <div className="w-16 h-16 rounded-[1.5rem] bg-[#F26513]/10 flex items-center justify-center text-[#F26513] mb-6 group-hover:bg-[#F26513] group-hover:text-white transition-all duration-500">
+                <Target size={32} />
+              </div>
+              <h2 className="text-2xl font-black text-[#1e2a5a] mb-4">Nuestra Misión</h2>
+              <p className="text-gray-600 leading-relaxed text-base text-justify">
+                Somos una Institución Educativa Privada que brinda una educación integral basada en valores éticos,
+                morales y cívicos. Desarrollamos y potenciamos las competencias de nuestros estudiantes para que
+                culminen su escolaridad con excelencia, en espacios seguros, inclusivos y de sana convivencia,
+                afianzando permanentemente sus aprendizajes bajo los principios de la Educación Peruana.
+              </p>
+            </div>
+
+            {/* Visión */}
+            <div className="group p-8 rounded-[2rem] bg-[#1e2a5a] text-white hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-500">
+              <div className="w-16 h-16 rounded-[1.5rem] bg-white/10 flex items-center justify-center text-white mb-6 group-hover:bg-[#F26513] transition-all duration-500">
+                <Eye size={32} />
+              </div>
+              <h2 className="text-2xl font-black mb-4">Nuestra Visión</h2>
+              <p className="text-gray-300 leading-relaxed text-base text-justify">
+                Ser reconocidos al año 2026 como una institución líder que contribuye a que todos sus estudiantes
+                desarrollen su potencial desde la primera infancia. Formamos ciudadanos capaces de resolver con éxito
+                los problemas de su entorno, asumiendo una actitud activa, crítica y responsable, contribuyendo así
+                al desarrollo de su comunidad y del país con una visión global.
+              </p>
+            </div>
+          </div>
         </div>
-        <h3 className="text-2xl font-bold text-[#F26513] mb-3 border-b-2 border-[#3E328C] pb-1">Visión</h3>
-        <p className="text-[#2B2461] text-justify leading-relaxed">
-          Ser reconocidos en nuestra localidad al año 2026, como una Institución Educativa Privada que contribuye a que todos sus estudiantes puedan desarrollar su potencial desde la primera infancia, sean ciudadanos capaces de resolver con éxito los problemas que se les presente, asumiendo una actitud activa, crítica, analítica y responsable frente a los hechos de su entorno, practicando los valores basados en los principios de la Educación Peruana, autoevaluándose y evaluando a los demás para seguir aprendiendo, asumiéndose como ciudadanos con derechos y responsabilidades. Contribuyendo así al desarrollo de su comunidad y del país, combinando su capital cultural y natural con los avances mundiales en concordancia en el marco de los once aspectos del perfil de egreso del CNEB.
-        </p>
-      </div>
+      </section>
+
+      {/* Values Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+            <h2 className="text-[#F26513] font-bold tracking-widest uppercase text-xs">Nuestros Valores</h2>
+            <p className="text-3xl font-black text-[#1e2a5a] tracking-tight">
+              Lo que nos define.
+            </p>
+            <div className="w-16 h-1 bg-[#F26513] mx-auto rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {values.map((value, i) => (
+              <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 text-center space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-orange-50 text-[#F26513] flex items-center justify-center mx-auto">
+                  {value.icon}
+                </div>
+                <h3 className="text-xl font-bold text-[#1e2a5a]">{value.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{value.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
-  </section>
-);
+  );
+};
 
-export default VisionMision; 
+export default VisionMision;

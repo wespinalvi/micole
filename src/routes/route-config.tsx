@@ -20,6 +20,22 @@ import CuotasProgramar from "@/view/private/teacher/CuotasProgramar";
 import HistorialAsistencia from "@/view/private/teacher/HistorialAsistencia";
 import VisionMision from "@/view/public/VisionMision";
 import Body from "@/view/public/body";
+import Contact from "@/view/public/Contact";
+import Admision from "@/view/public/Admision";
+import Valores from "@/view/public/Valores";
+import Pilares from "@/view/public/Pilares";
+import Infraestructura from "@/view/public/Infraestructura";
+import Comunidad from "@/view/public/Comunidad";
+import PropuestaEducativa from "@/view/public/PropuestaEducativa";
+import Bienvenida from "@/view/public/Bienvenida";
+import EarlyYears from "@/view/public/EarlyYears";
+import Idiomas from "@/view/public/Idiomas";
+import Tecnologia from "@/view/public/Tecnologia";
+import Deporte from "@/view/public/Deporte";
+import ArteCultura from "@/view/public/ArteCultura";
+import ExcelenciaAcademica from "@/view/public/ExcelenciaAcademica";
+import ViajesEstudio from "@/view/public/ViajesEstudio";
+import ConveniosAlianzas from "@/view/public/ConveniosAlianzas";
 import CuotasDetalle from "@/view/private/CuotasDetalle";
 import DashboardHome from "@/view/private/DashboardHome";
 import BulkEnrollment from "@/view/private/BulkEnrollment";
@@ -37,6 +53,25 @@ const router = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "vision-mision", element: <VisionMision /> },
       { path: "change-password", element: <ChangePassword /> },
+      { path: "contacto", element: <Contact /> },
+      { path: "admision", element: <Admision /> },
+      { path: "valores", element: <Valores /> },
+      { path: "pilares", element: <Pilares /> },
+      { path: "espacio", element: <Infraestructura /> },
+      { path: "bienvenida", element: <Bienvenida /> },
+      { path: "alumnos", element: <Comunidad /> },
+      { path: "padres", element: <Comunidad /> },
+      { path: "profesores", element: <Comunidad /> },
+      { path: "exalumnos", element: <Comunidad /> },
+      { path: "early-years", element: <EarlyYears /> },
+      { path: "excelencia", element: <ExcelenciaAcademica /> },
+      { path: "idiomas", element: <Idiomas /> },
+      { path: "tecnologia", element: <Tecnologia /> },
+      { path: "deporte", element: <Deporte /> },
+      { path: "arte", element: <ArteCultura /> },
+      { path: "viajes", element: <ViajesEstudio /> },
+      { path: "convenios", element: <ConveniosAlianzas /> },
+      { path: "blog", element: <PropuestaEducativa /> },
       { path: "/", element: <Body /> },
     ],
   },
