@@ -246,133 +246,135 @@ const HomePage = () => {
         <Outlet />
       </main>
 
-      {/* Footer Premium */}
-      <footer className="bg-[#0a0f24] text-white pt-16 pb-8 relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#F26513] via-orange-400 to-[#F26513]"></div>
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#F26513]/5 rounded-full blur-3xl"></div>
+      {/* Footer Premium - Hidden on Login and Change Password */}
+      {location.pathname !== "/login" && location.pathname !== "/change-password" && (
+        <footer className="bg-[#0a0f24] text-white pt-16 pb-8 relative overflow-hidden">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#F26513] via-orange-400 to-[#F26513]"></div>
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#F26513]/5 rounded-full blur-3xl"></div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          {location.pathname === "/" ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-                {/* Brand Info */}
-                <div className="space-y-6">
-                  <Link to="/" className="flex items-center gap-3">
-                    <img
-                      src="https://res.cloudinary.com/dszdc6rh8/image/upload/v1747351782/image_1_vhjpzr.png"
-                      alt="Logo Footer"
-                      className="h-14 w-auto brightness-0 invert"
-                    />
-                    <div>
-                      <h3 className="font-bold text-xl tracking-tighter">CRAYON'S</h3>
-                      <p className="text-[9px] text-[#F26513] font-semibold tracking-widest uppercase">Excelencia Educativa</p>
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            {location.pathname === "/" ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                  {/* Brand Info */}
+                  <div className="space-y-6">
+                    <Link to="/" className="flex items-center gap-3">
+                      <img
+                        src="https://res.cloudinary.com/dszdc6rh8/image/upload/v1747351782/image_1_vhjpzr.png"
+                        alt="Logo Footer"
+                        className="h-14 w-auto brightness-0 invert"
+                      />
+                      <div>
+                        <h3 className="font-bold text-xl tracking-tighter">CRAYON'S</h3>
+                        <p className="text-[9px] text-[#F26513] font-semibold tracking-widest uppercase">Excelencia Educativa</p>
+                      </div>
+                    </Link>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      Transformando el potential de cada estudiante en éxito real,
+                      con valores sólidos y excelencia académica.
+                    </p>
+                    <div className="flex gap-3">
+                      {[Facebook, Instagram, Youtube].map((Icon, i) => (
+                        <a key={i} href="#" className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center hover:bg-[#F26513] transition-all duration-300 group">
+                          <Icon size={18} className="group-hover:text-white transition-colors" />
+                        </a>
+                      ))}
                     </div>
-                  </Link>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    Transformando el potencial de cada estudiante en éxito real,
-                    con valores sólidos y excelencia académica.
-                  </p>
-                  <div className="flex gap-3">
-                    {[Facebook, Instagram, Youtube].map((Icon, i) => (
-                      <a key={i} href="#" className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center hover:bg-[#F26513] transition-all duration-300 group">
-                        <Icon size={18} className="group-hover:text-white transition-colors" />
-                      </a>
-                    ))}
+                  </div>
+
+                  {/* Quick Links */}
+                  <div>
+                    <h4 className="text-base font-semibold mb-6 flex items-center gap-2">
+                      <span className="w-6 h-0.5 bg-[#F26513] rounded-full"></span>
+                      Explorar
+                    </h4>
+                    <ul className="space-y-3">
+                      {[
+                        { name: "Nuestro Colegio", path: "/bienvenida" },
+                        { name: "Propuesta Educativa", path: "/excelencia" },
+                        { name: "Admisión 2026", path: "/admision" },
+                        { name: "Comunidad", path: "/alumnos" },
+                        { name: "Blog Institucional", path: "/blog" }
+                      ].map((link, i) => (
+                        <li key={i}>
+                          <Link to={link.path} className="text-gray-400 hover:text-[#F26513] text-sm transition-colors flex items-center gap-2 group">
+                            <span className="w-1 h-1 rounded-full bg-[#F26513] opacity-0 group-hover:opacity-100 transition-all"></span>
+                            {link.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div>
+                    <h4 className="text-base font-semibold mb-6 flex items-center gap-2">
+                      <span className="w-6 h-0.5 bg-[#F26513] rounded-full"></span>
+                      Contacto
+                    </h4>
+                    <ul className="space-y-4">
+                      <li className="flex items-start gap-3 group">
+                        <MapPin className="text-[#F26513] shrink-0 mt-1" size={16} />
+                        <span className="text-gray-400 text-sm leading-relaxed">
+                          Jr. José Pardo Nro. 181<br />
+                          Junín - Satipo, Perú
+                        </span>
+                      </li>
+                      <li className="flex items-center gap-3 group">
+                        <Phone className="text-[#F26513] shrink-0" size={16} />
+                        <span className="text-gray-400 text-sm">+51 974 958 865</span>
+                      </li>
+                      <li className="flex items-center gap-3 group">
+                        <Mail className="text-[#F26513] shrink-0" size={16} />
+                        <span className="text-gray-400 text-sm">pvilcapoma2022@gmail.com</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Newsletter/CTA */}
+                  <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
+                    <h4 className="text-base font-semibold mb-3">Boletín Informativo</h4>
+                    <p className="text-gray-400 text-xs mb-4 leading-relaxed">
+                      Recibe noticias y actualizaciones de nuestra comunidad.
+                    </p>
+                    <form className="space-y-2">
+                      <input
+                        type="email"
+                        placeholder="Tu correo"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-xs focus:outline-none focus:border-[#F26513] transition-colors"
+                      />
+                      <button className="w-full bg-[#F26513] hover:bg-[#d95a11] text-white py-2.5 rounded-lg font-semibold text-xs transition-all duration-300">
+                        SUSCRIBIRSE
+                      </button>
+                    </form>
                   </div>
                 </div>
 
-                {/* Quick Links */}
-                <div>
-                  <h4 className="text-base font-semibold mb-6 flex items-center gap-2">
-                    <span className="w-6 h-0.5 bg-[#F26513] rounded-full"></span>
-                    Explorar
-                  </h4>
-                  <ul className="space-y-3">
-                    {[
-                      { name: "Nuestro Colegio", path: "/bienvenida" },
-                      { name: "Propuesta Educativa", path: "/excelencia" },
-                      { name: "Admisión 2026", path: "/admision" },
-                      { name: "Comunidad", path: "/alumnos" },
-                      { name: "Blog Institucional", path: "/blog" }
-                    ].map((link, i) => (
-                      <li key={i}>
-                        <Link to={link.path} className="text-gray-400 hover:text-[#F26513] text-sm transition-colors flex items-center gap-2 group">
-                          <span className="w-1 h-1 rounded-full bg-[#F26513] opacity-0 group-hover:opacity-100 transition-all"></span>
-                          {link.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-gray-500">
+                  <p>&copy; {new Date().getFullYear()} I.E. Crayon's. Todos los derechos reservados.</p>
+                  <div className="flex gap-6">
+                    <a href="#" className="hover:text-white transition-colors">Privacidad</a>
+                    <a href="#" className="hover:text-white transition-colors">Términos</a>
+                    <a href="#" className="hover:text-white transition-colors">Libro de Reclamaciones</a>
+                  </div>
                 </div>
-
-                {/* Contact Info */}
-                <div>
-                  <h4 className="text-base font-semibold mb-6 flex items-center gap-2">
-                    <span className="w-6 h-0.5 bg-[#F26513] rounded-full"></span>
-                    Contacto
-                  </h4>
-                  <ul className="space-y-4">
-                    <li className="flex items-start gap-3 group">
-                      <MapPin className="text-[#F26513] shrink-0 mt-1" size={16} />
-                      <span className="text-gray-400 text-sm leading-relaxed">
-                        Jr. José Pardo Nro. 181<br />
-                        Junín - Satipo, Perú
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-3 group">
-                      <Phone className="text-[#F26513] shrink-0" size={16} />
-                      <span className="text-gray-400 text-sm">+51 974 958 865</span>
-                    </li>
-                    <li className="flex items-center gap-3 group">
-                      <Mail className="text-[#F26513] shrink-0" size={16} />
-                      <span className="text-gray-400 text-sm">pvilcapoma2022@gmail.com</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Newsletter/CTA */}
-                <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
-                  <h4 className="text-base font-semibold mb-3">Boletín Informativo</h4>
-                  <p className="text-gray-400 text-xs mb-4 leading-relaxed">
-                    Recibe noticias y actualizaciones de nuestra comunidad.
-                  </p>
-                  <form className="space-y-2">
-                    <input
-                      type="email"
-                      placeholder="Tu correo"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-xs focus:outline-none focus:border-[#F26513] transition-colors"
-                    />
-                    <button className="w-full bg-[#F26513] hover:bg-[#d95a11] text-white py-2.5 rounded-lg font-semibold text-xs transition-all duration-300">
-                      SUSCRIBIRSE
-                    </button>
-                  </form>
-                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center py-4">
+                <Link to="/" className="flex items-center gap-3">
+                  <img
+                    src="https://res.cloudinary.com/dszdc6rh8/image/upload/v1747351782/image_1_vhjpzr.png"
+                    alt="Logo Footer"
+                    className="h-12 w-auto brightness-0 invert opacity-50 hover:opacity-100 transition-opacity"
+                  />
+                </Link>
+                <p className="text-[10px] text-gray-600 mt-4">&copy; {new Date().getFullYear()} I.E. Crayon's</p>
               </div>
-
-              <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-gray-500">
-                <p>&copy; {new Date().getFullYear()} I.E. Crayon's. Todos los derechos reservados.</p>
-                <div className="flex gap-6">
-                  <a href="#" className="hover:text-white transition-colors">Privacidad</a>
-                  <a href="#" className="hover:text-white transition-colors">Términos</a>
-                  <a href="#" className="hover:text-white transition-colors">Libro de Reclamaciones</a>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center py-4">
-              <Link to="/" className="flex items-center gap-3">
-                <img
-                  src="https://res.cloudinary.com/dszdc6rh8/image/upload/v1747351782/image_1_vhjpzr.png"
-                  alt="Logo Footer"
-                  className="h-12 w-auto brightness-0 invert opacity-50 hover:opacity-100 transition-opacity"
-                />
-              </Link>
-              <p className="text-[10px] text-gray-600 mt-4">&copy; {new Date().getFullYear()} I.E. Crayon's</p>
-            </div>
-          )}
-        </div>
-      </footer>
+            )}
+          </div>
+        </footer>
+      )}
     </div>
   );
 };

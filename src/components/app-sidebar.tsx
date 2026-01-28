@@ -77,10 +77,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             url: "/dashboard/list-student",
           },
           {
-            title: "Matrícula Masiva",
-            url: "/dashboard/bulk-enrollment",
+            title: "Promoción y Estado",
+            url: "/dashboard/promocion-alumnos",
           },
-
         ],
       },
       {

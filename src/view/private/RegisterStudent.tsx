@@ -308,64 +308,97 @@ export default function RegisterStudent() {
     }
   };
 
-  const validateField = (name: string, value: string | number | boolean) => {
-    // Convertir el valor a string para la validación
-    const stringValue = value.toString();
+  const validateField = (name: string, value: any) => {
+    const stringValue = value?.toString().trim() || '';
 
     switch (name) {
       case 'alumno_dni':
-        if (!stringValue) return 'El DNI es obligatorio';
-        if (stringValue.length !== 8) return 'El DNI debe tener 8 dígitos';
+      case 'padre_dni':
+      case 'madre_dni':
+      case 'apoderado_dni':
+        if (!stringValue) return 'Este campo es obligatorio';
+        if (!/^\d{8}$/.test(stringValue)) return 'DNI debe tener 8 dígitos';
         return '';
       case 'alumno_nombre':
-        if (!stringValue) return 'El nombre es obligatorio';
-        return '';
       case 'alumno_ap_p':
-        if (!stringValue) return 'El apellido paterno es obligatorio';
-        return '';
       case 'alumno_ap_m':
-        if (!stringValue) return 'El apellido materno es obligatorio';
-        return '';
       case 'alumno_fecha_nacimiento':
-        if (!stringValue) return 'La fecha de nacimiento es obligatoria';
-        return '';
+      case 'alumno_email':
+      case 'alumno_sexo':
+      case 'alumno_lengua_materna':
       case 'id_grado':
-        if (!stringValue) return 'Debe seleccionar un grado';
-        return '';
       case 'tipo_ingreso':
-        if (!stringValue) return 'Debe seleccionar el tipo de ingreso';
+      case 'padre_nombre':
+      case 'padre_ap_p':
+      case 'padre_ap_m':
+      case 'padre_fecha_nacimiento':
+      case 'padre_telefono':
+      case 'padre_email':
+      case 'padre_ocupacion':
+      case 'madre_nombre':
+      case 'madre_ap_p':
+      case 'madre_ap_m':
+      case 'madre_fecha_nacimiento':
+      case 'madre_telefono':
+      case 'madre_email':
+      case 'madre_ocupacion':
+      case 'año_academico':
+        if (!stringValue) return 'Este campo es obligatorio';
         return '';
-      case 'apoderado_dni':
-        if (!stringValue) return 'El DNI del apoderado es obligatorio';
-        if (stringValue.length !== 8) return 'El DNI debe tener 8 dígitos';
-        return '';
-      case 'apoderado_nombre':
-        if (!stringValue) return 'El nombre del apoderado es obligatorio';
-        return '';
-      case 'apoderado_ap_p':
-        if (!stringValue) return 'El apellido paterno del apoderado es obligatorio';
-        return '';
-      case 'apoderado_ap_m':
-        if (!stringValue) return 'El apellido materno del apoderado es obligatorio';
-        return '';
+      case 'padre_telefono':
+      case 'madre_telefono':
       case 'apoderado_telefono':
-        if (!stringValue) return 'El teléfono del apoderado es obligatorio';
-        if (stringValue.length !== 9) return 'El teléfono debe tener 9 dígitos';
+        if (!stringValue) return 'Este campo es obligatorio';
+        if (!/^\d{9}$/.test(stringValue)) return 'Teléfono debe tener 9 dígitos';
         return '';
       case 'matricula_precio':
-        if (!stringValue) return 'El precio de matrícula es obligatorio';
-        if (Number(stringValue) <= 0) return 'El precio debe ser mayor a 0';
-        return '';
       case 'costo_cuota':
-        if (!stringValue) return 'El costo de cuota es obligatorio';
-        if (Number(stringValue) <= 0) return 'El costo debe ser mayor a 0';
+        if (stringValue === '' || isNaN(Number(stringValue))) return 'Este campo es obligatorio';
+        if (Number(stringValue) <= 0) return 'Debe ser mayor a 0';
         return '';
       default:
         return '';
     }
   };
 
-  const nextStep = () => setStep((s) => Math.min(s + 1, steps.length - 1));
+  const validateStep = (currentStep: number) => {
+    const stepErrors: { [key: string]: string } = {};
+    let fieldsToValidate: string[] = [];
+
+    if (currentStep === 0) {
+      fieldsToValidate = [
+        'alumno_dni', 'alumno_nombre', 'alumno_ap_p', 'alumno_ap_m',
+        'alumno_fecha_nacimiento', 'alumno_sexo', 'alumno_lengua_materna',
+        'id_grado', 'tipo_ingreso', 'alumno_email'
+      ];
+    } else if (currentStep === 1) {
+      // Validar al menos uno (Padre o Madre) o según requerimiento "ninguno vacío"
+      // Si el usuario quiere "ninguno vacio" para todos los inputs visibles:
+      fieldsToValidate = [
+        'padre_dni', 'padre_nombre', 'padre_ap_p', 'padre_ap_m', 'padre_fecha_nacimiento', 'padre_telefono', 'padre_email', 'padre_ocupacion',
+        'madre_dni', 'madre_nombre', 'madre_ap_p', 'madre_ap_m', 'madre_fecha_nacimiento', 'madre_telefono', 'madre_email', 'madre_ocupacion'
+      ];
+    } else if (currentStep === 2) {
+      fieldsToValidate = ['año_academico', 'matricula_precio', 'costo_cuota'];
+    }
+
+    fieldsToValidate.forEach(field => {
+      const error = validateField(field, formData[field]);
+      if (error) stepErrors[field] = error;
+    });
+
+    setErrors(prev => ({ ...prev, ...stepErrors }));
+    return Object.keys(stepErrors).length === 0;
+  };
+
+  const nextStep = () => {
+    if (validateStep(step)) {
+      setStep((s) => Math.min(s + 1, steps.length - 1));
+      setMessage(null);
+    } else {
+      setMessage({ text: "Por favor complete todos los campos obligatorios (*) correctamente.", isError: true });
+    }
+  };
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
   // Cargar grados al montar el componente
@@ -469,29 +502,33 @@ export default function RegisterStudent() {
   // Modificar los campos de input para mostrar errores
   const renderInput = (name: Extract<keyof FormData, string>, label: string, type: string = "text", placeholder: string = "") => (
     <div>
-      <Label className="">{label}</Label>
+      <Label className="flex gap-1">
+        {label} <span className="text-red-500">*</span>
+      </Label>
       <Input
         type={type}
         name={name}
         value={String(formData[name])}
         onChange={handleInputChange}
         placeholder={placeholder}
-        className={errors[name] ? "border-red-500" : ""}
+        className={errors[name] ? "border-red-500 focus-visible:ring-red-500" : ""}
       />
       {errors[name] && (
-        <p className="text-sm text-red-500 mt-1">{errors[name]}</p>
+        <p className="text-[10px] text-red-500 mt-1 font-medium">{errors[name]}</p>
       )}
     </div>
   );
 
   const renderSelect = (name: Extract<keyof FormData, string>, label: string, options: { value: string; label: string }[]) => (
     <div>
-      <Label>{label}</Label>
+      <Label className="flex gap-1">
+        {label} <span className="text-red-500">*</span>
+      </Label>
       <Select
         value={String(formData[name])}
         onValueChange={(value) => handleSelectChange(name, value)}
       >
-        <SelectTrigger className={errors[name] ? "border-red-500" : ""}>
+        <SelectTrigger className={errors[name] ? "border-red-500 focus:ring-red-500" : ""}>
           <SelectValue placeholder={`Seleccione ${label.toLowerCase()}`} />
         </SelectTrigger>
         <SelectContent>
@@ -503,7 +540,7 @@ export default function RegisterStudent() {
         </SelectContent>
       </Select>
       {errors[name] && (
-        <p className="text-sm text-red-500 mt-1">{errors[name]}</p>
+        <p className="text-[10px] text-red-500 mt-1 font-medium">{errors[name]}</p>
       )}
     </div>
   );

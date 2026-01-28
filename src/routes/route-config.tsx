@@ -12,6 +12,7 @@ import ListStudent from "@/view/private/ListStudent";
 import ListTeacher from "@/view/private/ListTeacher";
 import RegsiterStudent from "@/view/private/RegisterStudent";
 import RegisterTeacher from "@/view/private/RegisterTeacher";
+import StudentPromotions from "@/view/private/StudentPromotions";
 import ProtectedRoute from "./ProtectedRoute";
 
 import TeacherDashboard from "@/view/private/teacher/teacherDashboard";
@@ -92,7 +93,7 @@ const router = createBrowserRouter([
       { path: "list-teacher", element: <ListTeacher /> },
       { path: "programar-cuotas", element: <CuotasProgramar /> },
       { path: "cuotas-detalle", element: <CuotasDetalle /> },
-      { path: "bulk-enrollment", element: <BulkEnrollment /> },
+      { path: "promocion-alumnos", element: <StudentPromotions /> },
 
     ],
   },
