@@ -1,131 +1,157 @@
-import { Globe, Languages, CheckCircle2, MessageSquare, BookOpen, GraduationCap, Plane } from "lucide-react";
+import { Globe2, MessageSquare, Headphones, Award, Languages, ChevronRight, Check } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 
 const Idiomas = () => {
-    const levels = [
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, []);
+
+    const features = [
         {
-            title: "Starters / Movers",
-            target: "Primaria Baja",
-            desc: "Iniciación lúdica y comunicativa para sentar las bases del idioma.",
-            icon: <BookOpen className="text-blue-500" />
+            title: "Inmersión Total",
+            desc: "Ambientes diseñados para que el aprendizaje del idioma sea natural y constante.",
+            icon: <Headphones className="w-8 h-8" />
         },
         {
-            title: "Flyers / KET",
-            target: "Primaria Alta",
-            desc: "Desarrollo de las cuatro habilidades: hablar, leer, escribir y escuchar.",
-            icon: <Languages className="text-orange-500" />
+            title: "Certificaciones",
+            desc: "Preparación especializada para exámenes internacionales (Cambridge, TOEFL).",
+            icon: <Award className="w-8 h-8" />
         },
         {
-            title: "PET / FCE",
-            target: "Secundaria",
-            desc: "Niveles intermedios y avanzados para una comunicación fluida y académica.",
-            icon: <GraduationCap className="text-purple-500" />
+            title: "Intercambios",
+            desc: "Oportunidades de viaje y programas de intercambio con instituciones globales.",
+            icon: <Globe2 className="w-8 h-8" />
         }
     ];
 
     return (
-        <div className="flex flex-col w-full">
-            {/* Hero Section */}
-            <section className="relative h-[50vh] flex items-center justify-center text-white overflow-hidden">
-                <img
-                    src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1920&q=80"
-                    className="absolute inset-0 w-full h-full object-cover brightness-50"
-                    alt="Idiomas Hero"
-                />
-                <div className="relative z-10 text-center space-y-4 px-6">
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Idiomas</h1>
-                    <p className="text-lg md:text-xl max-w-2xl mx-auto font-light">
-                        Conectando a nuestros estudiantes con un mundo sin fronteras.
-                    </p>
+        <div className="flex flex-col w-full bg-[#fdfcfb]">
+            {/* MULTILINGUAL HERO */}
+            <section className="relative h-[75vh] flex items-center overflow-hidden bg-indigo-950">
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=2000"
+                        alt="Global communication"
+                        className="w-full h-full object-cover opacity-30 mix-blend-overlay scale-110 animate-slow-zoom"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-950 via-indigo-950/60 to-transparent" />
+                </div>
+
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="max-w-4xl space-y-8">
+                        <div className={`flex items-center gap-4 transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                            <div className="w-12 h-0.5 bg-orange-500" />
+                            <span className="text-orange-500 font-black text-[10px] uppercase tracking-[0.4em]">Ciudadanos del Mundo</span>
+                        </div>
+                        <h1 className={`text-6xl md:text-9xl font-serif text-white leading-[0.9] transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                            Sin <br />
+                            <span className="italic text-orange-500">Fronteras.</span>
+                        </h1>
+                        <p className={`text-lg text-indigo-100 max-w-xl font-light leading-relaxed transition-all duration-1000 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            En un mundo interconectado, el dominio de los idiomas es la llave maestra para el éxito global. Nuestro programa de bilingüismo prepara a los estudiantes para comunicarse con fluidez y confianza.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Floating Words Decoration */}
+                <div className="absolute bottom-20 right-20 space-y-2 text-white/5 font-serif italic text-6xl hidden lg:block select-none pointer-events-none">
+                    <p className="translate-x-12 animate-pulse-slow">Hello.</p>
+                    <p className="-translate-x-8">Bonjour.</p>
+                    <p className="translate-x-4">Hola.</p>
                 </div>
             </section>
 
-            {/* Methodology Section */}
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-16">
-                        <div className="space-y-6">
-                            <div className="inline-block px-4 py-1 rounded-full bg-orange-100 text-[#F26513] font-semibold text-xs uppercase tracking-widest">
-                                Global Communication
+            {/* ENGLISH CORE SECTION - EDITORIAL SPLIT */}
+            <section className="py-24 md:py-48">
+                <div className="container mx-auto px-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                        <div className="relative">
+                            <div className="aspect-[4/5] rounded-[4rem] overflow-hidden shadow-2xl relative">
+                                <img
+                                    src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=1000"
+                                    alt="Students communicating"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-indigo-900/10" />
                             </div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-[#1e2a5a] leading-tight">
-                                Más que aprender un idioma, <br />enseñamos a vivirlo.
-                            </h2>
-                            <p className="text-base text-gray-600 leading-relaxed">
-                                Nuestro enfoque comunicativo integral permite que los estudiantes utilicen el inglés como una herramienta natural de aprendizaje en diversas áreas, desde ciencias hasta artes, preparándolos para un entorno globalizado.
-                            </p>
-                            <div className="space-y-3">
-                                {[
-                                    "Metodología 100% comunicativa",
-                                    "Preparación para Exámenes Cambridge",
-                                    "Docentes con certificaciones internacionales",
-                                    "Laboratorio de idiomas multimedia",
-                                    "Proyectos de intercambio virtual",
-                                    "Club de debate en inglés"
-                                ].map((item, i) => (
-                                    <div key={i} className="flex items-center gap-3 font-semibold text-[#1e2a5a] text-sm">
-                                        <CheckCircle2 className="text-[#F26513]" size={18} />
-                                        {item}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80" className="rounded-2xl shadow-xl" alt="Estudiantes" />
-                            <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=400&q=80" className="rounded-2xl shadow-xl mt-8" alt="Clase" />
-                        </div>
-                    </div>
 
-                    {/* Cambridge Levels */}
-                    <div className="text-center mb-12 space-y-3">
-                        <h3 className="text-2xl md:text-3xl font-bold text-[#1e2a5a]">Ruta de Certificación Cambridge</h3>
-                        <p className="text-gray-500 max-w-2xl mx-auto text-sm">Acompañamos a nuestros alumnos en cada etapa de su crecimiento lingüístico con estándares internacionales.</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {levels.map((level, i) => (
-                            <div key={i} className="p-6 rounded-2xl bg-gray-50 border border-gray-100 text-center hover:bg-white hover:shadow-xl transition-all duration-500">
-                                <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mx-auto mb-5">
-                                    {level.icon}
+                            {/* Decorative badge */}
+                            <div className="absolute -bottom-12 -left-12 p-12 bg-white rounded-[3rem] shadow-2xl border border-indigo-50 hidden md:block">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 text-indigo-600">
+                                        <Languages size={24} />
+                                        <span className="font-bold uppercase tracking-widest text-[10px]">Cambridge Partner</span>
+                                    </div>
+                                    <h4 className="text-3xl font-serif text-slate-900">Especialización <br /> Constante.</h4>
                                 </div>
-                                <h4 className="text-xl font-bold text-[#1e2a5a] mb-2">{level.title}</h4>
-                                <div className="text-[#F26513] font-semibold text-xs mb-4 uppercase tracking-wider">{level.target}</div>
-                                <p className="text-gray-600 leading-relaxed text-sm">{level.desc}</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-12">
+                            <div className="space-y-6">
+                                <span className="text-orange-600 font-black text-[10px] uppercase tracking-widest">Enfoque Académico</span>
+                                <h2 className="text-5xl md:text-7xl font-serif text-slate-900 leading-none">
+                                    Inglés como <br /> <span className="italic">Lengua Viva.</span>
+                                </h2>
+                                <p className="text-xl text-slate-600 font-light leading-relaxed">
+                                    Más que gramática y vocabulario, enseñamos a pensar y crear en inglés. Nuestro currículo integra el idioma en materias clave como Ciencias y Tecnología desde los primeros años.
+                                </p>
+                            </div>
+
+                            <ul className="space-y-6">
+                                {[
+                                    "Certificaciones Cambridge desde Primaria.",
+                                    "Debate e Oratoria en lengua extranjera.",
+                                    "Proyectos colaborativos internacionales.",
+                                    "Inmersión cultural y festividades globales."
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-4 group">
+                                        <div className="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                            <Check size={14} />
+                                        </div>
+                                        <span className="font-bold text-slate-700">{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* SECONDARY LANGUAGES / METHODOLOGY - GRID */}
+            <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+                        {features.map((feat, i) => (
+                            <div key={i} className="space-y-6 p-10 rounded-[3rem] border border-white/5 hover:bg-white/5 transition-colors group">
+                                <div className="text-orange-500 group-hover:scale-110 transition-transform duration-500">{feat.icon}</div>
+                                <h3 className="text-2xl font-serif">{feat.title}</h3>
+                                <p className="text-slate-400 font-light leading-relaxed">{feat.desc}</p>
+                                <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Saber más <ChevronRight size={14} />
+                                </button>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* International Experience */}
-            <section className="py-16 bg-[#F26513] text-white overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="flex flex-col lg:flex-row gap-16 items-center">
-                        <div className="flex-1 space-y-6">
-                            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Experiencias Internacionales</h2>
-                            <p className="text-lg text-orange-50 leading-relaxed">
-                                Fomentamos el intercambio cultural a través de viajes de estudio opcionales y proyectos colaborativos con colegios de otros países, permitiendo que nuestros alumnos pongan en práctica sus habilidades en el mundo real.
-                            </p>
-                            <div className="flex flex-wrap gap-4">
-                                <div className="flex items-center gap-3 bg-white/10 px-5 py-2 rounded-full border border-white/20 text-sm">
-                                    <Plane className="text-white" size={18} />
-                                    <span className="font-semibold">Study Tours</span>
-                                </div>
-                                <div className="flex items-center gap-3 bg-white/10 px-5 py-2 rounded-full border border-white/20 text-sm">
-                                    <Globe className="text-white" size={18} />
-                                    <span className="font-semibold">Intercambios Virtuales</span>
-                                </div>
-                                <div className="flex items-center gap-3 bg-white/10 px-5 py-2 rounded-full border border-white/20 text-sm">
-                                    <MessageSquare className="text-white" size={18} />
-                                    <span className="font-semibold">Debate Global</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex-1">
-                            <img
-                                src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80"
-                                className="rounded-2xl shadow-2xl border-8 border-white/10"
-                                alt="Experiencia internacional"
-                            />
+            {/* CALL TO ACTION - GLOBAL VISION */}
+            <section className="py-32 bg-white text-center">
+                <div className="container mx-auto px-6">
+                    <div className="max-w-3xl mx-auto space-y-12">
+                        <h2 className="text-5xl md:text-7xl font-serif text-slate-900 leading-[1.1]">
+                            Hablar el idioma del <br /> <span className="italic text-orange-600">futuro</span> es posible.
+                        </h2>
+                        <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                            <Link to="/admision" className="bg-slate-900 text-white px-12 py-5 rounded-full text-[11px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all">
+                                Consultar Programa
+                            </Link>
+                            <Link to="/contacto" className="px-12 py-5 rounded-full text-[11px] font-black uppercase tracking-widest text-slate-900 border-2 border-slate-900 hover:bg-slate-900 hover:text-white transition-all">
+                                Agendar Entrevista
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -134,4 +160,5 @@ const Idiomas = () => {
     );
 };
 
+import { Link } from "react-router-dom";
 export default Idiomas;

@@ -68,6 +68,31 @@ export interface DailyPayment {
   receiptNumber: string;
 }
 
+export interface DashboardSummaryData {
+  kpis: {
+    ingresos_mensuales: string;
+    ingresos_mes_anterior: string;
+    estudiantes_activos: number;
+    pagos_pendientes: string;
+    estudiantes_con_deuda: number;
+    tasa_recaudacion: number;
+    meta_mensual: number;
+  };
+  distribucion_sexo: {
+    sexo: string;
+    cantidad: number;
+  }[];
+  tendencia_ingresos: {
+    mes: number;
+    anio: number;
+    total: string;
+  }[];
+  comparativa_pagos: {
+    pagado: number;
+    pendiente: number;
+  };
+}
+
 export const fetchDashboardStats = async (): Promise<DashboardStats> => {
   // This could be real API too, but keeping it for now
   return {
@@ -84,6 +109,19 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
     monthlyTarget: 50000,
     overduePayments: 8
   };
+};
+
+export const fetchSummaryStats = async (): Promise<DashboardSummaryData | null> => {
+  try {
+    const response = await api.get('/dashboard/estadisticas');
+    if (response.data.success) {
+      return response.data.data;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching dashboard summary stats:", error);
+    return null;
+  }
 };
 
 export const fetchRecentPayments = async (): Promise<RecentPayment[]> => {

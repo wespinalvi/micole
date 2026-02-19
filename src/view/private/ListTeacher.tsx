@@ -33,9 +33,49 @@ interface ApiResponse {
 export default function ListTeacher() {
   const [docentes, setDocentes] = useState<Docente[]>([]);
   const [loading, setLoading] = useState(true);
-  const [anioSeleccionado, setAnioSeleccionado] = useState("2025");
+  const [anioSeleccionado, setAnioSeleccionado] = useState<string>("");
+  const [anios, setAnios] = useState<string[]>([]);
 
   useEffect(() => {
+    const initializeData = async () => {
+      setLoading(true);
+      try {
+        let availableYears: string[] = [];
+
+        // Try to get all periods for the dropdown
+        try {
+          const periodsRes = await axios.get('http://localhost:3000/api/cuotas/periodos');
+          const data = periodsRes.data;
+          if (data) {
+            // The API might return { success: true, data: [...] } or just [...]
+            const list = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+            availableYears = list.map((p: any) => p.anio?.toString()).filter(Boolean);
+          }
+        } catch (e) {
+          console.error("Error al obtener lista de periodos:", e);
+        }
+
+        const uniqueYears = Array.from(new Set(availableYears)).sort((a: any, b: any) => Number(b) - Number(a));
+
+        // Update states
+        setAnios(uniqueYears);
+
+        if (uniqueYears.length > 0) {
+          setAnioSeleccionado(uniqueYears[0]);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error crítico en inicialización:", error);
+        setLoading(false);
+      }
+    };
+    initializeData();
+  }, []);
+
+  useEffect(() => {
+    if (!anioSeleccionado) return;
+
     const fetchDocentes = async () => {
       setLoading(true);
       try {
@@ -44,9 +84,12 @@ export default function ListTeacher() {
         );
         if (data.success) {
           setDocentes(data.data);
+        } else {
+          setDocentes([]);
         }
       } catch (error) {
         console.error("Error al cargar los docentes:", error);
+        setDocentes([]);
       } finally {
         setLoading(false);
       }
@@ -62,8 +105,6 @@ export default function ListTeacher() {
     }
   };
 
-  const anios = ["2024", "2025", "2026"]; // Puedes ajustar los años según necesites
-
   const handleExportar = async () => {
     try {
       const response = await axios.get(
@@ -75,7 +116,7 @@ export default function ListTeacher() {
           }
         }
       );
-      
+
       // Crear un enlace temporal para descargar el archivo
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -99,10 +140,10 @@ export default function ListTeacher() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Lista de Docentes</h2>
         <div className="flex items-center gap-4">
-          <Button 
+          <Button
             onClick={handleExportar}
             variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 h-9"
           >
             <Download className="h-4 w-4" />
             Exportar Excel
@@ -110,7 +151,7 @@ export default function ListTeacher() {
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Año:</span>
             <Select value={anioSeleccionado} onValueChange={setAnioSeleccionado}>
-              <SelectTrigger className="w-[100px]">
+              <SelectTrigger className="w-[100px] h-9 bg-white border border-slate-300 rounded px-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                 <SelectValue placeholder="Selecciona año" />
               </SelectTrigger>
               <SelectContent>

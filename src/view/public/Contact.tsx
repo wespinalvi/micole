@@ -1,103 +1,142 @@
-import { MapPin, Phone, Clock, Facebook, Instagram, Youtube, Send } from "lucide-react";
+import { MapPin, Phone, Clock, Facebook, Instagram, Youtube, Send, MessageSquare, ChevronRight } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Link } from "react-router-dom";
 
 const Contact = () => {
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, []);
+
     return (
-        <div className="flex flex-col w-full">
-            {/* Page Header */}
-            <section className="relative py-16 bg-[#1e2a5a] text-white overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                <div className="max-w-7xl mx-auto px-6 relative z-10 text-center space-y-3">
-                    <h1 className="text-3xl md:text-5xl font-black tracking-tight">Contáctanos</h1>
-                    <p className="text-lg text-gray-300 max-w-2xl mx-auto font-light">
-                        Estamos aquí para resolver tus dudas y acompañarte en el proceso educativo de tus hijos.
-                    </p>
+        <div className="flex flex-col w-full bg-[#fdfcfb]">
+            {/* MINIMALIST HERO */}
+            <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+                <div className="container mx-auto">
+                    <div className="max-w-4xl space-y-8 relative z-10">
+                        <div className={`flex items-center gap-4 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                            <div className="w-12 h-px bg-slate-900" />
+                            <span className="text-slate-900 font-black text-[10px] uppercase tracking-[0.4em]">Canales Abiertos</span>
+                        </div>
+                        <h1 className={`text-6xl md:text-9xl font-serif text-slate-900 leading-[0.85] transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                            Hablemos <br />
+                            <span className="italic text-orange-600">Hoy.</span>
+                        </h1>
+                        <p className={`text-xl text-slate-500 max-w-2xl font-light leading-relaxed transition-all duration-1000 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            Estamos a su disposición para resolver cualquier inquietud y acompañarle en la decisión más importante para el futuro de sus hijos.
+                        </p>
+                    </div>
                 </div>
+
+                {/* Aesthetic Detail */}
+                <div className="absolute top-0 right-0 w-1/4 h-full bg-orange-50 -z-10 hidden lg:block" />
             </section>
 
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                        {/* Contact Form */}
-                        <div className="bg-gray-50 p-8 md:p-12 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                            <h2 className="text-2xl font-black text-[#1e2a5a] mb-6">Envíanos un mensaje</h2>
-                            <form className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-[#1e2a5a] ml-1">Nombre Completo</label>
-                                        <input type="text" className="w-full bg-white border border-gray-200 rounded-2xl px-6 py-3 text-sm focus:outline-none focus:border-[#F26513] transition-colors" placeholder="Ej. Juan Pérez" />
+            {/* CONTACT COMPOSITION - EDITORIAL SPLIT */}
+            <section className="py-24 md:py-48 bg-white">
+                <div className="container mx-auto px-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 items-start">
+
+                        {/* THE FORM AREA */}
+                        <div className="lg:col-span-7 bg-slate-50 p-12 md:p-20 rounded-[4rem] shadow-2xl shadow-slate-200/50">
+                            <div className="space-y-12">
+                                <div className="space-y-4">
+                                    <h2 className="text-4xl font-serif text-slate-900">Enviar Mensaje</h2>
+                                    <p className="text-sm text-slate-400 font-medium tracking-wide">Prometemos una respuesta atenta en menos de 24 horas.</p>
+                                </div>
+
+                                <form className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Nombre Completo</label>
+                                            <input type="text" className="w-full bg-white border-b-2 border-slate-100 px-0 py-4 text-sm focus:outline-none focus:border-orange-500 transition-all font-medium text-slate-900 placeholder:text-slate-200" placeholder="Ej. Alejandra Valdivia" />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Email Institucional/Personal</label>
+                                            <input type="email" className="w-full bg-white border-b-2 border-slate-100 px-0 py-4 text-sm focus:outline-none focus:border-orange-500 transition-all font-medium text-slate-900 placeholder:text-slate-200" placeholder="email@ejemplo.com" />
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-[#1e2a5a] ml-1">Correo Electrónico</label>
-                                        <input type="email" className="w-full bg-white border border-gray-200 rounded-2xl px-6 py-3 text-sm focus:outline-none focus:border-[#F26513] transition-colors" placeholder="juan@ejemplo.com" />
+
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Motivo del Contacto</label>
+                                        <select className="w-full bg-white border-b-2 border-slate-100 px-0 py-4 text-sm focus:outline-none focus:border-orange-500 transition-all font-medium text-slate-900 appearance-none cursor-pointer">
+                                            <option>Información de Admisión 2026</option>
+                                            <option>Consulta Académica</option>
+                                            <option>Alianzas e Institucional</option>
+                                            <option>Soporte de Plataformas</option>
+                                        </select>
                                     </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-[#1e2a5a] ml-1">Asunto</label>
-                                    <select className="w-full bg-white border border-gray-200 rounded-2xl px-6 py-3 text-sm focus:outline-none focus:border-[#F26513] transition-colors appearance-none">
-                                        <option>Información sobre Admisión</option>
-                                        <option>Consulta General</option>
-                                        <option>Soporte Técnico</option>
-                                        <option>Otros</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-[#1e2a5a] ml-1">Mensaje</label>
-                                    <textarea rows={4} className="w-full bg-white border border-gray-200 rounded-2xl px-6 py-3 text-sm focus:outline-none focus:border-[#F26513] transition-colors resize-none" placeholder="¿En qué podemos ayudarte?"></textarea>
-                                </div>
-                                <button className="w-full bg-[#F26513] hover:bg-[#d95a11] text-white py-4 rounded-2xl font-bold text-base shadow-xl shadow-orange-500/20 transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
-                                    Enviar Mensaje <Send size={18} />
-                                </button>
-                            </form>
+
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Su Mensaje</label>
+                                        <textarea rows={4} className="w-full bg-white border-b-2 border-slate-100 px-0 py-4 text-sm focus:outline-none focus:border-orange-500 transition-all font-medium text-slate-900 placeholder:text-slate-200 resize-none" placeholder="Cuéntenos cómo podemos ayudarle..."></textarea>
+                                    </div>
+
+                                    <button className="bg-slate-900 text-white px-12 py-6 rounded-full text-[10px] font-black uppercase tracking-[0.3em] hover:bg-orange-600 transition-all flex items-center justify-center gap-3 group">
+                                        Enviar Comunicación <Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                    </button>
+                                </form>
+                            </div>
                         </div>
 
-                        {/* Contact Info & Social */}
-                        <div className="space-y-10">
-                            <div className="space-y-6">
-                                <h2 className="text-2xl font-black text-[#1e2a5a]">Información de Contacto</h2>
-                                <div className="space-y-6">
-                                    <div className="flex items-start gap-5 group">
-                                        <div className="w-12 h-12 rounded-2xl bg-[#1e2a5a]/5 flex items-center justify-center text-[#1e2a5a] group-hover:bg-[#F26513] group-hover:text-white transition-all duration-300 shrink-0">
-                                            <MapPin size={24} />
+                        {/* INFO AREA - EDITORIAL SIDEBAR */}
+                        <div className="lg:col-span-5 space-y-20 pt-10">
+                            <div className="space-y-12">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500">Puntos de Contacto</h3>
+
+                                <div className="space-y-12">
+                                    {[
+                                        { i: MapPin, t: "Nuestra Sede", d: "Jr. José Pardo Nro. 181, Satipo, Junín, Perú" },
+                                        { i: Phone, t: "Líneas Directas", d: "+51 974 958 865 | (064) 545-123" },
+                                        { i: Clock, t: "Horarios", d: "Lun - Vie: 07:30 — 16:00 | Sáb: 08:00 — 12:00" }
+                                    ].map((item, i) => (
+                                        <div key={i} className="flex gap-8 group">
+                                            <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0 group-hover:bg-orange-600 group-hover:text-white transition-all duration-500">
+                                                <item.i size={24} strokeWidth={1.5} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <h4 className="font-bold text-slate-900 uppercase tracking-widest text-[10px]">{item.t}</h4>
+                                                <p className="text-lg font-serif text-slate-500 italic leading-snug">{item.d}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-[#1e2a5a] text-base">Nuestra Ubicación</h4>
-                                            <p className="text-gray-600 leading-relaxed text-sm">Jr. José Pardo Nro. 181, Junín - Satipo, Perú</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-5 group">
-                                        <div className="w-12 h-12 rounded-2xl bg-[#1e2a5a]/5 flex items-center justify-center text-[#1e2a5a] group-hover:bg-[#F26513] group-hover:text-white transition-all duration-300 shrink-0">
-                                            <Phone size={24} />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-[#1e2a5a] text-base">Llámanos</h4>
-                                            <p className="text-gray-600 leading-relaxed text-sm">+51 974 958 865 <br /> (064) 545-123</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-5 group">
-                                        <div className="w-12 h-12 rounded-2xl bg-[#1e2a5a]/5 flex items-center justify-center text-[#1e2a5a] group-hover:bg-[#F26513] group-hover:text-white transition-all duration-300 shrink-0">
-                                            <Clock size={24} />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-[#1e2a5a] text-base">Horario de Atención</h4>
-                                            <p className="text-gray-600 leading-relaxed text-sm">Lunes a Viernes: 7:30 AM - 4:00 PM <br /> Sábados: 8:00 AM - 12:00 PM</p>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            <div className="pt-8 border-t border-gray-100">
-                                <h3 className="font-bold text-[#1e2a5a] mb-6">Síguenos en nuestras redes</h3>
-                                <div className="flex gap-3">
+                            <div className="pt-20 border-t border-slate-100 space-y-8">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Presencia Digital</h3>
+                                <div className="flex gap-6">
                                     {[Facebook, Instagram, Youtube].map((Icon, i) => (
-                                        <a key={i} href="#" className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center hover:bg-[#F26513] hover:text-white transition-all duration-300">
-                                            <Icon size={20} />
+                                        <a key={i} href="#" className="w-14 h-14 rounded-full border border-slate-100 flex items-center justify-center text-slate-900 hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all duration-500">
+                                            <Icon size={20} strokeWidth={1.5} />
                                         </a>
                                     ))}
                                 </div>
                             </div>
+
+                            <div className="p-10 bg-orange-600 rounded-[3rem] text-white space-y-6 shadow-2xl shadow-orange-600/20">
+                                <MessageSquare size={32} />
+                                <h4 className="text-2xl font-serif italic">¿Prefiere WhatsApp?</h4>
+                                <p className="text-sm font-light text-orange-50 leading-relaxed">Atención inmediata para consultas rápidas sobre procesos de admisión y vacantes.</p>
+                                <button className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest bg-white text-orange-600 px-8 py-3 rounded-full hover:scale-105 transition-all">
+                                    Iniciar Chat <ChevronRight size={14} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </section>
+
+            {/* MAP SECTION - FULL WIDTH EDITORIAL */}
+            <section className="h-[60vh] bg-slate-100 relative grayscale hover:grayscale-0 transition-all duration-1000 grayscale">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3902.9!2d-74.63!3d-11.25!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDE1JzAwLjAiUyA3NMKwMzcnNDguMCJX!5e0!3m2!1sen!2spe!4v1620000000000!5m2!1sen!2spe"
+                    className="w-full h-full border-0"
+                    allowFullScreen
+                    loading="lazy"
+                ></iframe>
+                <div className="absolute inset-0 pointer-events-none border-[2rem] border-white/20" />
             </section>
         </div>
     );

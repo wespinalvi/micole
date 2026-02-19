@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import api from "@/lib/axios";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -18,308 +18,330 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useAuth } from "@/context/AuthContext";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Users, Save, X, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
-interface Alumno {
-  id: number;
-  nombre: string;
+interface Student {
+  id_alumno: number;
+  id_matricula: number;
+  dni: string;
+  nombre_completo: string;
+}
+
+interface AlumnoAsistencia extends Student {
   asistio: boolean;
   observacion: string;
 }
 
-// Tipos para la respuesta de la API
-interface AlumnoAPI {
-  alumno_id: number;
-  alumno_dni: string;
-  alumno_nombre: string;
-  alumno_apellido_paterno: string;
-  alumno_apellido_materno: string;
-  fecha_nacimiento: string;
-  grado: string;
-  fecha_matricula: string;
-}
-interface GradoAPI {
-  grado: string;
-  id_grado: string;
-  alumnos: AlumnoAPI[];
-}
-interface ApiResponse {
-  success: boolean;
-  data: GradoAPI[];
-  anio: string;
-}
-
-interface CursoDocente {
-  id_docente_curso: number;
+interface Asignacion {
+  id_asignacion: number;
   id_curso: number;
   curso: string;
   id_grado: number;
   grado: string;
+  anio: number;
+  alumnos: Student[];
 }
 
 export default function RegistrarAsistencia() {
-  const { token, roleId } = useAuth();
-  const [cursoSeleccionado, setCursoSeleccionado] = useState<string>("");
-  const [gradoSeleccionado, setGradoSeleccionado] = useState<string>("");
+  const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
+  const [asignacionSeleccionada, setAsignacionSeleccionada] = useState<string>("");
   const [anioSeleccionado, setAnioSeleccionado] = useState<string>(new Date().getFullYear().toString());
-  const [alumnos, setAlumnos] = useState<Alumno[]>([]);
-  const [mensaje, setMensaje] = useState<string>("");
-  const [cursos, setCursos] = useState<CursoDocente[]>([]);
-  const fechaActual = format(new Date(), "EEEE d 'de' MMMM 'de' yyyy", {
-    locale: es,
-  });
+  const [alumnos, setAlumnos] = useState<AlumnoAsistencia[]>([]);
+  const [mensaje, setMensaje] = useState<{ text: string; isError: boolean } | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Obtener cursos del docente al cargar o cambiar año
+  const fechaActual = format(new Date(), "EEEE d 'de' MMMM 'de' yyyy", { locale: es });
+
   useEffect(() => {
-    const fetchCursos = async () => {
+    const fetchAsignaciones = async () => {
+      setLoading(true);
       try {
-        const { data } = await api.get(`/docente/mis-cursos/${anioSeleccionado}`);
+        const { data } = await api.get(`/docente/mis-asignaciones-alumnos/${anioSeleccionado}`);
         if (data.success) {
-          setCursos(data.cursos);
+          setAsignaciones(data.data || []);
         } else {
-          setCursos([]);
+          setAsignaciones([]);
         }
-      } catch {
-        setCursos([]);
+      } catch (error) {
+        console.error("Error fetching asignaciones:", error);
+        setAsignaciones([]);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchCursos();
+    fetchAsignaciones();
   }, [anioSeleccionado]);
 
-  // Grados únicos de los cursos del docente
-  const gradosDisponibles = Array.from(
-    new Map(cursos.map(c => [c.id_grado, c.grado])).entries()
-  ).map(([id, nombre]) => ({ id, nombre }));
-
-  // Cursos filtrados por grado seleccionado
-  const cursosFiltrados = gradoSeleccionado
-    ? cursos.filter(c => c.id_grado.toString() === gradoSeleccionado)
-    : cursos;
-
-  // Fetch alumnos cuando cambian año o grado
   useEffect(() => {
-    if (!anioSeleccionado || !gradoSeleccionado) {
+    if (!asignacionSeleccionada) {
       setAlumnos([]);
-      setMensaje("");
       return;
     }
-    setMensaje("");
-    api
-      .get<ApiResponse>(`/docente/alumnos-matriculados/${anioSeleccionado}?id_grado=${gradoSeleccionado}`)
-      .then(res => {
-        const data = res.data;
-        if (data.success && data.data.length > 0 && data.data[0].alumnos.length > 0) {
-          setAlumnos(
-            data.data[0].alumnos.map((a) => ({
-              id: a.alumno_id,
-              nombre: `${a.alumno_nombre} ${a.alumno_apellido_paterno} ${a.alumno_apellido_materno}`,
-              asistio: false,
-              observacion: ""
-            }))
-          );
-          setMensaje("");
-        } else {
-          setAlumnos([]);
-          setMensaje("No tienes alumnos asignados para este año y grado.");
-        }
-      })
-      .catch(() => {
-        setAlumnos([]);
-        setMensaje("Error al cargar los alumnos.");
-      });
-  }, [anioSeleccionado, gradoSeleccionado]);
 
-  // Función para manejar cambios en la asistencia
+    const selected = asignaciones.find(a => a.id_asignacion.toString() === asignacionSeleccionada);
+    if (selected) {
+      setAlumnos(
+        selected.alumnos.map(al => ({
+          ...al,
+          asistio: true,
+          observacion: ""
+        }))
+      );
+      setMensaje(null);
+    } else {
+      setAlumnos([]);
+    }
+  }, [asignacionSeleccionada, asignaciones]);
+
   const handleAsistenciaChange = (id: number, checked: boolean) => {
-    setAlumnos(
-      alumnos.map((alumno) =>
-        alumno.id === id ? { ...alumno, asistio: checked } : alumno
-      )
-    );
+    setAlumnos(alumnos.map(a => a.id_alumno === id ? { ...a, asistio: checked } : a));
   };
 
-  // Función para manejar cambios en observaciones
   const handleObservacionChange = (id: number, observacion: string) => {
-    setAlumnos(
-      alumnos.map((alumno) =>
-        alumno.id === id ? { ...alumno, observacion } : alumno
-      )
-    );
+    setAlumnos(alumnos.map(a => a.id_alumno === id ? { ...a, observacion } : a));
   };
 
-  // Función para guardar asistencia
   const handleGuardarAsistencia = async () => {
+    if (!asignacionSeleccionada) return;
+    setLoading(true);
+    setMensaje(null);
     try {
-      // Verificar token
-      console.log("Token actual:", token ? "Presente" : "Ausente");
-      console.log("RoleId:", roleId);
-      
-      if (!token) {
-        setMensaje("Error: No hay token de autenticación. Por favor, inicie sesión nuevamente.");
-        return;
-      }
+      const fechaHoy = format(new Date(), "yyyy-MM-dd");
+      const horaActual = format(new Date(), "HH:mm:ss");
 
-      // Verificar que se haya seleccionado un curso
-      if (!cursoSeleccionado) {
-        setMensaje("Error: Debe seleccionar un curso antes de registrar la asistencia.");
-        return;
-      }
+      const payload = {
+        asistencias: alumnos.map((alumno) => ({
+          id_matricula: alumno.id_matricula,
+          id_asignacion: parseInt(asignacionSeleccionada),
+          fecha: fechaHoy,
+          estado: alumno.asistio ? "Presente" : "Ausente",
+          hora_llegada: alumno.asistio ? horaActual : null,
+          observaciones: alumno.observacion,
+        })),
+      };
 
-      for (const alumno of alumnos) {
-        // Restar un día a la fecha actual
-        const fechaHoy = new Date();
-        const fechaAEnviar = fechaHoy.toISOString().slice(0, 10);
-        await api.post("/docente/registrar-asistencia", {
-          id_alumno: alumno.id,
-          id_docente_curso: parseInt(cursoSeleccionado),
-          docente_id: roleId, // Agregar el ID del docente logueado
-          fecha: fechaAEnviar,
-          asistio: alumno.asistio,
-          observacion: alumno.observacion,
-        });
-      }
-      setMensaje("¡Asistencia registrada correctamente!");
-    } catch (error: unknown) {
-      console.error("Error completo:", error);
-      
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { status: number; data: { message?: string } } };
-        console.error("Respuesta del servidor:", axiosError.response?.data);
-        
-        if (axiosError.response?.status === 403) {
-          setMensaje("Error 403: No tiene permisos para registrar asistencia. Verifique su autenticación.");
-        } else if (axiosError.response?.status === 401) {
-          setMensaje("Error 401: Token inválido. Por favor, inicie sesión nuevamente.");
-        } else {
-          setMensaje(`Error al registrar la asistencia: ${axiosError.response?.data?.message || 'Error desconocido'}`);
-        }
+      const { data } = await api.post("/docente/registrar-asistencia-masiva", payload);
+
+      if (data.success) {
+        setMensaje({ text: data.message || "¡Asistencia registrada con éxito!", isError: false });
       } else {
-        setMensaje("Error al registrar la asistencia: Error desconocido");
+        setMensaje({ text: data.message || "Error al registrar la asistencia.", isError: true });
       }
+    } catch (error: any) {
+      const responseData = error.response?.data;
+      const errorMessage = responseData?.message || "Error al servidor al intentar guardar.";
+
+      if (error.response?.status === 400) {
+        setMensaje({ text: errorMessage, isError: true });
+      } else {
+        console.error("Error inesperado al registrar asistencia:", error);
+        setMensaje({ text: errorMessage, isError: true });
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
+  const stats = {
+    total: alumnos.length,
+    presentes: alumnos.filter(a => a.asistio).length,
+    faltas: alumnos.filter(a => !a.asistio).length
+  };
+
+  const gradosDisponibles = Array.from(
+    new Map(asignaciones.map(a => [a.id_grado, a.grado])).entries()
+  ).map(([id, nombre]) => ({ id, nombre }));
+
+  const [gradoSeleccionado, setGradoSeleccionado] = useState<string>("");
+
+  const asignacionesFiltradas = gradoSeleccionado
+    ? asignaciones.filter(a => a.id_grado.toString() === gradoSeleccionado)
+    : asignaciones;
+
   return (
-    <div className="container mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Registro de Asistencia</CardTitle>
-          <p className="text-sm text-gray-500">{fechaActual}</p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Año</label>
-              <Select
-                value={anioSeleccionado}
-                onValueChange={setAnioSeleccionado}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione un año" />
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 max-w-7xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">Registro de Asistencia</h1>
+          <div className="flex items-center gap-2 text-slate-500 text-sm">
+            <Calendar className="h-4 w-4" />
+            <span className="capitalize">{fechaActual}</span>
+          </div>
+        </div>
+
+        {alumnos.length > 0 && (
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-2 rounded-lg">
+            <div className="px-3 py-1.5 bg-white rounded border border-slate-100 flex flex-col items-center min-w-[60px]">
+              <span className="text-[9px] font-medium text-slate-500 uppercase">Total</span>
+              <span className="text-base font-semibold text-slate-700">{stats.total}</span>
+            </div>
+            <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 flex flex-col items-center rounded min-w-[60px]">
+              <span className="text-[9px] font-medium text-emerald-600 uppercase">Pres.</span>
+              <span className="text-base font-semibold text-emerald-700">{stats.presentes}</span>
+            </div>
+            <div className="px-3 py-1.5 bg-rose-50 border border-rose-200 flex flex-col items-center rounded min-w-[60px]">
+              <span className="text-[9px] font-medium text-rose-600 uppercase">Fal.</span>
+              <span className="text-base font-semibold text-rose-700">{stats.faltas}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Card className="border border-slate-200 shadow-sm">
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-600">Año Académico</label>
+              <Select value={anioSeleccionado} onValueChange={setAnioSeleccionado}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="Año" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={new Date().getFullYear().toString()}>{new Date().getFullYear()}</SelectItem>
-                  <SelectItem value={(new Date().getFullYear() + 1).toString()}>{new Date().getFullYear() + 1}</SelectItem>
+                  <SelectItem value="2026">2026</SelectItem>
+                  <SelectItem value="2025">2025</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Grado</label>
-              <Select
-                value={gradoSeleccionado}
-                onValueChange={setGradoSeleccionado}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione un grado" />
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-600">Grado</label>
+              <Select value={gradoSeleccionado} onValueChange={(val) => {
+                setGradoSeleccionado(val);
+                setAsignacionSeleccionada("");
+              }}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="Seleccionar grado" />
                 </SelectTrigger>
                 <SelectContent>
-                  {gradosDisponibles.map((g) => (
-                    <SelectItem key={g.id} value={g.id.toString()}>
-                      {g.nombre}
+                  {gradosDisponibles.map(g => (
+                    <SelectItem key={g.id} value={g.id.toString()}>{g.nombre}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-600">Asignatura</label>
+              <Select value={asignacionSeleccionada} onValueChange={setAsignacionSeleccionada}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="Seleccionar curso" />
+                </SelectTrigger>
+                <SelectContent>
+                  {asignacionesFiltradas.map(a => (
+                    <SelectItem key={a.id_asignacion} value={a.id_asignacion.toString()}>
+                      {a.curso}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Curso</label>
-              <Select
-                value={cursoSeleccionado}
-                onValueChange={setCursoSeleccionado}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione un curso" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cursosFiltrados.map((c) => (
-                    <SelectItem key={c.id_docente_curso} value={c.id_docente_curso.toString()}>
-                      {c.curso}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-           
           </div>
 
           {mensaje && (
-            <div className={`mb-4 p-3 rounded ${
-              mensaje.includes("¡Asistencia registrada correctamente!") 
-                ? "bg-green-100 text-green-800 border border-green-300" 
-                : "bg-red-100 text-red-800 border border-red-300"
-            }`}>
-              {mensaje}
+            <div className={`p-3 rounded-lg mb-4 flex items-center justify-between border ${mensaje.isError ? "bg-red-50 text-red-700 border-red-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
+              <div className="flex items-center gap-2">
+                {mensaje.isError ? <X className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                <span className="font-medium text-sm">{mensaje.text}</span>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setMensaje(null)} className="h-6 w-6 p-0">
+                <X className="h-3 w-3" />
+              </Button>
             </div>
           )}
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Alumno</TableHead>
-                <TableHead className="w-[100px]">Asistencia</TableHead>
-                <TableHead>Observación</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {alumnos.map((alumno) => (
-                <TableRow key={alumno.id}>
-                  <TableCell>{alumno.nombre}</TableCell>
-                  <TableCell>
-                    <Checkbox
-                      checked={alumno.asistio}
-                      onCheckedChange={(checked) =>
-                        handleAsistenciaChange(alumno.id, checked as boolean)
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Textarea
-                      placeholder="Observación..."
-                      value={alumno.observacion}
-                      onChange={(e) =>
-                        handleObservacionChange(alumno.id, e.target.value)
-                      }
-                      className="h-20"
-                    />
-                  </TableCell>
+          <div className="rounded-lg border border-slate-200 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-slate-50">
+                <TableRow>
+                  <TableHead className="h-10 px-4 font-medium text-xs text-slate-600">Estudiante</TableHead>
+                  <TableHead className="h-10 px-2 font-medium text-xs text-slate-600">Observación</TableHead>
+                  <TableHead className="h-10 px-4 font-medium text-xs text-slate-600 text-right">Asistencia</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          <div className="flex justify-end mt-6 space-x-4">
-            <Button variant="outline" className="bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-300">Cancelar</Button>
-            <Button 
-              onClick={handleGuardarAsistencia}
-              disabled={!cursoSeleccionado || alumnos.length === 0}
-              className="bg-purple-600 text-white hover:bg-purple-700"
-            >
-              Guardar Asistencia
-            </Button>
+              </TableHeader>
+              <TableBody>
+                {alumnos.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-12">
+                      <Users className="h-10 w-10 text-slate-300 mx-auto mb-2" />
+                      <p className="text-slate-400 font-medium text-sm">Seleccione un curso para ver los estudiantes</p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  alumnos.map((alumno: AlumnoAsistencia) => (
+                    <TableRow key={alumno.id_alumno} className="hover:bg-slate-50">
+                      <TableCell className="py-2 px-4">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-slate-700 text-sm">{alumno.nombre_completo}</span>
+                          <span className="text-xs text-slate-400">DNI: {alumno.dni}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-2 px-2">
+                        <Input
+                          placeholder="Agregar nota..."
+                          value={alumno.observacion}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleObservacionChange(alumno.id_alumno, e.target.value)}
+                          className="h-8 text-xs border-slate-200"
+                        />
+                      </TableCell>
+                      <TableCell className="py-2 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Badge
+                            variant="secondary"
+                            className={`px-2 py-0.5 text-xs font-medium ${alumno.asistio
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-rose-100 text-rose-700"
+                              }`}
+                          >
+                            {alumno.asistio ? "Presente" : "Falta"}
+                          </Badge>
+                          <Checkbox
+                            className={`h-4 w-4 ${alumno.asistio
+                              ? "border-emerald-500 data-[state=checked]:bg-emerald-500"
+                              : "border-slate-300"
+                              }`}
+                            checked={alumno.asistio}
+                            onCheckedChange={(checked) => handleAsistenciaChange(alumno.id_alumno, checked as boolean)}
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
+
+          {alumnos.length > 0 && (
+            <div className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+              <span className="text-xs text-slate-400 italic">
+                Verifique los datos antes de guardar
+              </span>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  className="h-9 px-4 text-xs font-medium"
+                  onClick={() => setAlumnos(alumnos.map(al => ({ ...al, asistio: true })))}
+                >
+                  Marcar todos
+                </Button>
+                <Button
+                  onClick={handleGuardarAsistencia}
+                  disabled={!asignacionSeleccionada || loading}
+                  className="h-9 px-6 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium flex gap-2"
+                >
+                  {loading ? (
+                    <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Save className="h-3.5 w-3.5" />
+                  )}
+                  <span>Registrar Asistencia</span>
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

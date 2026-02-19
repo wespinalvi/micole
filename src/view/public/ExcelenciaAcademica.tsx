@@ -1,88 +1,152 @@
-import { Trophy, Star, CheckCircle2, Globe, Users } from "lucide-react";
+import { Trophy, BookOpen, Microscope, Globe, BarChart3, GraduationCap, ArrowRight, CheckCircle2 } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 
 const ExcelenciaAcademica = () => {
-    const features = [
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, []);
+
+    const levels = [
         {
-            title: "Currículo Internacional",
-            desc: "Basado en estándares globales que preparan a nuestros alumnos para cualquier desafío académico.",
-            icon: <Globe className="w-8 h-8 text-blue-600" />
+            title: "Nivel Primaria",
+            desc: "Donde la curiosidad se convierte en competencia. Fomentamos el pensamiento lógico y la expresión creativa en un entorno bilingüe.",
+            icon: <BookOpen className="w-8 h-8" />,
+            metrics: ["Bilingüismo 50%", "STEAM Core", "Mentoring"],
+            image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1200"
         },
         {
-            title: "Docentes de Élite",
-            desc: "Contamos con un equipo de profesionales altamente calificados y en constante capacitación.",
-            icon: <Users className="w-8 h-8 text-orange-600" />
-        },
-        {
-            title: "Metodología Activa",
-            desc: "El estudiante es el protagonista de su propio aprendizaje a través de la investigación y el análisis.",
-            icon: <Star className="w-8 h-8 text-yellow-600" />
+            title: "Nivel Secundaria",
+            desc: "Preparación de alto rendimiento para el mundo real. Enfoque en liderazgo, investigación científica y preparación pre-universitaria.",
+            icon: <GraduationCap className="w-8 h-8" />,
+            metrics: ["IB Standards", "Tech Lab", "University Path"],
+            image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200"
         }
     ];
 
     return (
-        <div className="flex flex-col w-full">
-            {/* Hero Section */}
-            <section className="relative py-16 bg-[#1e2a5a] text-white overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                <div className="max-w-7xl mx-auto px-6 relative z-10 text-center space-y-3">
-                    <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium mb-3">
-                        <Trophy size={14} className="text-[#F26513]" />
-                        <span>Calidad Educativa Garantizada</span>
-                    </div>
-                    <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Excelencia Académica</h1>
-                    <p className="text-lg text-gray-300 max-w-2xl mx-auto font-light">
-                        Formamos mentes brillantes con un enfoque en la investigación, el pensamiento crítico y la superación personal.
-                    </p>
+        <div className="flex flex-col w-full bg-white">
+            {/* CINEMATIC HERO */}
+            <section className="relative h-[80vh] flex items-center overflow-hidden bg-slate-900">
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="https://images.unsplash.com/photo-1513258496099-48168024adb0?auto=format&fit=crop&q=80&w=2000"
+                        alt="Academic excellence"
+                        className="w-full h-full object-cover brightness-50 contrast-125 scale-105 animate-slow-zoom"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent" />
                 </div>
-            </section>
 
-            {/* Content Section */}
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                        <div className="space-y-8">
-                            <h2 className="text-3xl font-bold text-[#1e2a5a] leading-tight">
-                                Un estándar superior de <br />aprendizaje integral.
-                            </h2>
-                            <p className="text-base text-gray-600 leading-relaxed">
-                                En Crayon's, la excelencia no es un acto, sino un hábito. Nuestro programa académico está diseñado para potenciar las habilidades cognitivas y emocionales de cada estudiante, asegurando un ingreso exitoso a las mejores universidades.
-                            </p>
-                            <div className="space-y-4">
-                                {[
-                                    "Preparación pre-universitaria desde grados intermedios",
-                                    "Laboratorios de ciencias y tecnología de última generación",
-                                    "Programas de tutoría personalizada",
-                                    "Certificaciones internacionales en diversas áreas"
-                                ].map((item, i) => (
-                                    <div key={i} className="flex items-center gap-3 font-medium text-[#1e2a5a] text-sm">
-                                        <CheckCircle2 className="text-[#F26513]" size={18} />
-                                        {item}
-                                    </div>
-                                ))}
-                            </div>
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="max-w-4xl space-y-8">
+                        <div className={`flex items-center gap-4 transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                            <div className="w-12 h-0.5 bg-orange-500" />
+                            <span className="text-orange-500 font-black text-[10px] uppercase tracking-[0.4em]">Alto Rendimiento</span>
                         </div>
-                        <div className="relative">
-                            <img
-                                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80"
-                                alt="Estudiantes estudiando"
-                                className="rounded-[3rem] shadow-2xl"
-                            />
-                        </div>
+                        <h1 className={`text-6xl md:text-9xl font-serif text-white leading-[0.9] transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                            Hacia la <br />
+                            <span className="italic">Cúspide.</span>
+                        </h1>
+                        <p className={`text-lg text-slate-300 max-w-xl font-light leading-relaxed transition-all duration-1000 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            Nuestro modelo pedagógico combina la rigurosidad académica con la innovación tecnológica para formar mentes brillantes capaces de liderar el mañana.
+                        </p>
                     </div>
                 </div>
             </section>
 
-            {/* Features Grid */}
-            <section className="py-16 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        {features.map((f, i) => (
-                            <div key={i} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500">
-                                <div className="mb-6">{f.icon}</div>
-                                <h3 className="text-xl font-bold text-[#1e2a5a] mb-4">{f.title}</h3>
-                                <p className="text-gray-600 leading-relaxed">{f.desc}</p>
+            {/* DIFFERENTIATORS GRID */}
+            <section className="py-24 bg-slate-50">
+                <div className="container mx-auto px-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                        {[
+                            { icon: <Microscope />, title: "Investigación", d: "Fomentamos el espíritu científico desde la observación inicial." },
+                            { icon: <Globe />, title: "Bilingüismo", d: "Certificaciones internacionales que avalan el dominio del inglés." },
+                            { icon: <BarChart3 />, title: "Analítica", d: "Seguimiento personalizado del progreso académico mediante data." },
+                            { icon: <Trophy />, title: "Éxito", d: "Altos índices de ingreso a las universidades más prestigiosas." }
+                        ].map((item, i) => (
+                            <div key={i} className="space-y-4 group">
+                                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-orange-600 shadow-sm group-hover:bg-orange-600 group-hover:text-white transition-all duration-500">
+                                    {React.cloneElement(item.icon as React.ReactElement, { size: 24 })}
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900">{item.title}</h3>
+                                <p className="text-sm text-slate-500 leading-relaxed font-light">{item.d}</p>
                             </div>
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* LEVELS SHOWCASE - VERTICAL EDITORIAL */}
+            <section className="py-24 md:py-48">
+                <div className="container mx-auto px-6">
+                    <div className="space-y-48">
+                        {levels.map((lvl, i) => (
+                            <div key={i} className={`flex flex-col lg:flex-row gap-24 items-center ${i % 2 !== 0 ? 'lg:flex-row-reverse' : ''}`}>
+                                <div className="flex-1 w-full relative">
+                                    <div className="aspect-[16/10] rounded-[4rem] overflow-hidden shadow-2xl relative group">
+                                        <img src={lvl.image} alt={lvl.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                                        <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors" />
+                                    </div>
+                                    {/* Accent Card */}
+                                    <div className={`absolute -bottom-12 ${i % 2 !== 0 ? '-left-12' : '-right-12'} p-10 bg-white rounded-[2.5rem] shadow-2xl border border-slate-50 hidden lg:block`}>
+                                        <div className="flex flex-col gap-4">
+                                            {lvl.metrics.map((m, mi) => (
+                                                <div key={mi} className="flex items-center gap-3">
+                                                    <CheckCircle2 size={16} className="text-orange-500" />
+                                                    <span className="text-xs font-black uppercase tracking-widest text-slate-600">{m}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex-1 space-y-10">
+                                    <div className="space-y-6">
+                                        <div className="text-orange-600">{lvl.icon}</div>
+                                        <h2 className="text-5xl md:text-7xl font-serif text-slate-900 leading-none">
+                                            {lvl.title.split(' ')[0]} <br />
+                                            <span className="italic">{lvl.title.split(' ')[1]}</span>
+                                        </h2>
+                                        <p className="text-xl text-slate-600 font-light leading-relaxed">
+                                            {lvl.desc}
+                                        </p>
+                                    </div>
+                                    <div className="pt-6">
+                                        <button className="flex items-center gap-4 text-xs font-black uppercase tracking-[0.2em] text-slate-900 hover:text-orange-600 transition-colors group">
+                                            Plan Curricular <ArrowRight size={18} className="translate-x-0 group-hover:translate-x-2 transition-transform" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ACADEMIC ETHOS SECTION */}
+            <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-full text-[20vw] font-black text-white/5 leading-none -translate-y-1/2 pointer-events-none select-none italic">
+                    RIGOR.
+                </div>
+
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="max-w-4xl mx-auto flex flex-col items-center text-center space-y-12">
+                        <div className="w-20 h-20 rounded-full border-2 border-orange-500 flex items-center justify-center">
+                            <GraduationCap size={40} className="text-orange-500" />
+                        </div>
+                        <h2 className="text-4xl md:text-6xl font-serif leading-tight">
+                            "Un entorno que desafía <br /> y apoya a cada <span className="italic text-orange-500">estudiante</span>."
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full pt-12">
+                            <div className="p-8 border border-white/10 rounded-[2rem] hover:bg-white/5 transition-colors text-left space-y-4">
+                                <h4 className="text-lg font-bold">Certificaciones</h4>
+                                <p className="text-sm text-slate-400 font-light">Contamos con convenios internacionales que validan las competencias de nuestros egresados en idiomas y tecnología.</p>
+                            </div>
+                            <div className="p-8 border border-white/10 rounded-[2rem] hover:bg-white/5 transition-colors text-left space-y-4">
+                                <h4 className="text-lg font-bold">Acompañamiento</h4>
+                                <p className="text-sm text-slate-400 font-light">Tutoría personalizada para asegurar que cada alumno alcance su máximo potencial académico y emocional.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -90,4 +154,5 @@ const ExcelenciaAcademica = () => {
     );
 };
 
+import { Link } from "react-router-dom";
 export default ExcelenciaAcademica;

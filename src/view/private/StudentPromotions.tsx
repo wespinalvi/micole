@@ -212,13 +212,13 @@ export default function StudentPromotions() {
                                 placeholder="Buscar por nombre o DNI..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-9 bg-white"
+                                className="pl-9 h-9 bg-white border border-slate-300 rounded text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
                             />
                         </div>
 
                         <div>
                             <Select value={filterGrade} onValueChange={setFilterGrade}>
-                                <SelectTrigger className="bg-white">
+                                <SelectTrigger className="h-9 bg-white border border-slate-300 rounded px-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                                     <SelectValue placeholder="Filtrar por Grado" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -238,7 +238,7 @@ export default function StudentPromotions() {
                                 setFilterGrade("all");
                                 setSearchTerm("");
                             }}
-                            className="hover:bg-gray-100"
+                            className="h-9 hover:bg-gray-100"
                         >
                             Limpiar Filtros
                         </Button>
@@ -309,7 +309,7 @@ export default function StudentPromotions() {
                                                 value={student.academicStatus}
                                                 onValueChange={(val) => changeAcademicStatus(student.id, val as StudentStatus)}
                                             >
-                                                <SelectTrigger className="w-[130px] ml-auto h-8 text-xs">
+                                                <SelectTrigger className="w-[130px] ml-auto h-9 bg-white border border-slate-300 rounded px-3 text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>

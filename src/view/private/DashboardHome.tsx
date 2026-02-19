@@ -4,14 +4,12 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import {
-  fetchDashboardStats,
-  fetchRecentPayments,
-  fetchMonthlyData,
   fetchDebtors,
-  type DashboardStats,
+  fetchSummaryStats,
+  fetchRecentPayments,
   type RecentPayment,
-  type MonthlyData,
-  type Debtor
+  type Debtor,
+  type DashboardSummaryData
 } from "@/services/dashboardService";
 import { SimpleLineChart } from "@/components/charts/SimpleLineChart";
 import { SimplePieChart } from "@/components/charts/SimplePieChart";
@@ -19,26 +17,12 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+
+const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
 export default function DashboardHome() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalStudents: 0,
-    activeStudents: 0,
-    totalTeachers: 0,
-    totalRevenue: 0,
-    pendingPayments: 0,
-    studentsWithDebt: 0,
-    paidStudents: 0,
-    currentMonthRevenue: 0,
-    averagePaymentAmount: 0,
-    paymentCompletionRate: 0,
-    monthlyTarget: 50000,
-    overduePayments: 0,
-  });
-
+  const [summaryData, setSummaryData] = useState<DashboardSummaryData | null>(null);
   const [recentPayments, setRecentPayments] = useState<RecentPayment[]>([]);
-  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,16 +34,17 @@ export default function DashboardHome() {
     try {
       setIsLoading(true);
 
-      const [statsData, paymentsData, monthlyDataResult, debtorsData] = await Promise.all([
-        fetchDashboardStats(),
+      const [summary, paymentsData, debtorsData] = await Promise.all([
+        fetchSummaryStats(),
         fetchRecentPayments(),
-        fetchMonthlyData(),
         fetchDebtors()
       ]);
 
-      setStats(statsData);
+      if (summary) {
+        setSummaryData(summary);
+      }
+
       setRecentPayments(paymentsData);
-      setMonthlyData(monthlyDataResult);
       setDebtors(debtorsData);
 
     } catch (error) {
@@ -69,13 +54,14 @@ export default function DashboardHome() {
     }
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | string) => {
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
     return new Intl.NumberFormat('es-PE', {
       style: 'currency',
       currency: 'PEN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(numAmount);
   };
 
   const formatNumber = (num: number) => {
@@ -86,172 +72,131 @@ export default function DashboardHome() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-3 border-gray-300 border-t-blue-600"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
           <p className="text-sm text-gray-500">Cargando datos...</p>
         </div>
       </div>
     );
   }
 
+  if (!summaryData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-500">No se pudieron cargar los datos</p>
+      </div>
+    );
+  }
+
+  const { kpis, distribucion_sexo, tendencia_ingresos, comparativa_pagos } = summaryData;
+
   // Prepare chart data
   const paymentStatusData = [
-    { label: "Al día", value: stats.paidStudents, color: "#10b981" },
-    { label: "Con Deuda", value: stats.studentsWithDebt, color: "#ef4444" },
-    { label: "Pendientes", value: stats.totalStudents - stats.paidStudents - stats.studentsWithDebt, color: "#f59e0b" }
+    { label: "Pagado", value: comparativa_pagos.pagado, color: "#10b981" },
+    { label: "Pendiente", value: comparativa_pagos.pendiente, color: "#f59e0b" }
   ];
 
-  const monthlyTrendData = monthlyData.map(item => ({
-    label: item.month,
-    value: item.revenue
+  const monthlyTrendData = tendencia_ingresos.map(item => ({
+    label: MONTH_NAMES[item.mes - 1] || item.mes.toString(),
+    value: parseFloat(item.total)
   }));
 
-  // Calculate sparkline data for each metric (last 6 months)
-  const revenueSparkline = monthlyData.slice(-6).map(item => ({
-    label: '',
-    value: item.revenue
-  }));
-
-  const studentsSparkline = monthlyData.slice(-6).map((_, i) => ({
-    label: '',
-    value: stats.activeStudents - (5 - i) * 2 // Simulated growth
-  }));
+  // Calculate growth percentage
+  const ingresosActuales = parseFloat(kpis.ingresos_mensuales);
+  const ingresosAnteriores = parseFloat(kpis.ingresos_mes_anterior);
+  const crecimiento = ingresosAnteriores > 0
+    ? ((ingresosActuales - ingresosAnteriores) / ingresosAnteriores) * 100
+    : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-[1400px] mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Panel de Control</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            {new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
         </div>
 
-        {/* Main Metrics Grid */}
+        {/* Main KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
-            label="Ingresos Totales"
-            value={formatCurrency(stats.currentMonthRevenue)}
-            trend="+8.1%"
-            trendUp={true}
-            badge="Este mes"
-            sparklineData={revenueSparkline}
-            sparklineColor="#10b981"
-          />
-
-          <MetricCard
-            label="Tasa de Recaudación"
-            value={`${stats.paymentCompletionRate}%`}
-            trend="+2.5%"
-            trendUp={true}
-            badge="vs mes anterior"
-            sparklineData={revenueSparkline}
-            sparklineColor="#3b82f6"
+            label="Ingresos del Mes"
+            value={formatCurrency(kpis.ingresos_mensuales)}
+            trend={`${crecimiento >= 0 ? '+' : ''}${crecimiento.toFixed(1)}%`}
+            trendUp={crecimiento >= 0}
           />
 
           <MetricCard
             label="Estudiantes Activos"
-            value={formatNumber(stats.activeStudents)}
-            trend="+2%"
-            trendUp={true}
-            badge="Total"
-            sparklineData={studentsSparkline}
-            sparklineColor="#f59e0b"
+            value={formatNumber(kpis.estudiantes_activos)}
+            subtitle="matriculados"
           />
 
           <MetricCard
             label="Pagos Pendientes"
-            value={formatCurrency(stats.pendingPayments)}
-            trend="-3.4%"
-            trendUp={false}
-            badge="Por cobrar"
-            sparklineData={revenueSparkline}
-            sparklineColor="#06b6d4"
+            value={formatCurrency(kpis.pagos_pendientes)}
+            subtitle={`${kpis.estudiantes_con_deuda} con deuda`}
+          />
+
+          <MetricCard
+            label="Tasa de Recaudación"
+            value={`${kpis.tasa_recaudacion}%`}
+            subtitle={`Meta: ${kpis.meta_mensual}%`}
+            trend={kpis.tasa_recaudacion >= kpis.meta_mensual ? 'Cumplida' : 'Pendiente'}
+            trendUp={kpis.tasa_recaudacion >= kpis.meta_mensual}
           />
         </div>
 
-        {/* Secondary Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SimpleMetricCard
-            label="Tasa de Morosidad"
-            value="4.8%"
-            trend="-1%"
-            trendUp={false}
-            source="Deudores"
-          />
-
-          <SimpleMetricCard
-            label="Estudiantes con Deuda"
-            value={formatNumber(stats.studentsWithDebt)}
-            trend="+2.1%"
-            trendUp={true}
-            source="Estudiantes"
-          />
-
-          <SimpleMetricCard
-            label="Promedio de Pago"
-            value={formatCurrency(stats.averagePaymentAmount)}
-            trend="+1.8%"
-            trendUp={true}
-            source="Cuotas"
-          />
-
-          <SimpleMetricCard
-            label="Meta Mensual"
-            value={`${((stats.currentMonthRevenue / stats.monthlyTarget) * 100).toFixed(0)}%`}
-            trend="+5.2%"
-            trendUp={true}
-            source="Objetivo"
-          />
-        </div>
-
-        {/* Charts and Tables Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Revenue Trend */}
-          <Card className="lg:col-span-2 border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
+          <Card className="lg:col-span-2 border shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-base font-semibold text-gray-900">Tendencia de Ingresos</h3>
-                  <p className="text-sm text-gray-500 mt-1">Últimos 6 meses</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Evolución mensual</p>
                 </div>
-                <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-0">
-                  2024
-                </Badge>
+                <span className="text-xs text-gray-500">2026</span>
               </div>
-              <div className="h-[240px]">
-                <SimpleLineChart
-                  data={monthlyTrendData}
-                  height={240}
-                  color="#3b82f6"
-                  showDots={true}
-                />
+              <div className="h-[220px]">
+                {monthlyTrendData.length > 0 ? (
+                  <SimpleLineChart
+                    data={monthlyTrendData}
+                    height={220}
+                    color="#3b82f6"
+                    showDots={true}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-gray-400">
+                    <p className="text-sm">No hay datos disponibles</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
           {/* Payment Distribution */}
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="mb-6">
+          <Card className="border shadow-sm">
+            <CardContent className="p-5">
+              <div className="mb-4">
                 <h3 className="text-base font-semibold text-gray-900">Distribución de Pagos</h3>
-                <p className="text-sm text-gray-500 mt-1">Estado actual</p>
+                <p className="text-xs text-gray-500 mt-0.5">Estado actual</p>
               </div>
               <div className="flex flex-col items-center">
-                <SimplePieChart data={paymentStatusData} size={180} showLegend={false} />
-                <div className="w-full mt-6 space-y-3">
+                <SimplePieChart data={paymentStatusData} size={140} showLegend={false} />
+                <div className="w-full mt-4 space-y-2">
                   {paymentStatusData.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div key={index} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
                         <div
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: item.color }}
                         />
-                        <span className="text-sm text-gray-600">{item.label}</span>
+                        <span className="text-gray-700">{item.label}</span>
                       </div>
-                      <span className="text-sm font-semibold text-gray-900">{item.value}</span>
+                      <span className="font-semibold text-gray-900">{formatCurrency(item.value)}</span>
                     </div>
                   ))}
                 </div>
@@ -260,56 +205,69 @@ export default function DashboardHome() {
           </Card>
         </div>
 
-        {/* Recent Payments & Debtors */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Payments */}
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="mb-4">
-                <h3 className="text-base font-semibold text-gray-900">Pagos Recientes</h3>
-                <p className="text-sm text-gray-500 mt-1">Últimas transacciones</p>
-              </div>
-              <div className="space-y-3">
-                {recentPayments.slice(0, 5).map((payment) => (
-                  <div key={payment.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{payment.studentName}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {payment.type === 'matricula' ? 'Matrícula' : 'Cuota'} • {new Date(payment.date).toLocaleDateString('es-PE')}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-semibold text-gray-900">{formatCurrency(payment.amount)}</span>
-                      <div className={`w-2 h-2 rounded-full ${payment.status === 'paid' ? 'bg-green-500' : 'bg-yellow-500'
-                        }`} />
-                    </div>
+        {/* Secondary Info Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Gender Distribution */}
+          <Card className="border shadow-sm">
+            <CardContent className="p-5">
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Distribución por Sexo</h3>
+              <div className="flex justify-around">
+                {distribucion_sexo.map((item, idx) => (
+                  <div key={idx} className="text-center">
+                    <p className="text-2xl font-bold text-gray-900">{item.cantidad}</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {item.sexo === 'M' ? 'Varones' : 'Mujeres'}
+                    </p>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* Top Debtors */}
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="mb-4">
-                <h3 className="text-base font-semibold text-gray-900">Alertas de Morosidad</h3>
-                <p className="text-sm text-gray-500 mt-1">Deudas pendientes</p>
+          {/* Recent Payments */}
+          <Card className="border shadow-sm">
+            <CardContent className="p-5">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">Pagos Recientes</h3>
+              <div className="space-y-2.5">
+                {recentPayments.length > 0 ? (
+                  recentPayments.slice(0, 4).map((payment) => (
+                    <div key={payment.id} className="flex items-center justify-between text-sm border-b border-gray-100 pb-2 last:border-0">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{payment.studentName}</p>
+                        <p className="text-xs text-gray-500">
+                          {payment.type === 'matricula' ? 'Matrícula' : 'Cuota'}
+                        </p>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 ml-2">{formatCurrency(payment.amount)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-gray-400 py-4 text-sm">No hay pagos recientes</p>
+                )}
               </div>
-              <div className="space-y-3">
-                {debtors.slice(0, 5).map((debtor) => (
-                  <div key={debtor.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{debtor.studentName}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {debtor.months} {debtor.months === 1 ? 'mes' : 'meses'} de atraso
-                      </p>
+            </CardContent>
+          </Card>
+
+          {/* Top Debtors */}
+          <Card className="border shadow-sm">
+            <CardContent className="p-5">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">Deudores</h3>
+              <div className="space-y-2.5">
+                {debtors.length > 0 ? (
+                  debtors.slice(0, 4).map((debtor) => (
+                    <div key={debtor.id} className="flex items-center justify-between text-sm border-b border-gray-100 pb-2 last:border-0">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{debtor.studentName}</p>
+                        <p className="text-xs text-gray-500">
+                          {debtor.months} {debtor.months === 1 ? 'mes' : 'meses'}
+                        </p>
+                      </div>
+                      <span className="text-sm font-semibold text-red-600 ml-2">{formatCurrency(debtor.amount)}</span>
                     </div>
-                    <div className="text-right">
-                      <span className="text-sm font-semibold text-red-600">{formatCurrency(debtor.amount)}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-center text-gray-400 py-4 text-sm">No hay deudores</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -319,100 +277,40 @@ export default function DashboardHome() {
   );
 }
 
-// Metric Card with Sparkline
+// Simple Metric Card Component
 function MetricCard({
   label,
   value,
   trend,
   trendUp,
-  badge,
-  sparklineData,
-  sparklineColor
+  subtitle
 }: {
   label: string;
   value: string;
-  trend: string;
-  trendUp: boolean;
-  badge: string;
-  sparklineData: Array<{ label: string; value: number }>;
-  sparklineColor: string;
+  trend?: string;
+  trendUp?: boolean;
+  subtitle?: string;
 }) {
   return (
-    <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</span>
-          <Badge variant="secondary" className="bg-gray-100 text-gray-600 text-[10px] border-0 px-2 py-0.5">
-            {badge}
-          </Badge>
-        </div>
-
-        <div className="mb-3">
-          <h2 className="text-3xl font-bold text-gray-900">{value}</h2>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-1 text-xs font-medium ${trendUp ? 'text-green-600' : 'text-red-600'
-            }`}>
+    <Card className="border shadow-sm">
+      <CardContent className="p-4">
+        <p className="text-xs font-medium text-gray-600 mb-2">{label}</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{value}</h2>
+        {trend && (
+          <div className="flex items-center gap-1">
             {trendUp ? (
-              <TrendingUp className="h-3 w-3" />
+              <TrendingUp className="h-3.5 w-3.5 text-green-600" />
             ) : (
-              <TrendingDown className="h-3 w-3" />
+              <TrendingDown className="h-3.5 w-3.5 text-red-600" />
             )}
-            <span>{trend}</span>
+            <span className={`text-xs font-medium ${trendUp ? 'text-green-600' : 'text-red-600'}`}>
+              {trend}
+            </span>
           </div>
-
-          <div className="w-20 h-8">
-            <SimpleLineChart
-              data={sparklineData}
-              height={32}
-              color={sparklineColor}
-              showDots={false}
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// Simple Metric Card (no sparkline)
-function SimpleMetricCard({
-  label,
-  value,
-  trend,
-  trendUp,
-  source
-}: {
-  label: string;
-  value: string;
-  trend: string;
-  trendUp: boolean;
-  source: string;
-}) {
-  return (
-    <Card className="border-0 shadow-sm">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</span>
-        </div>
-
-        <div className="mb-2">
-          <h2 className="text-3xl font-bold text-gray-900">{value}</h2>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-1 text-xs font-medium ${trendUp ? 'text-green-600' : 'text-red-600'
-            }`}>
-            {trendUp ? (
-              <TrendingUp className="h-3 w-3" />
-            ) : (
-              <TrendingDown className="h-3 w-3" />
-            )}
-            <span>{trend}</span>
-          </div>
-          <span className="text-xs text-gray-500">{source}</span>
-        </div>
+        )}
+        {subtitle && !trend && (
+          <p className="text-xs text-gray-500">{subtitle}</p>
+        )}
       </CardContent>
     </Card>
   );

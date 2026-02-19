@@ -27,7 +27,7 @@ import Valores from "@/view/public/Valores";
 import Pilares from "@/view/public/Pilares";
 import Infraestructura from "@/view/public/Infraestructura";
 import Comunidad from "@/view/public/Comunidad";
-import PropuestaEducativa from "@/view/public/PropuestaEducativa";
+
 import Bienvenida from "@/view/public/Bienvenida";
 import EarlyYears from "@/view/public/EarlyYears";
 import Idiomas from "@/view/public/Idiomas";
@@ -35,13 +35,13 @@ import Tecnologia from "@/view/public/Tecnologia";
 import Deporte from "@/view/public/Deporte";
 import ArteCultura from "@/view/public/ArteCultura";
 import ExcelenciaAcademica from "@/view/public/ExcelenciaAcademica";
-import ViajesEstudio from "@/view/public/ViajesEstudio";
-import ConveniosAlianzas from "@/view/public/ConveniosAlianzas";
+
 import CuotasDetalle from "@/view/private/CuotasDetalle";
 import DashboardHome from "@/view/private/DashboardHome";
-import BulkEnrollment from "@/view/private/BulkEnrollment";
 
 import JustificacionesDocente from "@/view/private/teacher/JustificacionesDocente";
+import ReporteAsistenciaClases from "@/view/private/teacher/ReporteAsistenciaClases";
+import SeguimientoIngresos from "@/view/private/teacher/SeguimientoIngresos";
 
 // Componente para protección de rutas
 
@@ -64,15 +64,14 @@ const router = createBrowserRouter([
       { path: "padres", element: <Comunidad /> },
       { path: "profesores", element: <Comunidad /> },
       { path: "exalumnos", element: <Comunidad /> },
-      { path: "early-years", element: <EarlyYears /> },
+      { path: "inicial", element: <EarlyYears /> },
       { path: "excelencia", element: <ExcelenciaAcademica /> },
       { path: "idiomas", element: <Idiomas /> },
       { path: "tecnologia", element: <Tecnologia /> },
       { path: "deporte", element: <Deporte /> },
       { path: "arte", element: <ArteCultura /> },
-      { path: "viajes", element: <ViajesEstudio /> },
-      { path: "convenios", element: <ConveniosAlianzas /> },
-      { path: "blog", element: <PropuestaEducativa /> },
+
+
       { path: "/", element: <Body /> },
     ],
   },
@@ -106,8 +105,10 @@ const router = createBrowserRouter([
     ),
     children: [
       // { index: true, element: <ListStudent /> }, // Página por defecto del dashboard
-      { path: "registar-asistencia", element: <RegistrarAsistencia /> },
+      { path: "registrar-asistencia", element: <RegistrarAsistencia /> },
       { path: "ver-asistencia", element: <HistorialAsistencia /> },
+      { path: "reporte-clases", element: <ReporteAsistenciaClases /> },
+      { path: "seguimiento-ingresos", element: <SeguimientoIngresos /> },
       { path: "justificaciones", element: <JustificacionesDocente /> },
     ],
     // children: [{ path: "list-teacher", element: <ListTeacher /> }],

@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import api from "@/lib/axios";
 import axios from 'axios';
-import { Search, User, Calendar, DollarSign, CheckCircle, XCircle, AlertCircle, CreditCard, ChevronDown, ChevronRight, FileDown, Printer, Banknote } from 'lucide-react';
+import { Search, User, Calendar, DollarSign, CheckCircle, XCircle, AlertCircle, CreditCard, ChevronDown, ChevronRight, FileDown, Printer, Banknote, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -88,6 +88,9 @@ const CuotasDetalle = () => {
   const [pagoPresencial, setPagoPresencial] = useState(false);
   const [pagoMatriculaPresencial, setPagoMatriculaPresencial] = useState(false);
   const [cuotaSeleccionada, setCuotaSeleccionada] = useState<PagoDetalle | null>(null);
+  const [montoPagadoReq, setMontoPagadoReq] = useState('');
+  const [metodoPago, setMetodoPago] = useState('Efectivo');
+  const [observaciones, setObservaciones] = useState('');
 
   // Estados para el reporte
   const [viewMode, setViewMode] = useState<'search' | 'report' | 'daily'>('search');
@@ -187,6 +190,27 @@ const CuotasDetalle = () => {
     doc.save(`Recibo_${payment.receiptNumber}.pdf`);
   };
 
+  const handleDownloadReceipt = async (id: number) => {
+    try {
+      const response = await api.get(`/pago/constancia/${id}`, {
+        responseType: 'blob'
+      });
+
+      // Crear un URL para el blob y disparar la descarga
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `recibo-REC-${new Date().getFullYear()}-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al descargar la constancia:', error);
+      alert('Error al generar la constancia de pago');
+    }
+  };
+
   const buscarEstudiante = async () => {
     if (!dni.trim() || !año.trim()) {
       alert('Por favor ingrese DNI y año');
@@ -226,6 +250,7 @@ const CuotasDetalle = () => {
     const estadoUpper = (estado || '').toUpperCase();
     switch (estadoUpper) {
       case 'PAGADO':
+      case 'PAGADA':
         return <Badge className="bg-green-100 text-green-700 border-green-200">PAGADO</Badge>;
       case 'PENDIENTE':
         return <Badge variant="destructive">PENDIENTE</Badge>;
@@ -240,42 +265,79 @@ const CuotasDetalle = () => {
     if (!datosEstudiante || !cuotaSeleccionada) return;
     setIsPagoLoading(true);
     try {
-      await api.post(`/cuotas/pagar`, {
-        dni: datosEstudiante.dni,
-        anio: año,
-        tipo: 'Cuota',
-        numero_cuota: cuotaSeleccionada.numero_cuota,
-        metodo_pago: 'Efectivo',
-        presencial: pagoPresencial
-      });
+      if (pagoPresencial) {
+        // Nuevo endpoint para pago presencial
+        await api.post(`/pago/presencial/cuota`, {
+          id_cuota: cuotaSeleccionada.id,
+          monto_pagado: parseFloat(montoPagadoReq),
+          metodo_pago: metodoPago,
+          observaciones: observaciones
+        });
+      } else {
+        // Endpoint antiguo o flujo normal (Mercado Pago o similar)
+        await api.post(`/cuotas/pagar`, {
+          dni: datosEstudiante.dni,
+          anio: año,
+          tipo: 'Cuota',
+          numero_cuota: cuotaSeleccionada.numero_cuota,
+          metodo_pago: 'Efectivo',
+          presencial: false
+        });
+      }
+
       alert('Pago realizado con éxito');
       setShowPagoDialog(false);
       buscarEstudiante();
+
+      // Limpiar campos
+      setObservaciones('');
     } catch (error) {
       console.error('Error al procesar pago:', error);
-      alert('Error al procesar el pago');
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        alert('Error al procesar el pago');
+      }
     } finally {
       setIsPagoLoading(false);
     }
   };
 
   const confirmarPagoMatricula = async () => {
-    if (!datosEstudiante) return;
+    if (!datosEstudiante || !matriculaInfo) return;
     setIsMatriculaLoading(true);
     try {
-      await api.post(`/cuotas/pagar`, {
-        dni: datosEstudiante.dni,
-        anio: año,
-        tipo: 'Matricula',
-        metodo_pago: 'Efectivo',
-        presencial: pagoMatriculaPresencial
-      });
+      if (pagoMatriculaPresencial) {
+        // Usar el mismo endpoint universal para cobro presencial
+        await api.post(`/pago/presencial/cuota`, {
+          id_cuota: matriculaInfo.id,
+          monto_pagado: parseFloat(montoPagadoReq),
+          metodo_pago: metodoPago,
+          observaciones: observaciones
+        });
+      } else {
+        // Pago normal (flujo no presencial)
+        await api.post(`/cuotas/pagar`, {
+          dni: datosEstudiante.dni,
+          anio: año,
+          tipo: 'Matricula',
+          metodo_pago: 'Efectivo',
+          presencial: false
+        });
+      }
       alert('Matrícula pagada con éxito');
       setShowMatriculaDialog(false);
       buscarEstudiante();
+
+      // Limpiar campos
+      setObservaciones('');
     } catch (error) {
       console.error('Error al pagar matrícula:', error);
-      alert('Error al pagar matrícula');
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        alert('Error al procesar el pago de matrícula');
+      }
     } finally {
       setIsMatriculaLoading(false);
     }
@@ -331,7 +393,7 @@ const CuotasDetalle = () => {
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Ingrese DNI del estudiante"
-                    className="pl-10 h-11"
+                    className="pl-10 h-9 bg-white border border-slate-300 rounded text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
                     value={dni}
                     onChange={(e) => setDni(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && buscarEstudiante()}
@@ -341,7 +403,7 @@ const CuotasDetalle = () => {
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Año"
-                    className="pl-10 h-11"
+                    className="pl-10 h-9 bg-white border border-slate-300 rounded text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
                     value={año}
                     onChange={(e) => setAño(e.target.value)}
                   />
@@ -349,7 +411,7 @@ const CuotasDetalle = () => {
                 <Button
                   onClick={buscarEstudiante}
                   disabled={isLoading}
-                  className="h-11 px-8 bg-blue-600 hover:bg-blue-700"
+                  className="h-9 px-8 bg-blue-600 hover:bg-blue-700"
                 >
                   {isLoading ? 'Buscando...' : 'Buscar Alumno'}
                 </Button>
@@ -404,10 +466,27 @@ const CuotasDetalle = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => setShowMatriculaDialog(true)}
-                              className="text-xs h-8"
+                              onClick={() => {
+                                setMontoPagadoReq(matriculaInfo.monto);
+                                setMetodoPago('Efectivo');
+                                setObservaciones(`Pago de Matrícula - Periodo ${año}`);
+                                setPagoMatriculaPresencial(true);
+                                setShowMatriculaDialog(true);
+                              }}
+                              className="text-xs h-8 bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700"
                             >
                               Registrar Pago
+                            </Button>
+                          )}
+                          {(matriculaInfo.estado.toUpperCase() === 'PAGADO' || matriculaInfo.estado.toUpperCase() === 'PAGADA') && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDownloadReceipt(matriculaInfo.id)}
+                              className="text-xs h-8 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:border-blue-300"
+                            >
+                              <FileDown className="h-3.5 w-3.5 mr-1" />
+                              Constancia PDF
                             </Button>
                           )}
                         </div>
@@ -454,9 +533,25 @@ const CuotasDetalle = () => {
                                     variant="ghost"
                                     size="sm"
                                     className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8"
-                                    onClick={() => { setCuotaSeleccionada(cuota); setShowPagoDialog(true); }}
+                                    onClick={() => {
+                                      setCuotaSeleccionada(cuota);
+                                      setMontoPagadoReq(cuota.monto);
+                                      setPagoPresencial(true);
+                                      setShowPagoDialog(true);
+                                    }}
                                   >
                                     Pagar Presencial
+                                  </Button>
+                                )}
+                                {(cuota.estado.toUpperCase() === 'PAGADO' || cuota.estado.toUpperCase() === 'PAGADA') && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:border-blue-300"
+                                    onClick={() => handleDownloadReceipt(cuota.id)}
+                                  >
+                                    <FileDown className="h-4 w-4 mr-1" />
+                                    Constancia PDF
                                   </Button>
                                 )}
                               </TableCell>
@@ -500,16 +595,19 @@ const CuotasDetalle = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div>
                   <label className="text-sm font-medium mb-1 block">Año</label>
-                  <Input value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} />
+                  <Input
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    className="h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block">Grado</label>
                   <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 bg-white border border-slate-300 rounded px-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                       <SelectValue placeholder="Seleccionar grado" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Todos">Todos los grados</SelectItem>
                       {grades.map(grade => (
                         <SelectItem key={grade.id} value={grade.id.toString()}>{grade.nombre}</SelectItem>
                       ))}
@@ -519,7 +617,7 @@ const CuotasDetalle = () => {
                 <div>
                   <label className="text-sm font-medium mb-1 block">Estado</label>
                   <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9 bg-white border border-slate-300 rounded px-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                       <SelectValue placeholder="Estado" />
                     </SelectTrigger>
                     <SelectContent>
@@ -590,6 +688,7 @@ const CuotasDetalle = () => {
                                         <TableHead className="text-xs h-8">Pagado</TableHead>
                                         <TableHead className="text-xs h-8">Estado</TableHead>
                                         <TableHead className="text-xs h-8 font-mono">Recibo</TableHead>
+                                        <TableHead className="text-xs h-8 text-right">Acción</TableHead>
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -602,6 +701,19 @@ const CuotasDetalle = () => {
                                           <TableCell>S/ {parseFloat(det.monto_pagado).toFixed(2)}</TableCell>
                                           <TableCell>{getEstadoBadge(det.estado)}</TableCell>
                                           <TableCell className="font-mono text-[10px]">{det.numero_recibo || '-'}</TableCell>
+                                          <TableCell className="text-right">
+                                            {(det.estado.toUpperCase() === 'PAGADO' || det.estado.toUpperCase() === 'PAGADA') && (
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-7 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 px-2 text-[10px]"
+                                                onClick={() => handleDownloadReceipt(det.id)}
+                                              >
+                                                <FileDown className="h-3 w-3 mr-1" />
+                                                Constancia
+                                              </Button>
+                                            )}
+                                          </TableCell>
                                         </TableRow>
                                       ))}
                                     </TableBody>
@@ -657,6 +769,15 @@ const CuotasDetalle = () => {
                       <TableCell>{p.time}</TableCell>
                       <TableCell className="font-bold">S/ {p.amount.toFixed(2)}</TableCell>
                       <TableCell className="text-right">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                          onClick={() => handleDownloadReceipt(p.id)}
+                        >
+                          <FileDown className="h-4 w-4 mr-1" />
+                          Constancia PDF
+                        </Button>
                         <Button variant="ghost" size="sm" onClick={() => handlePrintReceipt(p)}>
                           <Printer className="h-4 w-4" />
                         </Button>
@@ -674,27 +795,94 @@ const CuotasDetalle = () => {
 
       {/* Dialogo Pago Cuota */}
       <Dialog open={showPagoDialog} onOpenChange={setShowPagoDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirmar Pago de Cuota</DialogTitle>
+            <DialogTitle>Registrar Pago de Cuota</DialogTitle>
             <DialogDescription>
-              Se registrará el pago de la Cuota {cuotaSeleccionada?.numero_cuota} para {datosEstudiante?.estudiante || 'el estudiante'}.
+              Confirme los detalles del pago para la Cuota {cuotaSeleccionada?.numero_cuota}.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <div className="flex justify-between p-3 bg-gray-50 rounded-lg">
-              <span>Monto a cobrar:</span>
-              <span className="font-bold text-lg">S/ {cuotaSeleccionada ? parseFloat(cuotaSeleccionada.monto).toFixed(2) : '0.00'}</span>
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-600 rounded-lg">
+                  <Banknote className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Monto de la Cuota</p>
+                  <p className="text-2xl font-bold text-blue-900 font-mono">
+                    S/ {cuotaSeleccionada ? parseFloat(cuotaSeleccionada.monto).toFixed(2) : '0.00'}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
+
+            <div className="flex items-center justify-between px-2">
+              <div className="space-y-0.5">
+                <label className="text-sm font-medium">Pago Presencial</label>
+                <p className="text-xs text-gray-500">Registrar cobro manual en efectivo</p>
+              </div>
               <Switch checked={pagoPresencial} onCheckedChange={setPagoPresencial} />
-              <label>¿Es pago presencial?</label>
             </div>
+
+            {pagoPresencial && (
+              <div className="space-y-4 pt-2 border-t animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-700">Monto Cobrado</label>
+                    <Input
+                      type="number"
+                      value={montoPagadoReq}
+                      readOnly
+                      className="h-9 bg-gray-50 font-medium text-gray-600 border border-slate-300 border-dashed cursor-not-allowed rounded px-3 text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-700">Método de Pago</label>
+                  <Select value={metodoPago} onValueChange={setMetodoPago}>
+                    <SelectTrigger className="h-9 bg-white border border-slate-300 rounded px-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                      <SelectValue placeholder="Seleccione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Efectivo">Efectivo</SelectItem>
+                      {/* <SelectItem value="Transferencia">Transferencia</SelectItem>
+                      <SelectItem value="Yape/Plin">Yape / Plin</SelectItem>
+                      <SelectItem value="Otro">Otro</SelectItem> */}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-700">Observaciones</label>
+                  <Input
+                    value={observaciones}
+                    onChange={(e) => setObservaciones(e.target.value)}
+                    placeholder="Ej: Pago realizado por el padre"
+                    className="h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPagoDialog(false)}>Cancelar</Button>
-            <Button onClick={confirmarPago} disabled={isPagoLoading}>
-              {isPagoLoading ? 'Procesando...' : 'Confirmar Pago'}
+            <Button variant="outline" onClick={() => setShowPagoDialog(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={confirmarPago}
+              disabled={isPagoLoading || (pagoPresencial && !montoPagadoReq)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isPagoLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Procesando...
+                </>
+              ) : (
+                'Confirmar Registro'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -702,27 +890,92 @@ const CuotasDetalle = () => {
 
       {/* Dialogo Pago Matricula */}
       <Dialog open={showMatriculaDialog} onOpenChange={setShowMatriculaDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirmar Pago de Matrícula</DialogTitle>
+            <DialogTitle>Registrar Pago de Matrícula</DialogTitle>
             <DialogDescription>
-              Se registrará el pago de matrícula {año} para {datosEstudiante?.estudiante || 'el estudiante'}.
+              Confirme los detalles del cobro de matrícula para {datosEstudiante?.estudiante}.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <div className="flex justify-between p-3 bg-gray-50 rounded-lg">
-              <span>Monto de Matrícula:</span>
-              <span className="font-bold text-lg">S/ {matriculaInfo ? parseFloat(matriculaInfo.monto).toFixed(2) : '0.00'}</span>
+            <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-600 rounded-lg">
+                  <Banknote className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-green-600 font-semibold uppercase tracking-wider">Costo de Matrícula</p>
+                  <p className="text-2xl font-bold text-green-900 font-mono">
+                    S/ {matriculaInfo ? parseFloat(matriculaInfo.monto).toFixed(2) : '0.00'}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
+
+            <div className="flex items-center justify-between px-2">
+              <div className="space-y-0.5">
+                <label className="text-sm font-medium">Pago Presencial</label>
+                <p className="text-xs text-gray-500">Registrar cobro manual en efectivo/otros</p>
+              </div>
               <Switch checked={pagoMatriculaPresencial} onCheckedChange={setPagoMatriculaPresencial} />
-              <label>¿Es pago presencial?</label>
             </div>
+
+            {pagoMatriculaPresencial && (
+              <div className="space-y-4 pt-2 border-t animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-700">Monto Cobrado</label>
+                  <Input
+                    type="number"
+                    value={montoPagadoReq}
+                    readOnly
+                    className="h-9 bg-gray-50 font-medium text-gray-600 border border-slate-300 border-dashed cursor-not-allowed rounded px-3 text-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-700">Método de Pago</label>
+                  <Select value={metodoPago} onValueChange={setMetodoPago}>
+                    <SelectTrigger className="h-9 bg-white border border-slate-300 rounded px-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                      <SelectValue placeholder="Seleccione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Efectivo">Efectivo</SelectItem>
+                      <SelectItem value="Transferencia">Transferencia</SelectItem>
+                      <SelectItem value="Yape/Plin">Yape / Plin</SelectItem>
+                      <SelectItem value="Otro">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-700">Observaciones</label>
+                  <Input
+                    value={observaciones}
+                    onChange={(e) => setObservaciones(e.target.value)}
+                    placeholder="Ej: Pago total de matrícula recibido"
+                    className="h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowMatriculaDialog(false)}>Cancelar</Button>
-            <Button onClick={confirmarPagoMatricula} disabled={isMatriculaLoading}>
-              {isMatriculaLoading ? 'Procesando...' : 'Confirmar Pago'}
+            <Button variant="outline" onClick={() => setShowMatriculaDialog(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={confirmarPagoMatricula}
+              disabled={isMatriculaLoading || (pagoMatriculaPresencial && !montoPagadoReq)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isMatriculaLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Procesando...
+                </>
+              ) : (
+                'Confirmar Pago de Matrícula'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

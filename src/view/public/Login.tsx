@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
-import { User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 
 export default function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -50,11 +47,18 @@ export default function Login() {
         const axiosError = error as { response: { status: number; data: { message?: string; change_password_required?: boolean; token?: string; roleId?: number } } };
         const { status, data } = axiosError.response;
 
-        if (status === 403 && data.change_password_required) {
+        // Check if password change is required (by flag or message)
+        const requiresPasswordChange =
+          data.change_password_required ||
+          (data.message && data.message.toLowerCase().includes('debe cambiar su contraseña'));
+
+        if ((status === 403 || status === 401) && requiresPasswordChange) {
           if (data.token) {
             login(data.token, data.roleId || null);
           }
-          return navigate("/change-password");
+          // Redirect immediately without showing error
+          navigate("/change-password");
+          return;
         }
         setError(data.message || "Credenciales incorrectas");
       } else {
@@ -66,102 +70,107 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center bg-[#f8fafc] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Shapes - increased opacity for better visibility */}
-      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-[#1e2a5a]/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#F26513]/10 rounded-full blur-3xl"></div>
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 font-sans antialiased p-4">
+      <div className="flex w-full max-w-4xl bg-white rounded-2xl overflow-hidden shadow-xl">
 
-      <Card className="w-full max-w-md border border-gray-100 shadow-[0_20px_60px_-15px_rgba(30,42,90,0.2)] overflow-hidden bg-white z-10 scale-100 transition-transform duration-500">
-        {/* Top Accent bar - School Colors Gradient */}
-        <div className="h-2 w-full bg-gradient-to-r from-[#1e2a5a] via-[#F26513] to-[#1e2a5a]"></div>
+        {/* LADO IZQUIERDO: Branding */}
+        <div className="hidden md:flex md:w-1/2 relative bg-gradient-to-br from-slate-900 to-slate-700">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1200')] bg-cover bg-center opacity-20"></div>
 
-        <CardContent className="p-8 md:p-10">
-          <div className="flex flex-col items-center mb-8">
-            <div className="relative mb-6">
-              <div className="absolute -inset-4 bg-gray-50 rounded-full scale-110"></div>
-              <img
-                src="https://res.cloudinary.com/dszdc6rh8/image/upload/v1747351782/image_1_vhjpzr.png"
-                alt="Logo Colegio Crayon's"
-                className="h-20 w-auto relative z-10 drop-shadow-md"
-              />
+          <div className="relative z-10 p-10 flex flex-col justify-between h-full">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <img
+                  src="https://res.cloudinary.com/dszdc6rh8/image/upload/v1747351782/image_1_vhjpzr.png"
+                  alt="Logo Crayon's"
+                  className="h-10 w-auto"
+                />
+              </div>
+
+              <h2 className="text-3xl font-bold text-white leading-tight mb-4">
+                El futuro de <br />
+                <span className="text-white/60 italic font-light">tus hijos</span> <br />
+                comienza aquí.
+              </h2>
+              <div className="h-1 w-16 bg-[#F26513] rounded-full"></div>
             </div>
-            <h2 className="text-3xl font-bold text-[#1e2a5a] text-center mb-2">MiCole</h2>
-            <div className="h-1 w-12 bg-[#F26513] rounded-full mb-4"></div>
-            <p className="text-gray-500 text-center text-sm font-medium">Plataforma de Gestión Educativa</p>
+          </div>
+        </div>
+
+        {/* LADO DERECHO: Formulario */}
+        <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-slate-900 mb-1">MiCole Login</h1>
+            <p className="text-slate-500 text-sm">Acceso exclusivo para la comunidad Crayon's</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md text-sm animate-in fade-in duration-300">
-                <p className="font-bold">Error</p>
-                <p>{error}</p>
+              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-lg text-sm">
+                <p className="font-semibold text-xs mb-1">Error de acceso</p>
+                <p className="text-xs">{error}</p>
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-gray-700 font-bold ml-1">Usuario</Label>
-              <div className="relative group">
-                <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center border-r border-gray-100">
-                  <User className="w-4 h-4 text-gray-400 group-focus-within:text-[#1e2a5a] transition-colors" />
-                </div>
-                <Input
-                  id="username"
-                  name="username"
+            {/* Input Usuario */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-700">Usuario</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
                   type="text"
+                  name="username"
                   value={form.username}
                   onChange={handleChange}
-                  placeholder="Ingresa tu usuario"
-                  className="pl-14 h-14 bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-[#1e2a5a]/10 focus:border-[#1e2a5a] transition-all rounded-xl text-base"
+                  placeholder="DNI o Código de Familia"
+                  className="w-full h-10 bg-white border border-slate-300 rounded-lg text-sm pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between ml-1">
-                <Label htmlFor="password" className="text-gray-700 font-bold">Contraseña</Label>
-                <a href="#" className="text-xs text-[#F26513] hover:underline font-bold">¿Olvidaste tu contraseña?</a>
-              </div>
-              <div className="relative group">
-                <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center border-r border-gray-100">
-                  <Lock className="w-4 h-4 text-gray-400 group-focus-within:text-[#1e2a5a] transition-colors" />
-                </div>
-                <Input
-                  id="password"
-                  name="password"
+            {/* Input Contraseña */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-700">Contraseña</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
                   value={form.password}
                   onChange={handleChange}
-                  placeholder="••••••••"
-                  className="pl-14 h-14 bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-[#1e2a5a]/10 focus:border-[#1e2a5a] transition-all rounded-xl text-base"
+                  placeholder="Contraseña"
+                  className="w-full h-10 bg-white border border-slate-300 rounded-lg text-sm pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#1e2a5a] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            <Button
+            {/* Botón de Acción */}
+            <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-14 bg-[#1e2a5a] hover:bg-[#151c3d] text-white font-bold rounded-xl shadow-xl shadow-[#1e2a5a]/20 transition-all active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2 text-lg"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold h-11 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {isLoading ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                "Iniciar Sesión"
+                <>
+                  <span className="text-sm">Entrar a MiCole</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
               )}
-            </Button>
+            </button>
           </form>
-        </CardContent>
-
-
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

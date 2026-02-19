@@ -19,6 +19,11 @@ import {
 import axios from "axios";
 import EditarDatosButton from "@/components/EditarDatosButton";
 
+interface Periodo {
+  id: number;
+  anio: number;
+}
+
 type Apoderado = {
   dni: string;
   nombre: string;
@@ -41,12 +46,13 @@ type Student = {
 };
 
 export default function ListStudent() {
-  const [year, setYear] = useState("2025");
+  const [year, setYear] = useState("2026");
   const [grade, setGrade] = useState("3");
   const [dniSearch, setDniSearch] = useState("");
   const [showParent, setShowParent] = useState<number | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [yearsAvailable, setYearsAvailable] = useState<Periodo[]>([]);
   const [loading, setLoading] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<{
     text: string;
@@ -95,8 +101,20 @@ export default function ListStudent() {
   }, [dniSearch, students]);
 
   useEffect(() => {
+    fetchYears();
     fetchStudents();
   }, []);
+
+  const fetchYears = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/cuotas/periodos");
+      if (response.data.success) {
+        setYearsAvailable(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error al cargar años académicos:", error);
+    }
+  };
 
   const fetchStudents = async () => {
     if (!year || !grade) return;
@@ -125,20 +143,25 @@ export default function ListStudent() {
         <div>
           <label className="text-sm font-medium">Año</label>
           <Select value={year} onValueChange={setYear}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
               <SelectValue placeholder="Año" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2023">2023</SelectItem>
-              <SelectItem value="2024">2024</SelectItem>
-              <SelectItem value="2025">2025</SelectItem>
+              {yearsAvailable.map((p) => (
+                <SelectItem key={p.id} value={p.anio.toString()}>
+                  {p.anio}
+                </SelectItem>
+              ))}
+              {yearsAvailable.length === 0 && (
+                <SelectItem value="2026">2026</SelectItem>
+              )}
             </SelectContent>
           </Select>
         </div>
         <div>
           <label className="text-sm font-medium">Grado</label>
           <Select value={grade} onValueChange={setGrade}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
               <SelectValue placeholder="Grado" />
             </SelectTrigger>
             <SelectContent>
@@ -157,10 +180,10 @@ export default function ListStudent() {
             placeholder="Ingrese DNI..."
             value={dniSearch}
             onChange={(e) => setDniSearch(e.target.value)}
-            className="w-48"
+            className="w-48 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
           />
         </div>
-        <Button className="mt-2" onClick={fetchStudents} disabled={loading}>
+        <Button className="mt-2 h-9" onClick={fetchStudents} disabled={loading}>
           {loading ? "Cargando..." : "Buscar"}
         </Button>
       </div>
@@ -168,8 +191,8 @@ export default function ListStudent() {
       {/* Mensaje de actualización */}
       {updateMessage && (
         <div className={`p-4 rounded-md mb-4 ${updateMessage.isSuccess
-            ? 'bg-green-100 text-green-700 border border-green-300'
-            : 'bg-red-100 text-red-700 border border-red-300'
+          ? 'bg-green-100 text-green-700 border border-green-300'
+          : 'bg-red-100 text-red-700 border border-red-300'
           }`}>
           {updateMessage.text}
         </div>

@@ -1,128 +1,153 @@
-import { Code, Cpu, CheckCircle2, Rocket, Brain, Globe, ShieldCheck } from "lucide-react";
+import { Laptop, Cpu, Globe, Rocket, Terminal, Code2, ChevronRight, Share2 } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 
 const Tecnologia = () => {
-    const features = [
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, []);
+
+    const techPillars = [
         {
-            title: "Robótica STEAM",
-            desc: "Diseño, construcción y programación de robots utilizando kits de última generación para resolver retos complejos.",
-            image: "https://images.unsplash.com/photo-1561557944-6e7860d1a7eb?auto=format&fit=crop&w=800&q=80",
-            icon: <Cpu className="text-blue-500" />
+            title: "Robótica & STEAM",
+            desc: "Diseño y construcción de soluciones tecnológicas para desafíos del mundo real.",
+            icon: <Cpu className="w-8 h-8" />,
+            image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=800"
         },
         {
-            title: "Programación y Lógica",
-            desc: "Desde Scratch hasta lenguajes como Python, desarrollando el pensamiento computacional y la resolución de problemas.",
-            image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
-            icon: <Code className="text-green-500" />
+            title: "Pensamiento Computacional",
+            desc: "Desde la lógica de programación hasta el desarrollo de aplicaciones móviles y web.",
+            icon: <Code2 className="w-8 h-8" />,
+            image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800"
         },
         {
             title: "Inteligencia Artificial",
-            desc: "Introducción ética y práctica a la IA, comprendiendo su funcionamiento y potencial como herramienta creativa.",
-            image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80",
-            icon: <Brain className="text-purple-500" />
+            desc: "Entendiendo y utilizando la IA de manera ética para potenciar el aprendizaje.",
+            icon: <Share2 className="w-8 h-8" />,
+            image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800"
         }
     ];
 
     return (
-        <div className="flex flex-col w-full">
-            {/* Hero Section */}
-            <section className="relative h-[50vh] flex items-center justify-center text-white overflow-hidden">
-                <img
-                    src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=1920&q=80"
-                    className="absolute inset-0 w-full h-full object-cover brightness-50"
-                    alt="Tecnología Hero"
-                />
-                <div className="relative z-10 text-center space-y-4 px-6">
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Tecnología e Innovación</h1>
-                    <p className="text-lg md:text-xl max-w-2xl mx-auto font-light">
-                        Empoderando a la próxima generación de creadores digitales.
-                    </p>
+        <div className="flex flex-col w-full bg-[#080B16] text-white selection:bg-cyan-500/30">
+            {/* FUTURISTIC HERO */}
+            <section className="relative h-[80vh] flex items-center overflow-hidden">
+                {/* Background artistic elements */}
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#080B16] via-[#080B16]/80 to-transparent z-10" />
+                    <img
+                        src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2000"
+                        alt="Technological innovation"
+                        className="w-full h-full object-cover opacity-20 scale-105 animate-slow-zoom grayscale"
+                    />
+                    {/* Digital Grid Overlay */}
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
+                </div>
+
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="max-w-4xl space-y-8">
+                        <div className={`flex items-center gap-4 transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                            <div className="w-12 h-0.5 bg-cyan-500" />
+                            <span className="text-cyan-400 font-black text-[10px] uppercase tracking-[0.4em]">Arquitectos del Mañana</span>
+                        </div>
+                        <h1 className={`text-6xl md:text-9xl font-serif leading-[0.85] transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                            Innovar para <br />
+                            <span className="italic text-cyan-400">Trascender.</span>
+                        </h1>
+                        <p className={`text-lg text-slate-400 max-w-xl font-light leading-relaxed transition-all duration-1000 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            En Crayon's, la tecnología no es solo una herramienta, sino el lenguaje con el que nuestros estudiantes diseñan el futuro.
+                        </p>
+                    </div>
                 </div>
             </section>
 
-            {/* Innovation Lab Section */}
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex flex-col lg:flex-row gap-16 items-center mb-16">
-                        <div className="flex-1 space-y-6">
-                            <div className="inline-block px-4 py-1 rounded-full bg-blue-100 text-blue-600 font-semibold text-xs uppercase tracking-widest">
-                                Innovation Lab
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-[#1e2a5a] leading-tight">
-                                Un espacio para imaginar, <br />prototipar y crear.
-                            </h2>
-                            <p className="text-base text-gray-600 leading-relaxed">
-                                Nuestro Laboratorio de Innovación está equipado con impresoras 3D, kits de robótica, estaciones de programación y herramientas de realidad virtual. Aquí, los estudiantes transforman sus ideas en proyectos reales.
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {[
-                                    "Impresión 3D y Modelado",
-                                    "Realidad Virtual Educativa",
-                                    "Internet de las Cosas (IoT)",
-                                    "Desarrollo de Apps",
-                                    "Ciberseguridad Básica",
-                                    "Diseño de Videojuegos"
-                                ].map((item, i) => (
-                                    <div key={i} className="flex items-center gap-3 font-semibold text-[#1e2a5a] text-sm">
-                                        <CheckCircle2 className="text-blue-500" size={18} />
-                                        {item}
+            {/* TECH ECOSYSTEM - DARK EDITORIAL GRID */}
+            <section className="py-24 md:py-48 bg-white text-[#080B16]">
+                <div className="container mx-auto px-6">
+                    <div className="space-y-32">
+                        {techPillars.map((pillar, i) => (
+                            <div key={i} className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-32 ${i % 2 !== 0 ? 'lg:flex-row-reverse' : ''}`}>
+                                <div className="flex-1 w-full group">
+                                    <div className="relative aspect-[16/9] rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-700 group-hover:rounded-[1.5rem] bg-slate-900">
+                                        <img
+                                            src={pillar.image}
+                                            alt={pillar.title}
+                                            className="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-1000"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex-1 relative">
-                            <img
-                                src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80"
-                                className="rounded-3xl shadow-2xl relative z-10"
-                                alt="Laboratorio de tecnología"
-                            />
-                            <div className="absolute -top-10 -left-10 w-full h-full border-2 border-blue-500/20 rounded-3xl -z-10 translate-x-4 translate-y-4"></div>
-                        </div>
-                    </div>
-
-                    {/* Features Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {features.map((f, i) => (
-                            <div key={i} className="group p-6 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-xl transition-all duration-500">
-                                <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                                    {f.icon}
                                 </div>
-                                <h3 className="text-xl font-bold text-[#1e2a5a] mb-4">{f.title}</h3>
-                                <p className="text-gray-600 leading-relaxed mb-6 text-sm">{f.desc}</p>
-                                <img src={f.image} className="rounded-2xl w-full aspect-video object-cover" alt={f.title} />
+
+                                <div className="flex-1 space-y-8">
+                                    <div className="space-y-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
+                                            {pillar.icon}
+                                        </div>
+                                        <h2 className="text-4xl md:text-6xl font-serif leading-tight">
+                                            {pillar.title.split(' ')[0]} <br />
+                                            <span className="italic text-cyan-500">{pillar.title.split(' ')[1] || ''} {pillar.title.split(' ')[2] || ''}</span>
+                                        </h2>
+                                    </div>
+
+                                    <p className="text-xl text-slate-500 font-light leading-relaxed">
+                                        {pillar.desc}
+                                    </p>
+
+                                    <div className="pt-6">
+                                        <button className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-[#080B16] hover:text-cyan-600 transition-colors group">
+                                            Explorar Programa <ChevronRight size={18} className="translate-x-0 group-hover:translate-x-2 transition-transform" />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Digital Citizenship */}
-            <section className="py-16 bg-[#1e2a5a] text-white overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-blue-500/5 skew-x-12 translate-x-1/2"></div>
-                <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="max-w-3xl space-y-6">
-                        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Ciudadanía Digital Responsable</h2>
-                        <p className="text-lg text-gray-300 leading-relaxed">
-                            No solo enseñamos a usar la tecnología, sino a hacerlo de manera ética, segura y productiva. Nuestro programa incluye talleres de prevención de ciberbullying, gestión de identidad digital y pensamiento crítico ante la información.
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                            <div className="flex items-center gap-3 bg-white/10 px-5 py-2 rounded-full border border-white/20 text-sm">
-                                <ShieldCheck className="text-blue-400" size={18} />
-                                <span className="font-semibold">Seguridad Online</span>
+            {/* DIGITAL MINDSET SECTION - DARK TECH VIBE */}
+            <section className="py-24 md:py-48 relative overflow-hidden">
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-center">
+                        {[
+                            { icon: <Terminal />, t: "Coding Hub", d: "Espacio dedicado al desarrollo de software." },
+                            { icon: <Globe />, t: "E-Learning", d: "Plataformas de clase mundial para el aprendizaje." },
+                            { icon: <Cpu />, t: "Steam Lab", d: "Laboratorios equipados con tecnología de punta." },
+                            { icon: <Rocket />, t: "Startups", d: "Fomentamos el espíritu emprendedor tech." }
+                        ].map((item, i) => (
+                            <div key={i} className="space-y-6 group">
+                                <div className="w-20 h-20 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-all duration-500 shadow-2xl shadow-cyan-500/0 group-hover:shadow-cyan-500/20">
+                                    {React.cloneElement(item.icon as React.ReactElement, { size: 32, strokeWidth: 1.5 })}
+                                </div>
+                                <h4 className="text-lg font-bold">{item.t}</h4>
+                                <p className="text-sm text-slate-400 font-light px-4">{item.d}</p>
                             </div>
-                            <div className="flex items-center gap-3 bg-white/10 px-5 py-2 rounded-full border border-white/20 text-sm">
-                                <Globe className="text-blue-400" size={18} />
-                                <span className="font-semibold">Ética Digital</span>
-                            </div>
-                            <div className="flex items-center gap-3 bg-white/10 px-5 py-2 rounded-full border border-white/20 text-sm">
-                                <Rocket className="text-blue-400" size={18} />
-                                <span className="font-semibold">Emprendimiento Tech</span>
-                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-32 p-12 md:p-24 rounded-[4rem] bg-gradient-to-br from-cyan-900/40 to-blue-900/40 border border-white/10 backdrop-blur-xl text-center space-y-12">
+                        <h3 className="text-4xl md:text-7xl font-serif italic">
+                            ¿Preparado para <br /> el siguiente nivel?
+                        </h3>
+                        <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                            <Link to="/admision" className="bg-white text-[#080B16] px-12 py-5 rounded-full text-[11px] font-black uppercase tracking-widest hover:scale-105 transition-all">
+                                Solicitar Información
+                            </Link>
+                            <Link to="/contacto" className="bg-white/5 border border-white/10 text-white px-12 py-5 rounded-full text-[11px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
+                                Agendar Demo Tech
+                            </Link>
                         </div>
                     </div>
                 </div>
+
+                {/* Aesthetic Accents */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[150px] translate-y-1/2 -translate-x-1/2" />
             </section>
         </div>
     );
 };
 
+import { Link } from "react-router-dom";
 export default Tecnologia;

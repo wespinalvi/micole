@@ -1,100 +1,163 @@
-import { ClipboardList, UserPlus, FileCheck, CreditCard, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ClipboardList, UserPlus, FileCheck, CreditCard, ArrowRight, CheckCircle2, ChevronRight, Download } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 
 const Admision = () => {
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, []);
+
     const steps = [
-        { title: "Solicitud", icon: <ClipboardList size={32} />, desc: "Completa el formulario de pre-inscripción en línea o presencial." },
-        { title: "Entrevista", icon: <UserPlus size={32} />, desc: "Programamos una reunión con los padres y una evaluación diagnóstica." },
-        { title: "Documentación", icon: <FileCheck size={32} />, desc: "Entrega de documentos requeridos por el MINEDU y la institución." },
-        { title: "Matrícula", icon: <CreditCard size={32} />, desc: "Pago de cuota de ingreso y confirmación de vacante." }
+        {
+            title: "Solicitud de Vacante",
+            icon: <ClipboardList className="w-8 h-8" />,
+            desc: "Complete nuestro formulario digital de pre-inscripción para iniciar el proceso formal de admisión."
+        },
+        {
+            title: "Encuentro Familiar",
+            icon: <UserPlus className="w-8 h-8" />,
+            desc: "Programamos una entrevista personalizada para conocer a la familia y realizar la evaluación diagnóstica del alumno."
+        },
+        {
+            title: "Carga Documental",
+            icon: <FileCheck className="w-8 h-8" />,
+            desc: "Presentación de la documentación académica y administrativa necesaria para la validación del perfil."
+        },
+        {
+            title: "Afiliación & Matrícula",
+            icon: <CreditCard className="w-8 h-8" />,
+            desc: "Confirmación de ingreso tras la aprobación del comité y formalización del compromiso institucional."
+        }
     ];
 
     return (
-        <div className="flex flex-col w-full">
-            {/* Page Header */}
-            <section className="relative py-16 bg-[#1e2a5a] text-white overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                <div className="max-w-7xl mx-auto px-6 relative z-10 text-center space-y-3">
-                    <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Proceso de Admisión</h1>
-                    <p className="text-lg text-gray-300 max-w-2xl mx-auto font-light">
-                        Únete a nuestra comunidad educativa y brinda a tus hijos una formación de excelencia.
-                    </p>
+        <div className="flex flex-col w-full bg-[#fdfcfb]">
+            {/* CLEAN PROFESSIONAL HERO */}
+            <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+                <div className="container mx-auto">
+                    <div className="max-w-4xl space-y-8 relative z-10">
+                        <div className={`flex items-center gap-4 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                            <div className="w-12 h-px bg-orange-600" />
+                            <span className="text-orange-600 font-black text-[10px] uppercase tracking-[0.4em]">Admisiones 2026</span>
+                        </div>
+                        <h1 className={`text-6xl md:text-9xl font-serif text-slate-900 leading-[0.85] transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                            Un Futuro <br />
+                            <span className="italic">Por Escribir.</span>
+                        </h1>
+                        <p className={`text-xl text-slate-500 max-w-2xl font-light leading-relaxed transition-all duration-1000 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            Forme parte de una comunidad educativa que trasciende fronteras. El proceso de admisión de Crayon's está diseñado para identificar y potenciar el talento de cada nuevo integrante.
+                        </p>
+                    </div>
                 </div>
+
+                {/* Aesthetic Detail */}
+                <div className="absolute top-0 right-0 w-1/3 h-full bg-slate-50 -z-10 hidden lg:block" />
             </section>
 
-            {/* Steps Section */}
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
-                        <h2 className="text-[#F26513] font-semibold tracking-widest uppercase text-xs">Paso a Paso</h2>
-                        <p className="text-3xl font-bold text-[#1e2a5a] tracking-tight">¿Cómo postular?</p>
-                        <div className="w-16 h-1 bg-[#F26513] mx-auto rounded-full"></div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-                        {/* Connector Line (Desktop) */}
-                        <div className="hidden lg:block absolute top-1/2 left-0 w-full h-0.5 bg-gray-100 -translate-y-12 z-0"></div>
-
+            {/* THE PROCESS - STEP BY STEP EDITORIAL */}
+            <section className="py-24 md:py-48 bg-white overflow-hidden">
+                <div className="container mx-auto px-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 relative">
                         {steps.map((step, i) => (
-                            <div key={i} className="relative z-10 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 text-center space-y-4">
-                                <div className="w-20 h-20 rounded-3xl bg-[#F26513] text-white flex items-center justify-center mx-auto shadow-lg shadow-orange-500/20">
-                                    {step.icon}
+                            <div key={i} className="group relative space-y-8">
+                                <div className="space-y-6 relative z-10">
+                                    <div className="flex items-end justify-between">
+                                        <div className="w-16 h-16 rounded-[1.5rem] bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all duration-500 shadow-xl shadow-orange-600/0 group-hover:shadow-orange-600/20">
+                                            {step.icon}
+                                        </div>
+                                        <span className="text-6xl font-serif text-slate-100 leading-none select-none">0{i + 1}</span>
+                                    </div>
+                                    <h3 className="text-2xl font-serif text-slate-900 leading-tight">{step.title}</h3>
+                                    <p className="text-sm text-slate-500 font-light leading-relaxed">{step.desc}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <h3 className="text-xl font-semibold text-[#1e2a5a]">{step.title}</h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
-                                </div>
-                                <div className="absolute -top-4 -left-4 w-10 h-10 rounded-full bg-[#1e2a5a] text-white flex items-center justify-center font-bold text-lg">
-                                    {i + 1}
-                                </div>
+                                <div className="absolute -inset-6 bg-slate-50 rounded-[2.5rem] scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500 -z-0" />
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Requirements Section */}
-            <section className="py-16 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                        <div className="space-y-6">
-                            <h2 className="text-3xl font-bold text-[#1e2a5a] tracking-tight">Requisitos Generales</h2>
-                            <div className="space-y-4">
+            {/* REQUIREMENTS & GUIDANCE SECTION */}
+            <section className="py-24 md:py-48 relative">
+                <div className="container mx-auto px-6">
+                    <div className="flex flex-col lg:flex-row gap-24 items-start">
+                        <div className="lg:w-3/5 space-y-12">
+                            <div className="space-y-6">
+                                <span className="text-orange-600 font-black text-[10px] uppercase tracking-widest px-4 py-1 bg-orange-50 rounded-full">Indispensable</span>
+                                <h2 className="text-4xl md:text-6xl font-serif text-slate-900 leading-tight">
+                                    Requisitos <br /> para la <span className="italic text-orange-500">Postulación.</span>
+                                </h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {[
-                                    "Copia del DNI del estudiante y de ambos padres.",
-                                    "Ficha Única de Matrícula del SIAGIE.",
-                                    "Certificado de estudios de los grados anteriores.",
-                                    "Constancia de no adeudo del colegio de procedencia.",
+                                    "Copia del DNI del estudiante y padres.",
+                                    "Ficha Única de Matrícula (SIAGIE).",
+                                    "Certificado de estudios previos.",
+                                    "Constancia de no adeudo origen.",
                                     "Partida de nacimiento original.",
-                                    "Informe de progreso (Libreta de notas) del año anterior."
+                                    "Informe de progreso anual."
                                 ].map((req, i) => (
-                                    <div key={i} className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-100">
-                                        <CheckCircle2 className="text-[#F26513] shrink-0" size={20} />
-                                        <span className="text-gray-700 font-medium text-sm">{req}</span>
+                                    <div key={i} className="flex items-center gap-4 p-6 bg-white rounded-2xl border border-slate-100 hover:border-orange-200 transition-colors group">
+                                        <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-orange-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                                            <CheckCircle2 size={12} />
+                                        </div>
+                                        <span className="text-xs font-bold text-slate-700">{req}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                        <div className="bg-[#1e2a5a] rounded-3xl p-8 text-white space-y-6 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-[#F26513] rounded-full blur-3xl opacity-20"></div>
-                            <h3 className="text-2xl font-semibold">¿Necesitas ayuda?</h3>
-                            <p className="text-gray-300 leading-relaxed">
-                                Nuestro equipo de admisión está listo para guiarte en cada paso.
-                                Si tienes dudas sobre las vacantes disponibles o los costos, no dudes en contactarnos.
-                            </p>
-                            <div className="space-y-4">
-                                <button className="w-full bg-[#F26513] hover:bg-[#d95a11] text-white py-4 rounded-2xl font-semibold transition-all flex items-center justify-center gap-2">
-                                    Descargar Guía de Admisión <ArrowRight size={20} />
-                                </button>
-                                <button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 py-4 rounded-2xl font-semibold transition-all">
-                                    Ver Preguntas Frecuentes
-                                </button>
+
+                        <div className="lg:w-2/5 sticky top-40">
+                            <div className="bg-[#0a0a0c] text-white p-12 md:p-16 rounded-[4rem] shadow-2xl relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600 rounded-full blur-[80px] opacity-20 transition-all group-hover:scale-150" />
+
+                                <div className="space-y-8 relative z-10 transition-transform duration-500 group-hover:-translate-y-2">
+                                    <h3 className="text-3xl font-serif italic">¿Desea resolver dudas?</h3>
+                                    <p className="text-slate-400 font-light leading-relaxed">
+                                        Nuestro equipo de admisiones está disponible para brindarle una atención personalizada.
+                                    </p>
+                                    <div className="space-y-4 pt-4">
+                                        <button className="w-full bg-orange-600 hover:bg-orange-700 text-white py-5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2">
+                                            Guía de Admisión PDF <Download size={16} />
+                                        </button>
+                                        <button className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white py-5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all">
+                                            Preguntas Frecuentes
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* CALL TO ACTION - START THE JOURNEY */}
+            <section className="py-32 bg-slate-50 text-center relative overflow-hidden">
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="max-w-3xl mx-auto space-y-12">
+                        <h2 className="text-5xl md:text-8xl font-serif text-slate-900 leading-tight">
+                            Comience la <br /> <span className="italic text-orange-600">Aventura.</span>
+                        </h2>
+                        <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                            <Link to="/contacto" className="bg-slate-900 text-white px-12 py-5 rounded-full text-[11px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all">
+                                Solicitar Vacante
+                            </Link>
+                            <Link to="/espacio" className="px-12 py-5 rounded-full text-[11px] font-black uppercase tracking-widest text-[#0a0a0c] border-2 border-[#0a0a0c] hover:bg-[#0a0a0c] hover:text-white transition-all">
+                                Visitar el Campus
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+                {/* Background Large Text */}
+                <div className="absolute bottom-0 left-0 w-full text-[25vw] font-black text-slate-100 leading-none translate-y-1/2 -z-0 select-none pointer-events-none italic">
+                    ADMISSIONS.
                 </div>
             </section>
         </div>
     );
 };
 
+import { Link } from "react-router-dom";
 export default Admision;

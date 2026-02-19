@@ -1,82 +1,156 @@
-import { Target, Eye, ShieldCheck, Heart, Users, Star } from "lucide-react";
+import { History, Target, Compass, ArrowUpRight, GraduationCap } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 
 const VisionMision = () => {
-  const values = [
-    { title: "Integridad", icon: <ShieldCheck className="w-6 h-6" />, desc: "Actuamos con honestidad y coherencia en cada paso." },
-    { title: "Respeto", icon: <Heart className="w-6 h-6" />, desc: "Valoramos la diversidad y la dignidad de cada persona." },
-    { title: "Excelencia", icon: <Star className="w-6 h-6" />, desc: "Buscamos siempre la mejor versión de nosotros mismos." },
-    { title: "Comunidad", icon: <Users className="w-6 h-6" />, desc: "Trabajamos unidos por un propósito común." }
-  ];
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
   return (
-    <div className="flex flex-col w-full">
-      {/* Page Header */}
-      <section className="relative py-16 bg-[#1e2a5a] text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center space-y-3">
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight">Nuestra Identidad</h1>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto font-light">
-            Conoce los cimientos que guían nuestra labor educativa y el futuro que construimos para nuestros estudiantes.
-          </p>
+    <div className="flex flex-col w-full bg-white">
+      {/* HERITAGE HERO */}
+      <section className="relative h-[80vh] flex items-end overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1541339907198-e08759dfc3ef?auto=format&fit=crop&q=80&w=2000"
+            alt="Academic heritage"
+            className="w-full h-full object-cover grayscale brightness-50 contrast-125"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-transparent to-transparent" />
+        </div>
+
+        <div className="container mx-auto px-6 pb-24 relative z-10">
+          <div className="max-w-4xl space-y-6">
+            <div className={`flex items-center gap-4 transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="w-12 h-0.5 bg-orange-600" />
+              <span className="text-orange-500 font-black text-[10px] uppercase tracking-[0.4em]">Desde 2013</span>
+            </div>
+            <h1 className={`text-6xl md:text-9xl font-serif text-white leading-none transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+              Legado & <br />
+              <span className="italic text-orange-500">Destino.</span>
+            </h1>
+          </div>
         </div>
       </section>
 
-      {/* Mission & Vision Grid */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Misión */}
-            <div className="group p-8 rounded-[2rem] bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-2xl transition-all duration-500">
-              <div className="w-16 h-16 rounded-[1.5rem] bg-[#F26513]/10 flex items-center justify-center text-[#F26513] mb-6 group-hover:bg-[#F26513] group-hover:text-white transition-all duration-500">
+      {/* THE PHILOSOPHY SECTION - ASYMETRIC SPLIT */}
+      <section className="py-24 md:py-48">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+            <div className="space-y-10 order-2 lg:order-1">
+              <div className="space-y-6">
+                <span className="text-orange-600 font-black text-[10px] uppercase tracking-widest px-4 py-1 bg-orange-50 rounded-full">Nuestro Propósito</span>
+                <h2 className="text-4xl md:text-6xl font-serif text-slate-900 leading-tight">
+                  Nuestra <span className="italic">Misión.</span>
+                </h2>
+                <p className="text-xl text-slate-600 font-light leading-relaxed">
+                  Brindar una educación integral de vanguardia, fundamentada en valores trascendentes y la excelencia académica, para formar líderes éticos que contribuyan al progreso de la sociedad global.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="p-8 bg-slate-50 rounded-[2rem] space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-orange-600 shadow-sm">
+                    <GraduationCap size={24} />
+                  </div>
+                  <h3 className="font-bold text-slate-900">Formación Holística</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">Desarrollamos el intelecto, el cuerpo y el espíritu en equilibrio perfecto.</p>
+                </div>
+                <div className="p-8 bg-slate-50 rounded-[2rem] space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-orange-600 shadow-sm">
+                    <Compass size={24} />
+                  </div>
+                  <h3 className="font-bold text-slate-900">Liderazgo Ético</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">Inspiramos a actuar con rectitud y visión comunitaria.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative order-1 lg:order-2">
+              <div className="aspect-[4/5] rounded-[4rem] overflow-hidden shadow-2xl skew-y-3 hover:skew-y-0 transition-all duration-1000">
+                <img
+                  src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=1000"
+                  alt="Education in action"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute -top-12 -right-12 w-48 h-48 bg-orange-600 rounded-full flex items-center justify-center p-8 text-white text-center animate-bounce-subtle">
+                <p className="text-[10px] font-black uppercase tracking-widest">Comprometidos con el Éxito</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ARTISTIC VISION SECTION - DARK EDITORIAL */}
+      <section className="py-24 md:py-48 bg-[#0a0a0c] text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-orange-600/5 -skew-x-12 translate-x-1/2" />
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-16">
+            <div className="space-y-6">
+              <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center mx-auto text-orange-500 mb-8">
                 <Target size={32} />
               </div>
-              <h2 className="text-2xl font-black text-[#1e2a5a] mb-4">Nuestra Misión</h2>
-              <p className="text-gray-600 leading-relaxed text-base text-justify">
-                Somos una Institución Educativa Privada que brinda una educación integral basada en valores éticos,
-                morales y cívicos. Desarrollamos y potenciamos las competencias de nuestros estudiantes para que
-                culminen su escolaridad con excelencia, en espacios seguros, inclusivos y de sana convivencia,
-                afianzando permanentemente sus aprendizajes bajo los principios de la Educación Peruana.
-              </p>
+              <h2 className="text-5xl md:text-8xl font-serif leading-none">
+                Nuestra <br />
+                <span className="italic text-orange-500">Visión.</span>
+              </h2>
             </div>
 
-            {/* Visión */}
-            <div className="group p-8 rounded-[2rem] bg-[#1e2a5a] text-white hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-500">
-              <div className="w-16 h-16 rounded-[1.5rem] bg-white/10 flex items-center justify-center text-white mb-6 group-hover:bg-[#F26513] transition-all duration-500">
-                <Eye size={32} />
-              </div>
-              <h2 className="text-2xl font-black mb-4">Nuestra Visión</h2>
-              <p className="text-gray-300 leading-relaxed text-base text-justify">
-                Ser reconocidos al año 2026 como una institución líder que contribuye a que todos sus estudiantes
-                desarrollen su potencial desde la primera infancia. Formamos ciudadanos capaces de resolver con éxito
-                los problemas de su entorno, asumiendo una actitud activa, crítica y responsable, contribuyendo así
-                al desarrollo de su comunidad y del país con una visión global.
-              </p>
+            <p className="text-2xl md:text-4xl font-serif italic text-slate-400 leading-tight">
+              "Ser reconocidos como el referente educativo líder en la región, impulsando una cultura de <span className="text-white border-b border-orange-600">innovación constante</span> y formando ciudadanos del mundo capaces de crear un futuro sostenible."
+            </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12">
+              {['Innovación', 'Excelencia', 'Integridad', 'Comunidad'].map((item, i) => (
+                <div key={i} className="space-y-2">
+                  <span className="block text-4xl font-serif text-white">0{i + 1}</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">{item}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Values Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
-            <h2 className="text-[#F26513] font-bold tracking-widest uppercase text-xs">Nuestros Valores</h2>
-            <p className="text-3xl font-black text-[#1e2a5a] tracking-tight">
-              Lo que nos define.
-            </p>
-            <div className="w-16 h-1 bg-[#F26513] mx-auto rounded-full"></div>
-          </div>
+      {/* THE TIMELINE / STORY SECTION */}
+      <section className="py-24 md:py-40 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row gap-16 items-start">
+            <div className="md:w-1/3 sticky top-40 space-y-6">
+              <History size={48} className="text-orange-500" />
+              <h2 className="text-4xl font-serif text-slate-900 leading-tight">
+                Un camino <br /> de constante <br /> <span className="italic">evolución.</span>
+              </h2>
+              <p className="text-slate-500 font-light leading-relaxed">
+                Desde nuestros humildes comienzos en 2013, Crayon's ha crecido impulsado por un único sueño: transformar la educación en Satipo.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, i) => (
-              <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 text-center space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-orange-50 text-[#F26513] flex items-center justify-center mx-auto">
-                  {value.icon}
+            <div className="md:w-2/3 space-y-32">
+              {[
+                { year: "2013", title: "El Comienzo", desc: "Apertura de nuestras primeras aulas con un enfoque disruptivo y un grupo selecto de visionarios.", img: "https://images.unsplash.com/photo-1577891772327-0c5874c72d1f?auto=format&fit=crop&q=80&w=800" },
+                { year: "2017", title: "Expansión Regional", desc: "Inauguración de nuestro campus tecnológico y consolidación como líderes académicos en la selva central.", img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800" },
+                { year: "2026", title: "Educación 4.0", desc: "Implementación de IA y metodologías internacionales para preparar a la nueva generación de líderes globales.", img: "https://images.unsplash.com/photo-1510070112810-d4e9a46d9e91?auto=format&fit=crop&q=80&w=800" }
+              ].map((milestone, i) => (
+                <div key={i} className="grid grid-cols-1 lg:grid-cols-2 gap-12 group">
+                  <div className="space-y-6">
+                    <span className="text-6xl font-serif text-slate-100 group-hover:text-orange-500/20 transition-colors uppercase leading-none">{milestone.year}</span>
+                    <h3 className="text-2xl font-bold text-slate-900">{milestone.title}</h3>
+                    <p className="text-slate-600 font-light leading-relaxed">{milestone.desc}</p>
+                    <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-orange-600 transition-colors">
+                      Leer mas <ArrowUpRight size={14} />
+                    </button>
+                  </div>
+                  <div className="aspect-square rounded-[3rem] overflow-hidden grayscale hover:grayscale-0 transition-all duration-1000">
+                    <img src={milestone.img} alt={milestone.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-[#1e2a5a]">{value.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{value.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -84,4 +158,5 @@ const VisionMision = () => {
   );
 };
 
+import { Link } from "react-router-dom";
 export default VisionMision;

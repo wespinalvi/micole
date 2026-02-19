@@ -27,11 +27,8 @@ import { Input } from "@/components/ui/input";
 // Tipo para los datos de grado desde el API
 interface GradoData {
     id: number;
-    nivel: string;
-    grado: number;
-    seccion: string;
-    capacidad_maxima: number;
-    descripcion: string;
+    numero_grado: number;
+    nombre: string;
 }
 
 // Tipo para los datos extraídos de cada ficha (Nuevo Formato)
@@ -781,8 +778,8 @@ export default function BulkEnrollment() {
                                                                 if (grado) {
                                                                     const newData = [...studentsData];
                                                                     newData[0].gradoId = grado.id;
-                                                                    newData[0].grado = parseInt(grado.descripcion);
-                                                                    newData[0].seccion = grado.seccion;
+                                                                    newData[0].grado = grado.numero_grado;
+                                                                    // newData[0].seccion = grado.seccion; // Seccion ya no existe en la respuesta
                                                                     setStudentsData(newData);
                                                                 }
                                                             }}
@@ -794,7 +791,7 @@ export default function BulkEnrollment() {
                                                             <SelectContent>
                                                                 {gradosDisponibles.map((grado) => (
                                                                     <SelectItem key={grado.id} value={grado.id.toString()}>
-                                                                        {grado.descripcion} - {grado.nivel} ({grado.seccion})
+                                                                        {grado.nombre}
                                                                     </SelectItem>
                                                                 ))}
                                                             </SelectContent>
@@ -1107,6 +1104,7 @@ export default function BulkEnrollment() {
                                             </Button>
                                         </div>
                                     </div>
+
                                 )}
 
                                 {/* Files Table - Solo mostrar si está pendiente o procesando */}

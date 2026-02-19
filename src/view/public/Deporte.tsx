@@ -1,113 +1,84 @@
-import { Trophy, CheckCircle2, Users, Medal, Heart } from "lucide-react";
+import { Trophy, Users, Heart, Star, Target, Zap, ChevronRight, Activity } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 
 const Deporte = () => {
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, []);
+
     const sports = [
         {
-            title: "Fútbol",
-            desc: "Nuestra disciplina estrella. Contamos con una academia de fútbol que participa en torneos regionales y nacionales, fomentando la técnica y la estrategia.",
-            image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
-            features: ["Entrenamiento táctico", "Preparación física", "Torneos Interescolares"]
+            title: "Fútbol & Vóley",
+            desc: "Trabajo en equipo y estrategia en nuestras canchas reglamentarias.",
+            image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=800",
+            icon: <Activity className="w-8 h-8" />
         },
         {
-            title: "Vóleibol",
-            desc: "Desarrollamos la coordinación, agilidad y el espíritu de equipo en nuestras canchas polideportivas techadas.",
-            image: "https://images.unsplash.com/photo-1592656670411-2918f7ed47ad?auto=format&fit=crop&w=800&q=80",
-            features: ["Técnica de saque y recepción", "Trabajo en equipo", "Competencias regionales"]
-        },
-        {
-            title: "Básquetbol",
-            desc: "Fomentamos la rapidez mental y física a través del básquet, con entrenamientos dinámicos y competitivos.",
-            image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80",
-            features: ["Fundamentos de tiro", "Estrategia de juego", "Liderazgo en cancha"]
+            title: "Natación",
+            desc: "Desarrollo de resistencia y técnica en nuestra piscina semi-olímpica.",
+            image: "https://images.unsplash.com/photo-1530549387634-e5a529b41f5f?auto=format&fit=crop&q=80&w=800",
+            icon: <Zap className="w-8 h-8" />
         },
         {
             title: "Atletismo",
-            desc: "Carreras de velocidad, saltos y lanzamientos para desarrollar la potencia y resistencia de nuestros atletas.",
-            image: "https://images.unsplash.com/photo-1461896756985-21465c16c73e?auto=format&fit=crop&w=800&q=80",
-            features: ["Técnica de carrera", "Salto largo y alto", "Resistencia aeróbica"]
+            desc: "Superación personal y disciplina en nuestras pistas de entrenamiento.",
+            image: "https://images.unsplash.com/photo-1461896756913-64756598344f?auto=format&fit=crop&q=80&w=800",
+            icon: <Target className="w-8 h-8" />
         }
     ];
 
     return (
-        <div className="flex flex-col w-full">
-            {/* Hero Section */}
-            <section className="relative h-[50vh] flex items-center justify-center text-white overflow-hidden">
-                <img
-                    src="https://images.unsplash.com/photo-1541252260730-0412e8e2108e?auto=format&fit=crop&w=1920&q=80"
-                    className="absolute inset-0 w-full h-full object-cover brightness-50"
-                    alt="Deporte Hero"
-                />
-                <div className="relative z-10 text-center space-y-4 px-6">
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Deporte y Bienestar</h1>
-                    <p className="text-lg md:text-xl max-w-2xl mx-auto font-light">
-                        Formando campeones dentro y fuera de la cancha.
-                    </p>
+        <div className="flex flex-col w-full bg-white">
+            {/* ENERGETIC HERO */}
+            <section className="relative h-[85vh] flex items-center overflow-hidden bg-orange-600">
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=2000"
+                        alt="Sports and movement"
+                        className="w-full h-full object-cover brightness-75 contrast-110 saturate-150 animate-slow-zoom"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-orange-950/80 via-orange-600/40 to-transparent" />
                 </div>
-            </section>
 
-            {/* Stats Section */}
-            <section className="py-8 bg-[#F26513] text-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                        <div className="space-y-2">
-                            <Trophy className="mx-auto w-10 h-10 opacity-80" />
-                            <div className="text-3xl font-bold">50+</div>
-                            <div className="text-xs uppercase tracking-widest font-semibold">Trofeos Ganados</div>
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="max-w-4xl space-y-8">
+                        <div className={`flex items-center gap-4 transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                            <div className="w-12 h-px bg-white" />
+                            <span className="text-white font-black text-[10px] uppercase tracking-[0.4em]">Mente Sana, Cuerpo Sano</span>
                         </div>
-                        <div className="space-y-2">
-                            <Users className="mx-auto w-10 h-10 opacity-80" />
-                            <div className="text-3xl font-bold">12</div>
-                            <div className="text-xs uppercase tracking-widest font-semibold">Selecciones Activas</div>
-                        </div>
-                        <div className="space-y-2">
-                            <Medal className="mx-auto w-10 h-10 opacity-80" />
-                            <div className="text-3xl font-bold">100%</div>
-                            <div className="text-xs uppercase tracking-widest font-semibold">Participación Alumnos</div>
-                        </div>
-                        <div className="space-y-2">
-                            <Heart className="mx-auto w-10 h-10 opacity-80" />
-                            <div className="text-3xl font-bold">Vida</div>
-                            <div className="text-xs uppercase tracking-widest font-semibold">Saludable</div>
-                        </div>
+                        <h1 className={`text-6xl md:text-9xl font-serif text-white leading-[0.85] transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                            Fuerza & <br />
+                            <span className="italic">Disciplina.</span>
+                        </h1>
+                        <p className={`text-lg text-orange-50 max-w-xl font-light leading-relaxed transition-all duration-1000 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            El deporte en Crayon's es una escuela de vida. Fomentamos la competitividad sana, la resiliencia y el espíritu de equipo en cada disciplina.
+                        </p>
                     </div>
                 </div>
             </section>
 
-            {/* Main Content */}
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
-                        <h2 className="text-[#F26513] font-semibold tracking-widest uppercase text-xs">Nuestra Propuesta Deportiva</h2>
-                        <p className="text-3xl md:text-4xl font-bold text-[#1e2a5a] tracking-tight">
-                            Disciplinas que forjan el carácter.
-                        </p>
-                        <p className="text-lg text-gray-600">
-                            Contamos con infraestructura de primer nivel y un equipo de entrenadores profesionales dedicados a potenciar el talento de cada estudiante.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* SPORTS GRID - DYNAMIC CARDS */}
+            <section className="py-24 md:py-48">
+                <div className="container mx-auto px-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-8">
                         {sports.map((sport, i) => (
-                            <div key={i} className="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-500">
-                                <div className="h-64 overflow-hidden relative">
-                                    <img
-                                        src={sport.image}
-                                        alt={sport.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                    />
-                                    <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-6 py-2 rounded-full font-bold text-[#1e2a5a] shadow-lg">
-                                        {sport.title}
-                                    </div>
+                            <div key={i} className="group relative pt-12">
+                                <div className="absolute top-0 left-0 text-[10rem] font-black text-slate-50 -z-10 group-hover:text-orange-50 transition-colors leading-none tracking-tighter">
+                                    0{i + 1}
                                 </div>
-                                <div className="p-6 space-y-4">
-                                    <p className="text-gray-600 leading-relaxed">{sport.desc}</p>
-                                    <div className="space-y-3">
-                                        {sport.features.map((feat, fi) => (
-                                            <div key={fi} className="flex items-center gap-3 font-semibold text-[#1e2a5a]">
-                                                <CheckCircle2 className="text-[#F26513]" size={18} />
-                                                {feat}
-                                            </div>
-                                        ))}
+                                <div className="space-y-8">
+                                    <div className="aspect-[3/4] rounded-[3rem] overflow-hidden shadow-2xl relative group-hover:-translate-y-4 transition-transform duration-700">
+                                        <img src={sport.image} alt={sport.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
+                                        <div className="absolute inset-x-0 bottom-0 p-10 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <p className="text-white text-xs font-black uppercase tracking-widest">Ver Instalaciones</p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4 px-2">
+                                        <div className="text-orange-600">{sport.icon}</div>
+                                        <h3 className="text-3xl font-serif text-slate-900 leading-tight">{sport.title}</h3>
+                                        <p className="text-slate-500 font-light leading-relaxed">{sport.desc}</p>
                                     </div>
                                 </div>
                             </div>
@@ -116,44 +87,69 @@ const Deporte = () => {
                 </div>
             </section>
 
-            {/* Infrastructure Preview */}
-            <section className="py-16 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex flex-col lg:flex-row gap-16 items-center">
-                        <div className="flex-1 space-y-6">
-                            <h2 className="text-3xl font-bold text-[#1e2a5a]">Infraestructura de Vanguardia</h2>
-                            <p className="text-lg text-gray-600 leading-relaxed">
-                                Nuestras instalaciones deportivas están diseñadas para cumplir con los más altos estándares de seguridad y rendimiento.
-                            </p>
-                            <ul className="space-y-4">
-                                <li className="flex items-start gap-4">
-                                    <div className="w-6 h-6 rounded-full bg-[#F26513] flex items-center justify-center text-white shrink-0 mt-1">1</div>
-                                    <div>
-                                        <h4 className="font-semibold text-[#1e2a5a]">Canchas de Grass Sintético</h4>
-                                        <p className="text-gray-500">Certificadas para la práctica profesional del fútbol.</p>
+            {/* PERFORMANCE SECTION - EDITORIAL DARK */}
+            <section className="py-24 md:py-48 bg-[#0D101C] text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-full h-full opacity-5 pointer-events-none select-none text-[30vw] font-black text-white italic -translate-y-1/2 translate-x-1/2">
+                    SOAR
+                </div>
+
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="flex flex-col lg:flex-row gap-24 items-center">
+                        <div className="lg:w-1/2 space-y-10">
+                            <div className="space-y-6">
+                                <span className="text-orange-500 font-black text-[10px] uppercase tracking-widest px-4 py-1 border border-orange-500 rounded-full">Alto Rendimiento</span>
+                                <h2 className="text-5xl md:text-7xl font-serif leading-none">
+                                    Más allá del <br /> <span className="italic text-orange-500">Mar marcador.</span>
+                                </h2>
+                                <p className="text-xl text-slate-400 font-light leading-relaxed">
+                                    Creemos que la excelencia física es el complemento perfecto del éxito académico. Nuestros programas de entrenamiento están diseñados para cultivar no solo atletas, sino líderes resilientes.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                {[
+                                    { t: "Liderazgo", d: "Capitanía y gestión de equipos en torneos regionales." },
+                                    { t: "Resiliencia", d: "Aprender del proceso, no solo del resultado." },
+                                    { t: "Disciplina", d: "Hábitos saludables y rigor en el entrenamiento." },
+                                    { t: "Cero Excusas", d: "Compromiso total con los objetivos colectivos." }
+                                ].map((val, i) => (
+                                    <div key={i} className="flex gap-4">
+                                        <div className="mt-1 w-2 h-2 rounded-full bg-orange-500 shrink-0" />
+                                        <div className="space-y-1">
+                                            <h4 className="font-bold text-white">{val.t}</h4>
+                                            <p className="text-xs text-slate-500">{val.d}</p>
+                                        </div>
                                     </div>
-                                </li>
-                                <li className="flex items-start gap-4">
-                                    <div className="w-6 h-6 rounded-full bg-[#F26513] flex items-center justify-center text-white shrink-0 mt-1">2</div>
-                                    <div>
-                                        <h4 className="font-semibold text-[#1e2a5a]">Coliseo Cerrado</h4>
-                                        <p className="text-gray-500">Espacio techado para vóley, básquet y eventos masivos.</p>
-                                    </div>
-                                </li>
-                                <li className="flex items-start gap-4">
-                                    <div className="w-6 h-6 rounded-full bg-[#F26513] flex items-center justify-center text-white shrink-0 mt-1">3</div>
-                                    <div>
-                                        <h4 className="font-semibold text-[#1e2a5a]">Gimnasio Equipado</h4>
-                                        <p className="text-gray-500">Área de preparación física y musculación controlada.</p>
-                                    </div>
-                                </li>
-                            </ul>
+                                ))}
+                            </div>
                         </div>
-                        <div className="flex-1 grid grid-cols-2 gap-4">
-                            <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80" className="rounded-3xl shadow-lg" alt="Gym" />
-                            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=400&q=80" className="rounded-3xl shadow-lg mt-8" alt="Soccer" />
-                            <img src="https://images.unsplash.com/photo-1592656670411-2918f7ed47ad?auto=format&fit=crop&w=400&q=80" className="rounded-3xl shadow-lg -mt-8" alt="Volley" />
-                            <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=400&q=80" className="rounded-3xl shadow-lg" alt="Basket" />
+
+                        <div className="lg:w-1/2 grid grid-cols-2 gap-6 pt-16 lg:pt-0">
+                            <div className="aspect-[3/5] rounded-[2.5rem] overflow-hidden shadow-2xl skew-y-2">
+                                <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=800" alt="Training" className="w-full h-full object-cover grayscale brightness-75" />
+                            </div>
+                            <div className="aspect-[3/5] rounded-[2.5rem] overflow-hidden shadow-2xl -skew-y-2 translate-y-12">
+                                <img src="https://images.unsplash.com/photo-1542652694-40abf526446e?auto=format&fit=crop&q=80&w=800" alt="Teamwork" className="w-full h-full object-cover" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA SECTION - BOLD & CLEAN */}
+            <section className="py-32 bg-white text-center">
+                <div className="container mx-auto px-6">
+                    <div className="max-w-3xl mx-auto space-y-10">
+                        <h2 className="text-5xl md:text-7xl font-serif text-slate-900 leading-tight">
+                            Únase al equipo <br /> de los <span className="italic text-orange-600">campeones.</span>
+                        </h2>
+                        <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
+                            <Link to="/admision" className="bg-slate-900 text-white px-12 py-5 rounded-full text-[11px] font-black uppercase tracking-widest hover:bg-orange-600 hover:scale-105 transition-all">
+                                Solicitar Admisión
+                            </Link>
+                            <Link to="/contacto" className="px-12 py-5 rounded-full text-[11px] font-black uppercase tracking-widest text-[#0D101C] border-2 border-[#0D101C] hover:bg-[#0D101C] hover:text-white transition-all">
+                                Ver Calendario Deportivo
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -162,4 +158,5 @@ const Deporte = () => {
     );
 };
 
+import { Link } from "react-router-dom";
 export default Deporte;

@@ -1,99 +1,195 @@
-import { Star, Trophy, Laptop, Music, Plane, MessageSquare, ArrowRight } from "lucide-react";
+import { BookOpen, Calendar, Clock, ArrowUpRight, Search, ChevronRight, Bookmark } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 
 const PropuestaEducativa = () => {
-    const offerings = [
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, []);
+
+    const posts = [
         {
-            title: "Excelencia Académica",
-            desc: "Nuestro currículo está diseñado para desafiar y motivar a los estudiantes, preparándolos para los retos universitarios y profesionales.",
-            icon: <Trophy className="w-10 h-10" />,
-            color: "bg-blue-50 text-blue-600"
+            category: "Innovación",
+            date: "12 de Febrero, 2026",
+            title: "El impacto de la Inteligencia Artificial en las aulas de primaria.",
+            desc: "Descubra cómo estamos utilizando herramientas de IA generativa para personalizar el aprendizaje.",
+            image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800",
+            readTime: "5 min"
         },
         {
-            title: "Idiomas (Inglés)",
-            desc: "Programa intensivo de inglés con certificaciones internacionales, permitiendo a nuestros alumnos comunicarse con fluidez en un mundo global.",
-            icon: <MessageSquare className="w-10 h-10" />,
-            color: "bg-orange-50 text-orange-600"
+            category: "Psicología",
+            date: "05 de Febrero, 2026",
+            title: "Inteligencia Emocional: La base de todo éxito académico.",
+            desc: "Estrategias prácticas para padres sobre cómo fomentar la resiliencia en casa.",
+            image: "https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?auto=format&fit=crop&q=80&w=800",
+            readTime: "7 min"
         },
         {
-            title: "Tecnología e Innovación",
-            desc: "Integración de robótica, programación y herramientas digitales para desarrollar el pensamiento lógico y la creatividad.",
-            icon: <Laptop className="w-10 h-10" />,
-            color: "bg-indigo-50 text-indigo-600"
-        },
-        {
-            title: "Deporte y Bienestar",
-            desc: "Fomentamos la actividad física y el espíritu deportivo a través de diversas disciplinas y competencias interescolares.",
-            icon: <Star className="w-10 h-10" />,
-            color: "bg-green-50 text-green-600"
-        },
-        {
-            title: "Arte y Cultura",
-            desc: "Talleres de música, danza, teatro y artes plásticas para el desarrollo de la sensibilidad y la expresión personal.",
-            icon: <Music className="w-10 h-10" />,
-            color: "bg-red-50 text-red-600"
-        },
-        {
-            title: "Viajes de Estudio",
-            desc: "Experiencias vivenciales que complementan el aprendizaje en el aula, conociendo la realidad cultural y natural de nuestro país.",
-            icon: <Plane className="w-10 h-10" />,
-            color: "bg-yellow-50 text-yellow-600"
+            category: "Metodología",
+            date: "28 de Enero, 2026",
+            title: "Aprendizaje basado en proyectos vs. Enseñanza tradicional.",
+            desc: "Por qué el ABP está revolucionando la forma en que los alumnos retienen el conocimiento.",
+            image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
+            readTime: "6 min"
         }
     ];
 
     return (
-        <div className="flex flex-col w-full">
-            {/* Header */}
-            <section className="relative py-16 bg-[#1e2a5a] text-white overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                <div className="max-w-7xl mx-auto px-6 relative z-10 text-center space-y-3">
-                    <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Nuestra Propuesta</h1>
-                    <p className="text-lg text-gray-300 max-w-2xl mx-auto font-light">
-                        Un modelo educativo integral diseñado para potenciar el talento de cada estudiante.
-                    </p>
-                </div>
-            </section>
+        <div className="flex flex-col w-full bg-[#fdfcfb]">
+            {/* MAGAZINE HERO */}
+            <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+                <div className="container mx-auto">
+                    <div className="max-w-4xl space-y-10 relative z-10">
+                        <div className={`flex items-center gap-4 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                            <div className="w-12 h-px bg-slate-900" />
+                            <span className="text-slate-900 font-black text-[10px] uppercase tracking-[0.4em]">Journal & Crónicas</span>
+                        </div>
+                        <h1 className={`text-6xl md:text-9xl font-serif text-slate-900 leading-[0.85] transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                            Nuestras <br />
+                            <span className="italic">Historias.</span>
+                        </h1>
+                        <p className={`text-xl text-slate-500 max-w-2xl font-light leading-relaxed transition-all duration-1000 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                            Un espacio dedicado al conocimiento, la reflexión académica y las crónicas que definen el pulso de nuestra institución.
+                        </p>
+                    </div>
 
-            {/* Grid */}
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        {offerings.map((off, i) => (
-                            <div key={i} className="group p-8 rounded-[2rem] bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-2xl transition-all duration-500">
-                                <div className={`w-14 h-14 rounded-2xl ${off.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500`}>
-                                    {off.icon}
+                    {/* Featured Article - Magazine Style */}
+                    <div className="mt-20 relative group cursor-pointer transition-all duration-1000">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden rounded-[3rem] shadow-2xl bg-white">
+                            <div className="lg:col-span-7 h-[50vh] lg:h-auto overflow-hidden">
+                                <img
+                                    src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1200"
+                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                                    alt="Featured"
+                                />
+                            </div>
+                            <div className="lg:col-span-5 p-12 lg:p-20 flex flex-col justify-center space-y-8">
+                                <div className="space-y-4">
+                                    <span className="text-orange-500 font-black text-[10px] uppercase tracking-widest">Artículo Destacado</span>
+                                    <h2 className="text-4xl font-serif text-slate-900 group-hover:text-orange-600 transition-colors">La educación en la era de la IA: ¿Estamos listos?</h2>
+                                    <p className="text-slate-500 font-light leading-relaxed">Una mirada profunda a cómo la tecnología está redefiniendo el papel del maestro y el alumno en el siglo XXI.</p>
                                 </div>
-                                <h3 className="text-xl font-bold text-[#1e2a5a] mb-3">{off.title}</h3>
-                                <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                                    {off.desc}
-                                </p>
-                                <button className="flex items-center gap-2 font-semibold text-[#F26513] hover:text-[#1e2a5a] transition-colors text-xs">
-                                    VER DETALLES <ArrowRight size={16} />
-                                </button>
+                                <div className="flex items-center justify-between border-t border-slate-100 pt-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden">
+                                            <img src="https://i.pravatar.cc/100?img=11" alt="Author" />
+                                        </div>
+                                        <div className="text-[10px]">
+                                            <p className="font-bold text-slate-900">Dr. Ricardo Ruiz</p>
+                                            <p className="text-slate-400 uppercase tracking-tighter">Dir. Académico</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-slate-400">
+                                        <Clock size={14} />
+                                        <span className="text-[10px] font-bold">12 min read</span>
+                                    </div>
+                                </div>
                             </div>
-                        ))}
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Partners Section */}
-            <section className="py-16 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-12 space-y-3">
-                        <h2 className="text-2xl font-bold text-[#1e2a5a]">Convenios y Alianzas</h2>
-                        <p className="text-gray-500 text-sm">Trabajamos con las mejores instituciones para brindar mayores oportunidades.</p>
+            {/* ARTISTIC SEARCH / CATEGORIES */}
+            <section className="py-12 bg-white border-y border-slate-100">
+                <div className="container mx-auto px-6">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div className="flex gap-8 overflow-x-auto pb-4 md:pb-0 font-bold text-[10px] uppercase tracking-widest text-slate-400">
+                            {['Todos', 'Innovación', 'Psicología', 'Vida Crayon', 'Eventos'].map((cat, i) => (
+                                <button key={i} className={`whitespace-nowrap hover:text-orange-600 transition-colors ${i === 0 ? 'text-slate-900' : ''}`}>
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="relative w-full md:w-auto">
+                            <input
+                                type="text"
+                                placeholder="Buscar historias..."
+                                className="w-full md:w-96 pl-6 pr-12 py-3 rounded-full bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-xs text-slate-900 font-medium"
+                            />
+                            <Search size={16} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                        </div>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                        {/* Placeholder logos */}
-                        {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className="h-16 w-40 bg-gray-200 rounded-xl flex items-center justify-center font-semibold text-gray-400">
-                                PARTNER {i}
+                </div>
+            </section>
+
+            {/* EDITORIAL GRID */}
+            <section className="py-24 md:py-48 bg-white">
+                <div className="container mx-auto px-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+                        {posts.map((post, i) => (
+                            <div key={i} className="group cursor-pointer space-y-8">
+                                <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-700 group-hover:rounded-[1.5rem]">
+                                    <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                                    <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-sm px-6 py-2 rounded-full shadow-lg">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">{post.category}</span>
+                                    </div>
+                                    <button className="absolute bottom-8 right-8 w-12 h-12 rounded-full bg-white text-slate-900 flex items-center justify-center translate-y-20 group-hover:translate-y-0 transition-transform duration-500">
+                                        <Bookmark size={18} />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4 px-2">
+                                    <div className="flex items-center gap-3 text-slate-400 text-[10px] uppercase tracking-widest font-black">
+                                        <Calendar size={12} />
+                                        <span>{post.date}</span>
+                                        <span className="text-slate-200">|</span>
+                                        <span>{post.readTime}</span>
+                                    </div>
+                                    <h3 className="text-2xl font-serif text-slate-900 leading-tight group-hover:text-orange-600 transition-colors">{post.title}</h3>
+                                    <p className="text-sm text-slate-500 font-light leading-relaxed line-clamp-2">{post.desc}</p>
+                                    <div className="pt-4">
+                                        <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-900 hover:text-orange-600 transition-colors">
+                                            Leer Historia <ArrowUpRight size={14} />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
+
+                    <div className="mt-40 text-center">
+                        <button className="px-12 py-5 rounded-full border-2 border-slate-900 text-slate-900 text-[11px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">
+                            Cargar más historias
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* NEWSLETTER SECTION - ELEGANT DARK */}
+            <section className="py-24 bg-slate-950 text-white relative overflow-hidden">
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="max-w-4xl mx-auto flex flex-col items-center text-center space-y-12">
+                        <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center text-orange-500">
+                            <BookOpen size={32} />
+                        </div>
+                        <h2 className="text-5xl md:text-7xl font-serif italic leading-tight">
+                            Sabiduría en su <br /> <span className="text-orange-500 not-italic">bandeja de entrada.</span>
+                        </h2>
+                        <p className="text-xl text-slate-400 font-light max-w-xl mx-auto">
+                            Suscríbase a nuestro boletín mensual y reciba los mejores artículos sobre educación, innovación y crianza.
+                        </p>
+                        <form className="w-full max-w-md flex flex-col sm:flex-row gap-4 pt-8">
+                            <input
+                                type="email"
+                                placeholder="Su correo electrónico"
+                                className="flex-1 px-8 py-5 rounded-full bg-white/5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-xs"
+                            />
+                            <button className="bg-orange-600 text-white px-10 py-5 rounded-full text-[11px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all">
+                                Suscribirme
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {/* Background Detail */}
+                <div className="absolute top-1/2 left-0 w-full text-[15vw] font-black text-white/5 leading-none -translate-y-1/2 -z-0 pointer-events-none select-none italic">
+                    JOURNAL
                 </div>
             </section>
         </div>
     );
 };
 
+import { Link } from "react-router-dom";
 export default PropuestaEducativa;

@@ -21,7 +21,7 @@ export function AppSidebarTeacher({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
-  
+
   const data = {
     versions: ["1.0.0"],
     navMain: [
@@ -31,11 +31,19 @@ export function AppSidebarTeacher({
         items: [
           {
             title: "Registro de Asistencia",
-            url: "registar-asistencia",
+            url: "registrar-asistencia",
           },
           {
             title: "Historial de Asistencias",
             url: "ver-asistencia",
+          },
+          {
+            title: "Reporte Diario",
+            url: "reporte-clases",
+          },
+          {
+            title: "Seguimiento de Ingresos",
+            url: "seguimiento-ingresos",
           },
           {
             title: "Justificaciones",
@@ -49,7 +57,7 @@ export function AppSidebarTeacher({
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('token'); // O donde tengas almacenado el token
-      
+
       const response = await fetch('http://localhost:3000/api/auth/logout', {
         method: 'POST',
         headers: {
@@ -96,12 +104,12 @@ export function AppSidebarTeacher({
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
-        
+
         {/* Botón de cerrar sesión */}
         <div className="mt-auto p-4">
-          <Button 
+          <Button
             onClick={handleLogout}
-            variant="destructive" 
+            variant="destructive"
             className="w-full justify-start bg-purple-600 text-white hover:bg-purple-700"
           >
             <LogOut className="mr-2 h-4 w-4" />
