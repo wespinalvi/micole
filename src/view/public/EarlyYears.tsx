@@ -25,7 +25,7 @@ const EarlyYears = () => {
             title: "Psicomotricidad",
             desc: "Desarrollo del control corporal y la confianza física en espacios seguros y divertidos.",
             icon: <Footprints className="w-8 h-8" />,
-            image: "https://images.unsplash.com/photo-1566232392379-afd9298e6a46?auto=format&fit=crop&q=80&w=600"
+            image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123391/deportistas_alumnos_inical_hhq4nu.jpg"
         },
         {
             title: "Afectividad",
@@ -41,7 +41,7 @@ const EarlyYears = () => {
             <section className="relative h-[85vh] flex items-center overflow-hidden bg-rose-50">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://images.unsplash.com/photo-1587691592099-24045742c181?auto=format&fit=crop&q=80&w=2000"
+                        src="https://res.cloudinary.com/droodoirh/image/upload/v1772123383/Inicial_tdfx88.jpg"
                         alt="Playful learning"
                         className="w-full h-full object-cover opacity-60 mix-blend-multiply"
                     />

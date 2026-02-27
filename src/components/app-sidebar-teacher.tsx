@@ -1,6 +1,12 @@
 import * as React from "react";
-
-import { VersionSwitcher } from "@/components/version-switcher";
+import {
+  History,
+  FileText,
+  TrendingUp,
+  ShieldCheck,
+  LogOut,
+  UserCheck
+} from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -13,51 +19,26 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
 
 export function AppSidebarTeacher({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const data = {
-    versions: ["1.0.0"],
-    navMain: [
-      {
-        title: "Gestión",
-        url: "#",
-        items: [
-          {
-            title: "Registro de Asistencia",
-            url: "registrar-asistencia",
-          },
-          {
-            title: "Historial de Asistencias",
-            url: "ver-asistencia",
-          },
-          {
-            title: "Reporte Diario",
-            url: "reporte-clases",
-          },
-          {
-            title: "Seguimiento de Ingresos",
-            url: "seguimiento-ingresos",
-          },
-          {
-            title: "Justificaciones",
-            url: "justificaciones",
-          },
-        ],
-      },
-    ],
-  };
+  const menuItems = [
+    { id: 'registro', label: 'Registro Asistencia', icon: UserCheck, url: 'registrar-asistencia' },
+    { id: 'historial', label: 'Historial General', icon: History, url: 'ver-asistencia' },
+    { id: 'reporte', label: 'Reporte Diario', icon: FileText, url: 'reporte-clases' },
+    { id: 'ingresos', label: 'Seguimiento Marcajes', icon: TrendingUp, url: 'seguimiento-ingresos' },
+    { id: 'justificaciones', label: 'Justificaciones', icon: ShieldCheck, url: 'justificaciones' },
+  ];
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem('token'); // O donde tengas almacenado el token
-
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:3000/api/auth/logout', {
         method: 'POST',
         headers: {
@@ -67,53 +48,69 @@ export function AppSidebarTeacher({
       });
 
       if (response.ok) {
-        // Limpiar el token del localStorage
         localStorage.removeItem('token');
-        // Redirigir al login
         navigate('/login');
       } else {
-        console.error('Error al cerrar sesión');
+        localStorage.removeItem('token');
+        navigate('/login');
       }
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      localStorage.removeItem('token');
+      navigate('/login');
     }
   };
 
   return (
-    <Sidebar {...props}>
-      <SidebarHeader>
-        <VersionSwitcher
-          versions={data.versions}
-          defaultVersion={data.versions[0]}
-        />
+    <Sidebar className="border-r border-slate-200" {...props}>
+      <SidebarHeader className="p-5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-white font-black text-base italic shadow-md shrink-0">
+            C
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-sm font-bold tracking-tight text-slate-800 leading-none uppercase">Crayons</h1>
+            <p className="text-[9px] font-bold text-indigo-600 uppercase tracking-widest mt-0.5">Academic System</p>
+          </div>
+        </div>
       </SidebarHeader>
-      <SidebarContent>
-        {data.navMain.map((item) => (
-          <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {item.items.map((subItem) => (
-                  <SidebarMenuItem key={subItem.title}>
+
+      <SidebarContent className="px-3">
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-3 mt-2">
+            Panel de Control
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menuItems.map((item) => {
+                const isActive = location.pathname.includes(item.url);
+                return (
+                  <SidebarMenuItem key={item.id} className="mb-0.5">
                     <SidebarMenuButton asChild>
-                      <Link to={subItem.url}>{subItem.title}</Link>
+                      <Link
+                        to={item.url}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all font-bold text-xs ${isActive
+                          ? 'bg-slate-800 text-white shadow-sm'
+                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                          }`}
+                      >
+                        <item.icon size={16} />
+                        <span className="tracking-tight">{item.label}</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-        {/* Botón de cerrar sesión */}
-        <div className="mt-auto p-4">
+        <div className="mt-auto px-1 py-4 border-t border-slate-100">
           <Button
             onClick={handleLogout}
-            variant="destructive"
-            className="w-full justify-start bg-purple-600 text-white hover:bg-purple-700"
+            className="w-full bg-rose-50 text-rose-600 px-3 py-2 rounded-lg flex items-center gap-3 font-bold text-xs hover:bg-rose-600 hover:text-white transition-all border-none shadow-none"
           >
-            <LogOut className="mr-2 h-4 w-4" />
-            Cerrar Sesión
+            <LogOut size={16} />
+            <span>Cerrar Sesión</span>
           </Button>
         </div>
       </SidebarContent>

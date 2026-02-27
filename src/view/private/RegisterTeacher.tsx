@@ -83,6 +83,7 @@ export default function RegisterTeacher() {
     direccion: "",
     especialidad: "",
     grado_academico: "",
+    id_periodo: "",
   });
 
   const [cursosAsignados, setCursosAsignados] = useState<CursoAsignado[]>([]);
@@ -92,24 +93,28 @@ export default function RegisterTeacher() {
   const [credenciales, setCredenciales] = useState<Credenciales | null>(null);
 
   const [currentYear, setCurrentYear] = useState<string>("");
+  const [periodos, setPeriodos] = useState<any[]>([]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const initializeYear = async () => {
+    const initializePeriods = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/cuotas/periodos");
-        const data = response.data;
-        if (data) {
-          const list = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
-          if (list.length > 0) {
-            const years = list.map((p: any) => p.anio).sort((a: number, b: number) => b - a);
-            setCurrentYear(years[0].toString());
+        const response = await axios.get("http://localhost:3000/api/promocion/periodos");
+        if (response.data.status) {
+          const periods = response.data.data;
+          setPeriodos(periods);
+
+          const active = periods.find((p: any) => p.activo === 1);
+          if (active) {
+            setCurrentYear(active.anio.toString());
+            setFormData(prev => ({ ...prev, id_periodo: active.id.toString() }));
           }
         }
       } catch (error) {
-        console.error("Error al obtener el año actual:", error);
+        console.error("Error al obtener periodos academicos:", error);
       }
     };
-    initializeYear();
+    initializePeriods();
   }, []);
 
   useEffect(() => {
@@ -131,6 +136,7 @@ export default function RegisterTeacher() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (name === "dni") setSuccessMessage(null);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -141,7 +147,31 @@ export default function RegisterTeacher() {
     }
 
     setSearching(true);
+    setCredenciales(null);
     try {
+      // 1. Intentar búsqueda local
+      const localRes = await axios.get(`http://localhost:3000/api/docente/buscar-local/${formData.dni}`);
+
+      if (localRes.data.success) {
+        const d = localRes.data.data;
+        setFormData((prev) => ({
+          ...prev,
+          nombres: d.nombres || "",
+          apellido_paterno: d.apellido_paterno || "",
+          apellido_materno: d.apellido_materno || "",
+          email: d.email || "",
+          telefono: d.telefono || "",
+          direccion: d.direccion || "",
+          especialidad: d.especialidad || "",
+          grado_academico: d.grado_academico || "",
+          sexo: d.sexo || "M",
+          fecha_nacimiento: d.fecha_nacimiento ? d.fecha_nacimiento.split('T')[0] : "",
+        }));
+        setSuccessMessage("Docente encontrado en el sistema. Seleccione nuevos cursos para el período.");
+        return;
+      }
+
+      // 2. Si no es local, buscar en RENIEC/DNI externo
       const response = await axios.get<DniResponse>(
         `http://localhost:3000/api/dni/buscar-dni/${formData.dni}`
       );
@@ -154,6 +184,7 @@ export default function RegisterTeacher() {
           apellido_paterno: d.first_last_name || d.apellidoPaterno || "",
           apellido_materno: d.second_last_name || d.apellidoMaterno || "",
         }));
+        setSuccessMessage(null);
       }
     } catch (error) {
       console.error("Error al buscar DNI:", error);
@@ -183,6 +214,7 @@ export default function RegisterTeacher() {
     try {
       const payload = {
         ...formData,
+        id_periodo: Number(formData.id_periodo),
         cursos_asignados: cursosAsignados,
       };
 
@@ -206,7 +238,9 @@ export default function RegisterTeacher() {
           direccion: "",
           especialidad: "",
           grado_academico: "",
+          id_periodo: formData.id_periodo, // Mantiene el periodo seleccionado
         });
+        setSuccessMessage(null);
         setCursosAsignados([]);
         fetchDisponibilidad(currentYear);
       }
@@ -223,6 +257,12 @@ export default function RegisterTeacher() {
         <h1 className="text-xl font-semibold text-slate-900">Registro de Docente</h1>
         <p className="text-sm text-slate-600 mt-1">Complete los datos del docente y asigne sus cursos</p>
       </div>
+
+      {successMessage && (
+        <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4 text-sm text-blue-800">
+          {successMessage}
+        </div>
+      )}
 
       {credenciales && (
         <div className="bg-green-50 border border-green-200 rounded p-3 mb-4">
@@ -338,8 +378,8 @@ export default function RegisterTeacher() {
             </div>
           </div>
 
-          {/* Teléfono, Especialidad, Grado Académico */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Teléfono y Dirección */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label className="text-xs font-medium text-slate-700">Teléfono</Label>
               <Input
@@ -348,6 +388,43 @@ export default function RegisterTeacher() {
                 onChange={handleInputChange}
                 className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
               />
+            </div>
+            <div>
+              <Label className="text-xs font-medium text-slate-700">Dirección</Label>
+              <Input
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleInputChange}
+                className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Período Académico, Especialidad, Grado Académico */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <Label className="text-xs font-medium text-slate-700">Período Académico</Label>
+              <Select
+                value={formData.id_periodo}
+                onValueChange={(value) => {
+                  const selected = periodos.find(p => p.id.toString() === value);
+                  if (selected) {
+                    setCurrentYear(selected.anio.toString());
+                    setFormData(prev => ({ ...prev, id_periodo: value }));
+                  }
+                }}
+              >
+                <SelectTrigger className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500">
+                  <SelectValue placeholder="Seleccione período..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {periodos.map((p) => (
+                    <SelectItem key={p.id} value={p.id.toString()} className="text-sm">
+                      Año {p.anio} {p.activo === 1 ? "(Actual)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="text-xs font-medium text-slate-700">Especialidad</Label>
@@ -367,17 +444,6 @@ export default function RegisterTeacher() {
                 className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
               />
             </div>
-          </div>
-
-          {/* Dirección */}
-          <div>
-            <Label className="text-xs font-medium text-slate-700">Dirección</Label>
-            <Input
-              name="direccion"
-              value={formData.direccion}
-              onChange={handleInputChange}
-              className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
-            />
           </div>
 
           {/* Cursos y Grados */}

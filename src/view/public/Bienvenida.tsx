@@ -19,7 +19,7 @@ const Bienvenida = () => {
                 <div className="absolute inset-0 z-0">
                     <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-[#0a0a0c]" />
                     <img
-                        src="https://images.unsplash.com/photo-1523050335456-c38730b0ebf4?auto=format&fit=crop&q=80&w=2000"
+                        src="https://res.cloudinary.com/droodoirh/image/upload/v1772123393/docentes_3_gaiz8x.jpg"
                         alt="Campus atmosphere"
                         className="w-full h-full object-cover opacity-30 grayscale saturate-50 scale-105 animate-slow-zoom"
                     />
@@ -47,7 +47,7 @@ const Bienvenida = () => {
                         <div className="lg:col-span-5 relative group">
                             <div className="relative aspect-[3/4] overflow-hidden rounded-[2rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] bg-slate-100">
                                 <img
-                                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
+                                    src="https://res.cloudinary.com/droodoirh/image/upload/v1772123382/docentes_damas_ldquos.jpg"
                                     alt="Dra. Patricia Vilcapoma - Directora General"
                                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                                 />

@@ -46,7 +46,7 @@ const VisionMision = () => {
                   Nuestra <span className="italic">Misión.</span>
                 </h2>
                 <p className="text-xl text-slate-600 font-light leading-relaxed">
-                  Brindar una educación integral de vanguardia, fundamentada en valores trascendentes y la excelencia académica, para formar líderes éticos que contribuyan al progreso de la sociedad global.
+                  Brindar una educación integral y de excelencia en los niveles inicial, primaria y secundaria, promoviendo el desarrollo académico, ético y emocional de nuestros estudiantes. Formamos líderes críticos, creativos y comprometidos con la sociedad, preparados para enfrentar los desafíos del mundo actual, con valores sólidos y una formación basada en el respeto, la innovación y la sostenibilidad.
                 </p>
               </div>
 
@@ -100,8 +100,8 @@ const VisionMision = () => {
               </h2>
             </div>
 
-            <p className="text-2xl md:text-4xl font-serif italic text-slate-400 leading-tight">
-              "Ser reconocidos como el referente educativo líder en la región, impulsando una cultura de <span className="text-white border-b border-orange-600">innovación constante</span> y formando ciudadanos del mundo capaces de crear un futuro sostenible."
+            <p className="text-2xl md:text-3xl font-serif italic text-slate-400 leading-tight">
+              "Ser reconocidos como un colegio líder en educación de calidad, que inspira a cada estudiante a alcanzar su máximo potencial. Aspiramos a formar ciudadanos globales con una mentalidad inclusiva, capaces de transformar su entorno con conocimiento, valores y responsabilidad social."
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12">

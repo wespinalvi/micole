@@ -12,13 +12,13 @@ const Deporte = () => {
         {
             title: "Fútbol & Vóley",
             desc: "Trabajo en equipo y estrategia en nuestras canchas reglamentarias.",
-            image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=800",
+            image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123382/campo_deprotivp_acozvt.jpg",
             icon: <Activity className="w-8 h-8" />
         },
         {
             title: "Natación",
             desc: "Desarrollo de resistencia y técnica en nuestra piscina semi-olímpica.",
-            image: "https://images.unsplash.com/photo-1530549387634-e5a529b41f5f?auto=format&fit=crop&q=80&w=800",
+            image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123396/natacion_pc1n3u.jpg",
             icon: <Zap className="w-8 h-8" />
         },
         {
@@ -35,7 +35,7 @@ const Deporte = () => {
             <section className="relative h-[85vh] flex items-center overflow-hidden bg-orange-600">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&q=80&w=2000"
+                        src="https://res.cloudinary.com/droodoirh/image/upload/v1772123384/primaria_foto_grupal_deporte_mg1fpu.jpg"
                         alt="Sports and movement"
                         className="w-full h-full object-cover brightness-75 contrast-110 saturate-150 animate-slow-zoom"
                     />

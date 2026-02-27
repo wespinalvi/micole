@@ -12,6 +12,7 @@ import axios from "axios";
 import { Download } from "lucide-react";
 
 interface Curso {
+  id_asignacion?: number;
   curso: string;
   grado: string;
 }
@@ -189,9 +190,9 @@ export default function ListTeacher() {
                   {new Date(docente.fecha_registro).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-2 space-x-1">
-                  {docente.cursos.map((curso) => (
+                  {docente.cursos.map((curso, idx) => (
                     <Badge
-                      key={`${curso.curso}-${curso.grado}`}
+                      key={curso.id_asignacion || `${curso.curso}-${curso.grado}-${idx}`}
                       variant="secondary"
                     >
                       {curso.curso} ({curso.grado})

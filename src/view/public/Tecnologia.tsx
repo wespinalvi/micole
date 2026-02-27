@@ -1,5 +1,5 @@
-import { Laptop, Cpu, Globe, Rocket, Terminal, Code2, ChevronRight, Share2 } from "lucide-react";
-import React, { useState, useEffect } from 'react';
+import { Cpu, Globe, Rocket, Terminal, Code2, ChevronRight, Share2 } from "lucide-react";
+import { useState, useEffect } from 'react';
 
 const Tecnologia = () => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -111,14 +111,14 @@ const Tecnologia = () => {
                 <div className="container mx-auto px-6 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-center">
                         {[
-                            { icon: <Terminal />, t: "Coding Hub", d: "Espacio dedicado al desarrollo de software." },
-                            { icon: <Globe />, t: "E-Learning", d: "Plataformas de clase mundial para el aprendizaje." },
-                            { icon: <Cpu />, t: "Steam Lab", d: "Laboratorios equipados con tecnología de punta." },
-                            { icon: <Rocket />, t: "Startups", d: "Fomentamos el espíritu emprendedor tech." }
+                            { icon: <Terminal size={32} strokeWidth={1.5} />, t: "Coding Hub", d: "Espacio dedicado al desarrollo de software." },
+                            { icon: <Globe size={32} strokeWidth={1.5} />, t: "E-Learning", d: "Plataformas de clase mundial para el aprendizaje." },
+                            { icon: <Cpu size={32} strokeWidth={1.5} />, t: "Steam Lab", d: "Laboratorios equipados con tecnología de punta." },
+                            { icon: <Rocket size={32} strokeWidth={1.5} />, t: "Startups", d: "Fomentamos el espíritu emprendedor tech." }
                         ].map((item, i) => (
                             <div key={i} className="space-y-6 group">
                                 <div className="w-20 h-20 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-all duration-500 shadow-2xl shadow-cyan-500/0 group-hover:shadow-cyan-500/20">
-                                    {React.cloneElement(item.icon as React.ReactElement, { size: 32, strokeWidth: 1.5 })}
+                                    {item.icon}
                                 </div>
                                 <h4 className="text-lg font-bold">{item.t}</h4>
                                 <p className="text-sm text-slate-400 font-light px-4">{item.d}</p>

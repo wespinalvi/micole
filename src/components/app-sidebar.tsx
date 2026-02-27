@@ -76,10 +76,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Lista de Alumnos",
             url: "/dashboard/list-student",
           },
-          // {
-          //   title: "Promoción y Estado",
-          //   url: "/dashboard/promocion-alumnos",
-          // },
+          {
+            title: "Gestión de Grados",
+            url: "/dashboard/promocion-alumnos",
+          },
         ],
       },
       {

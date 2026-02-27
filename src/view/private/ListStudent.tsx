@@ -54,6 +54,12 @@ export default function ListStudent() {
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [yearsAvailable, setYearsAvailable] = useState<Periodo[]>([]);
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
   const [updateMessage, setUpdateMessage] = useState<{
     text: string;
     isSuccess: boolean;
@@ -88,7 +94,7 @@ export default function ListStudent() {
     }, 2000);
   };
 
-  // Filtrar estudiantes por DNI
+  // Filtrar estudiantes por DNI (Localmente sobre los datos de la página actual)
   useEffect(() => {
     if (dniSearch.trim() === "") {
       setFilteredStudents(students);
@@ -102,8 +108,11 @@ export default function ListStudent() {
 
   useEffect(() => {
     fetchYears();
-    fetchStudents();
   }, []);
+
+  useEffect(() => {
+    fetchStudents(1);
+  }, [year, grade, pagination.limit]);
 
   const fetchYears = async () => {
     try {
@@ -116,23 +125,35 @@ export default function ListStudent() {
     }
   };
 
-  const fetchStudents = async () => {
+  const fetchStudents = async (pageToFetch: number = pagination.page) => {
     if (!year || !grade) return;
 
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://localhost:3000/api/alumno/lista-alumnos/${year}/${grade}`
+        `http://localhost:3000/api/alumno/lista-alumnos/${year}/${grade}`,
+        {
+          params: {
+            page: pageToFetch,
+            limit: pagination.limit
+          }
+        }
       );
-      console.log("Respuesta de la API:", response.data);
-      if (response.data) {
-        setStudents(response.data);
-        setFilteredStudents(response.data);
+
+      if (response.data.success) {
+        setStudents(response.data.data || []);
+        setPagination(response.data.pagination);
       }
     } catch (error) {
       console.error("Error al cargar estudiantes:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      fetchStudents(newPage);
     }
   };
 
@@ -183,7 +204,11 @@ export default function ListStudent() {
             className="w-48 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
           />
         </div>
-        <Button className="mt-2 h-9" onClick={fetchStudents} disabled={loading}>
+        <Button
+          className="mt-2 h-9"
+          onClick={() => fetchStudents(1)}
+          disabled={loading}
+        >
           {loading ? "Cargando..." : "Buscar"}
         </Button>
       </div>
@@ -199,12 +224,15 @@ export default function ListStudent() {
       )}
 
       {/* Información de resultados */}
-      {dniSearch.trim() !== "" && (
-        <div className="text-sm text-gray-600">
-          Mostrando {filteredStudents.length} de {students.length} estudiantes
+      <div className="flex justify-between items-center text-sm text-gray-600">
+        <div>
+          Mostrando {students.length} de {pagination.total} estudiantes
           {dniSearch.trim() !== "" && ` (filtrados por DNI: ${dniSearch})`}
         </div>
-      )}
+        <div className="flex items-center gap-2 font-medium">
+          Página {pagination.page} de {pagination.totalPages || 1}
+        </div>
+      </div>
 
       {/* Tabla */}
       <div className="border rounded-md overflow-x-auto">
@@ -230,91 +258,136 @@ export default function ListStudent() {
               </TableRow>
             ) : (
               filteredStudents.map((student) => (
-                <>
-                  <TableRow key={student.alumno_id}>
-                    <TableCell>{student.alumno_dni}</TableCell>
-                    <TableCell>
-                      {student.alumno_nombre} {student.alumno_apellido_paterno}{" "}
-                      {student.alumno_apellido_materno}
-                    </TableCell>
-                    <TableCell>{student.grado}</TableCell>
-                    <TableCell>
-                      {new Date(student.fecha_matricula).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setShowParent(
-                            showParent === student.alumno_id
-                              ? null
-                              : student.alumno_id
-                          )
-                        }
-                      >
-                        {showParent === student.alumno_id
-                          ? "Ocultar Apoderados"
-                          : "Ver Apoderados"}
-                      </Button>
-                      <EditarDatosButton
-                        variant="outline"
-                        size="sm"
-                        className="text-[#3E328C] border-[#3E328C] hover:bg-[#3E328C] hover:text-white"
-                        alumnoId={student.alumno_id}
-                        alumnoData={{
-                          dni: student.alumno_dni,
-                          nombre: student.alumno_nombre,
-                          ap_p: student.alumno_apellido_paterno,
-                          ap_m: student.alumno_apellido_materno,
-                          fecha_nacimiento: student.fecha_nacimiento
-                        }}
-                        onDataUpdated={updateStudentInList}
-                      >
-                        Editar
-                      </EditarDatosButton>
-                    </TableCell>
-                  </TableRow>
-
-                  {showParent === student.alumno_id && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        className="bg-muted px-6 py-4 text-sm"
-                      >
-                        <div className="space-y-4">
-                          <h4 className="font-semibold text-gray-700">Información de Apoderados:</h4>
-                          {student.apoderados && student.apoderados.length > 0 ? (
-                            <div className="grid gap-4 md:grid-cols-2">
-                              {student.apoderados.map((apoderado, index) => (
-                                <div key={index} className="bg-white p-3 rounded border shadow-sm">
-                                  <div className="font-medium text-primary mb-1">{apoderado.parentesco}</div>
-                                  <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
-                                    <span className="text-gray-500">Nombre:</span>
-                                    <span>{apoderado.nombre} {apoderado.apellido_paterno} {apoderado.apellido_materno}</span>
-
-                                    <span className="text-gray-500">DNI:</span>
-                                    <span>{apoderado.dni}</span>
-
-                                    <span className="text-gray-500">Teléfono:</span>
-                                    <span>{apoderado.telefono || "No registrado"}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-gray-500 italic">No hay apoderados registrados para este alumno.</div>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </>
+                <CardGroup key={student.alumno_id} student={student} showParent={showParent} setShowParent={setShowParent} updateStudentInList={updateStudentInList} />
               ))
             )}
           </TableBody>
         </Table>
       </div>
+
+      {/* Controles de Paginación */}
+      {pagination.totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(pagination.page - 1)}
+            disabled={pagination.page === 1 || loading}
+          >
+            Anterior
+          </Button>
+
+          <div className="flex gap-1">
+            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+              <Button
+                key={p}
+                variant={pagination.page === p ? "default" : "outline"}
+                size="sm"
+                className="w-8 h-8 p-0"
+                onClick={() => handlePageChange(p)}
+                disabled={loading}
+              >
+                {p}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(pagination.page + 1)}
+            disabled={pagination.page === pagination.totalPages || loading}
+          >
+            Siguiente
+          </Button>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Subcomponente para organizar el Fragment/Rows y evitar problemas de Key
+function CardGroup({ student, showParent, setShowParent, updateStudentInList }: any) {
+  return (
+    <>
+      <TableRow>
+        <TableCell>{student.alumno_dni}</TableCell>
+        <TableCell>
+          {student.alumno_nombre} {student.alumno_apellido_paterno}{" "}
+          {student.alumno_apellido_materno}
+        </TableCell>
+        <TableCell>{student.grado}</TableCell>
+        <TableCell>
+          {new Date(student.fecha_matricula).toLocaleDateString()}
+        </TableCell>
+        <TableCell className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setShowParent(
+                showParent === student.alumno_id
+                  ? null
+                  : student.alumno_id
+              )
+            }
+          >
+            {showParent === student.alumno_id
+              ? "Ocultar Apoderados"
+              : "Ver Apoderados"}
+          </Button>
+          <EditarDatosButton
+            variant="outline"
+            size="sm"
+            className="text-[#3E328C] border-[#3E328C] hover:bg-[#3E328C] hover:text-white"
+            alumnoId={student.alumno_id}
+            alumnoData={{
+              dni: student.alumno_dni,
+              nombre: student.alumno_nombre,
+              ap_p: student.alumno_apellido_paterno,
+              ap_m: student.alumno_apellido_materno,
+              fecha_nacimiento: student.fecha_nacimiento
+            }}
+            onDataUpdated={updateStudentInList}
+          >
+            Editar
+          </EditarDatosButton>
+        </TableCell>
+      </TableRow>
+
+      {showParent === student.alumno_id && (
+        <TableRow>
+          <TableCell
+            colSpan={5}
+            className="bg-muted px-6 py-4 text-sm"
+          >
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-700">Información de Apoderados:</h4>
+              {student.apoderados && student.apoderados.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {student.apoderados.map((apoderado: any, index: number) => (
+                    <div key={index} className="bg-white p-3 rounded border shadow-sm">
+                      <div className="font-medium text-primary mb-1">{apoderado.parentesco}</div>
+                      <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
+                        <span className="text-gray-500">Nombre:</span>
+                        <span>{apoderado.nombre} {apoderado.apellido_paterno} {apoderado.apellido_materno}</span>
+
+                        <span className="text-gray-500">DNI:</span>
+                        <span>{apoderado.dni}</span>
+
+                        <span className="text-gray-500">Teléfono:</span>
+                        <span>{apoderado.telefono || "No registrado"}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-gray-500 italic">No hay apoderados registrados para este alumno.</div>
+              )}
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+    </>
   );
 }

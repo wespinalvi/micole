@@ -99,7 +99,7 @@ const HomePage = () => {
         className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1)] py-2" : "bg-white py-4"
           }`}
       >
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-8">
           {/* Logo */}
           <Link to="/" className="flex items-center shrink-0">
             <img

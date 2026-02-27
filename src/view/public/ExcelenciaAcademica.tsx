@@ -1,5 +1,5 @@
 import { Trophy, BookOpen, Microscope, Globe, BarChart3, GraduationCap, ArrowRight, CheckCircle2 } from "lucide-react";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const ExcelenciaAcademica = () => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -13,15 +13,15 @@ const ExcelenciaAcademica = () => {
             title: "Nivel Primaria",
             desc: "Donde la curiosidad se convierte en competencia. Fomentamos el pensamiento lógico y la expresión creativa en un entorno bilingüe.",
             icon: <BookOpen className="w-8 h-8" />,
-            metrics: ["Bilingüismo 50%", "STEAM Core", "Mentoring"],
-            image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1200"
+            metrics: ["Ambientes seguros", "Maestros de vocación", "Programas integrales"],
+            image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123384/primaria_foto_grupal_deporte_mg1fpu.jpg"
         },
         {
             title: "Nivel Secundaria",
             desc: "Preparación de alto rendimiento para el mundo real. Enfoque en liderazgo, investigación científica y preparación pre-universitaria.",
             icon: <GraduationCap className="w-8 h-8" />,
-            metrics: ["IB Standards", "Tech Lab", "University Path"],
-            image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200"
+            metrics: ["Prep. Preuniversitaria", "Profesores con vocación", "Tecnología de Vanguardia"],
+            image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123389/secundaria_s8qetc.jpg"
         }
     ];
 
@@ -31,7 +31,7 @@ const ExcelenciaAcademica = () => {
             <section className="relative h-[80vh] flex items-center overflow-hidden bg-slate-900">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://images.unsplash.com/photo-1513258496099-48168024adb0?auto=format&fit=crop&q=80&w=2000"
+                        src="https://res.cloudinary.com/droodoirh/image/upload/v1772123397/postualacion_auniverdades_alumnos_del_cole_crayons_itzilj.jpg"
                         alt="Academic excellence"
                         className="w-full h-full object-cover brightness-50 contrast-125 scale-105 animate-slow-zoom"
                     />
@@ -60,14 +60,14 @@ const ExcelenciaAcademica = () => {
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                         {[
-                            { icon: <Microscope />, title: "Investigación", d: "Fomentamos el espíritu científico desde la observación inicial." },
-                            { icon: <Globe />, title: "Bilingüismo", d: "Certificaciones internacionales que avalan el dominio del inglés." },
-                            { icon: <BarChart3 />, title: "Analítica", d: "Seguimiento personalizado del progreso académico mediante data." },
-                            { icon: <Trophy />, title: "Éxito", d: "Altos índices de ingreso a las universidades más prestigiosas." }
+                            { icon: <Microscope size={24} />, title: "Investigación", d: "Fomentamos el espíritu científico desde la observación inicial." },
+                            { icon: <Globe size={24} />, title: "Bilingüismo", d: "Certificaciones internacionales que avalan el dominio del inglés." },
+                            { icon: <BarChart3 size={24} />, title: "Analítica", d: "Seguimiento personalizado del progreso académico mediante data." },
+                            { icon: <Trophy size={24} />, title: "Éxito", d: "Altos índices de ingreso a las universidades más prestigiosas." }
                         ].map((item, i) => (
                             <div key={i} className="space-y-4 group">
                                 <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-orange-600 shadow-sm group-hover:bg-orange-600 group-hover:text-white transition-all duration-500">
-                                    {React.cloneElement(item.icon as React.ReactElement, { size: 24 })}
+                                    {item.icon}
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900">{item.title}</h3>
                                 <p className="text-sm text-slate-500 leading-relaxed font-light">{item.d}</p>

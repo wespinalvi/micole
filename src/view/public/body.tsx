@@ -16,7 +16,7 @@ const Body = () => {
       name: "Inicial",
       age: "3 — 5 años",
       description: "Donde la curiosidad se transforma en conocimiento a través del juego dirigido y el afecto.",
-      image: "https://scontent.flim22-1.fna.fbcdn.net/v/t39.30808-6/607612405_1393774129204838_1077893171308163344_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeGkKK603AAmYxeGF1I3050tagIEAWcgtkpqAgQBZyC2SkQAMsEbHeSGjVp_d6BjsnZhe0VAcI0dVh1-Ul4CG4vA&_nc_ohc=QIdOYR5of5kQ7kNvwE-zaF6&_nc_oc=AdnyScCuuCGxfqe6nBmaAsZb6JygZbrsJcYHFZ_HIqAZ-qaftQReawYYMBQHAwVsGB0&_nc_zt=23&_nc_ht=scontent.flim22-1.fna&_nc_gid=gKFCmzReEYLyTYCFJFP_2A&oh=00_AfvDZDKbKHFMriHaEZ389D3_agBF5OAMm13D2el5sELeXA&oe=699A9AFA",
+      image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123383/Inicial_tdfx88.jpg",
       color: "#10b981",
       path: "/inicial"
     },
@@ -25,8 +25,8 @@ const Body = () => {
       tag: "Crecimiento integral",
       name: "Primaria",
       age: "6 — 12 años",
-      description: "Construyendo las bases del pensamiento crítico y la autonomía en un entorno bilingüe.",
-      image: "https://scontent.flim22-1.fna.fbcdn.net/v/t39.30808-6/607843865_1393754615873456_6747360168549501012_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeGKerXTlu-twbKV_TDk7Ht-OcrEAAAUlTI5ysQAABSVMk08ydZSp22KYJOBD33dxw40DFnderI7I1vmmVji7rYw&_nc_ohc=Qm-1aaxvcjEQ7kNvwFcjn-6&_nc_oc=AdmzaSG4VjpO4hdGlim851f1ZT9kZNFEnC1cZJSD0oeebIu2JChXIzkrWkxXW5ea_NY&_nc_zt=23&_nc_ht=scontent.flim22-1.fna&_nc_gid=HxkOr4GqeL6J4-8tqwHTVQ&oh=00_AfsyhZmj7MItuJ7VhOFpk9Ln4UWX14ekePry0ewTa87VEg&oe=699AA1DB",
+      description: "Ambientes seguros y acogedores para fomentar el aprendizaje y la creatividad de nuestros alumnos.",
+      image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123386/primaria_b4a9rl.jpg",
       color: "#3b82f6",
       path: "/excelencia"
     },
@@ -35,8 +35,8 @@ const Body = () => {
       tag: "Visión de futuro",
       name: "Secundaria",
       age: "12 — 17 años",
-      description: "Preparación académica de alto rendimiento con enfoque en liderazgo y proyectos globales.",
-      image: "https://scontent.flim22-1.fna.fbcdn.net/v/t39.30808-6/601436941_1389175849664666_3409070667327536129_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeGNZuA8ED9XYXLe8tUMb5wURvHQ92Ede09G8dD3YR17T2MC8jUwKZkqHHhmWJ-wfoE5JJVhZ3ww9HPsFjSC2gGQ&_nc_ohc=g0WJlldyG4oQ7kNvwGOmNls&_nc_oc=Adnmh9-WFnTkGx7JjQUOSd4LpU3XyCPlnlFu2Zlw0miLEtVKzdhS_1sMTIFCV0b9yh0&_nc_zt=23&_nc_ht=scontent.flim22-1.fna&_nc_gid=QSaTtz_3uS91mBjcn-x6AQ&oh=00_AftkqTNrIapJWMbmZdhQj0EvdBDeN-QOgLGB-sknVCPY7w&oe=699A9231",
+      description: "Desbloquea tu potencial, descubre tu futuro con nuestra preparación académica de alto rendimiento.",
+      image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123389/secundaria_s8qetc.jpg",
       color: "#8b5cf6",
       path: "/excelencia"
     }
@@ -193,7 +193,7 @@ const Body = () => {
             <div className="relative w-full lg:w-1/2">
               <div className="relative aspect-[4/5] md:aspect-square overflow-hidden rounded-2xl shadow-2xl">
                 <img
-                  src="https://scontent.flim22-1.fna.fbcdn.net/v/t39.30808-6/536268515_1291017672813818_5771292147782689872_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeFpgkj3WeHWN_E2BYO-n-ntS8k5iFdJdl1LyTmIV0l2XeQMC2TXrzyXfjOoB2C0V7TBngxG2pdjoGyxYRdRVGoC&_nc_ohc=Nv8ElENt60UQ7kNvwEb9hGE&_nc_oc=AdlHGIjJoX_MgyCgZfTpx-7c4H7I4nmeLdaPAzUdSL-lfreJSKbGb8eGWSUVTE8gqb8&_nc_zt=23&_nc_ht=scontent.flim22-1.fna&_nc_gid=I192-TU3ZqT7xvUOpyo9MQ&oh=00_AfuFoPOiwSdt3xz0olRe4f-KkmneC6VH7_c1a4J1s3DGMQ&oe=699A866E"
+                  src="https://res.cloudinary.com/droodoirh/image/upload/v1772123391/fot_grupal_fzlpng.jpg"
                   alt="Educación colaborativa"
                   className="w-full h-full object-cover grayscale-[20%] contrast-[1.1]"
                 />
@@ -465,14 +465,14 @@ const Body = () => {
           {/* Card Principal - Biblioteca */}
           <div className="md:col-span-7 relative overflow-hidden rounded-[40px] group shadow-2xl border border-white/20">
             <img
-              src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=80&w=1200"
+              src="https://res.cloudinary.com/droodoirh/image/upload/v1772123384/labortatios_de_cincia_hraicy.jpg"
               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
               alt="Biblioteca moderna"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
             <div className="absolute bottom-12 left-12 text-white text-left">
               <p className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3">Centro de Aprendizaje</p>
-              <h3 className="text-4xl md:text-5xl font-bold font-serif leading-tight">Biblioteca del <br />Mañana</h3>
+              <h3 className="text-4xl md:text-5xl font-bold font-serif leading-tight">Laboratorios de <br />Ciencia</h3>
             </div>
           </div>
 
@@ -480,7 +480,7 @@ const Body = () => {
           <div className="md:col-span-5 flex flex-col gap-8 text-white">
             <div className="h-1/2 relative overflow-hidden rounded-[40px] group shadow-xl">
               <img
-                src="https://scontent.flim22-1.fna.fbcdn.net/v/t39.30808-6/574609225_1348386233743628_4410908790404705450_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeEKeC5SCDF8_zgfwj3ePdfXfg_4NoJrJRt-D_g2gmslG9Iw2Jr5Z-g7QHY8Y3bt0wTND3ugKzIZLueH0n3OZ_dx&_nc_ohc=4Odmp0hUZXoQ7kNvwH7cauY&_nc_oc=AdlTz6v2PoZnGxtBHdZDIBzUFaGZaTfLcRWQpoP4w2DYU4_3bP2gZoQ_8kB9l-Pa69Q&_nc_zt=23&_nc_ht=scontent.flim22-1.fna&_nc_gid=2D5Ec6JsgOULgKXntP0PIQ&oh=00_Aftt2DK_6kAAzOdQRqrGQp6V6X7lHXoUKEXX7A3ZWGkNog&oe=699A9FE5"
+                src="https://res.cloudinary.com/droodoirh/image/upload/v1772123382/campo_deprotivp_acozvt.jpg"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 alt="Campus deportivo"
               />
@@ -493,7 +493,7 @@ const Body = () => {
             <div className="h-1/2 grid grid-cols-2 gap-8 text-slate-900">
               <div className="relative overflow-hidden rounded-[40px] group shadow-lg">
                 <img
-                  src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=400"
+                  src="https://res.cloudinary.com/droodoirh/image/upload/v1772123383/docentes_kyqyyu.jpg"
                   className="w-full h-full object-cover transition-transform group-hover:scale-110"
                   alt="Aulas equipadas"
                 />
@@ -564,7 +564,7 @@ const Body = () => {
               {/* Marco de Imagen tipo Galería de Arte */}
               <div className="relative w-full h-full p-8 bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] rounded-2xl transform rotate-3 hover:rotate-0 transition-transform duration-700">
                 <img
-                  src="https://scontent.flim22-1.fna.fbcdn.net/v/t39.30808-6/523492449_1265930268655892_6450876978158931345_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeFbU_GuiWv8J9PwNuUwGzubbA-m4R-KsvNsD6bhH4qy82H8wU85OCAzrMFJB2PLCLEG1zeDcsFH97jOIjENeQMm&_nc_ohc=uURjEyDry6IQ7kNvwHpBKsv&_nc_oc=AdlFlpCNEfsFOYK2S5Vy43d2DUHiSItIVOWMBucAO5rAeYrGqU3NBu1pvWh7pihEMgg&_nc_zt=23&_nc_ht=scontent.flim22-1.fna&_nc_gid=3kUiM-nD6NrOdgWm9pD2LA&oh=00_AfvzbsuyePUK3FznmI6w5jGSxcJNuJ03kh63a-PM_P0vOQ&oe=699A85EC"
+                  src="https://res.cloudinary.com/droodoirh/image/upload/v1772123396/graduada_mujer_zullaq.jpg"
                   className="w-full h-full object-cover rounded-lg"
                   alt="Estudiante"
                 />

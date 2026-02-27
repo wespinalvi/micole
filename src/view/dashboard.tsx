@@ -56,6 +56,14 @@ export default function Page() {
               })}
             </BreadcrumbList>
           </Breadcrumb>
+          <div className="ml-auto flex items-center gap-4">
+            <div id="header-right-slot" className="flex items-center gap-4">
+              {/* Slot para búsqueda específica de cada página */}
+            </div>
+            <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center overflow-hidden shrink-0">
+              <span className="text-xs font-bold text-slate-600">AD</span>
+            </div>
+          </div>
         </header>
         <main>
           <Outlet />

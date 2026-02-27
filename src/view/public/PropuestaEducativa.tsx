@@ -14,7 +14,7 @@ const PropuestaEducativa = () => {
             date: "12 de Febrero, 2026",
             title: "El impacto de la Inteligencia Artificial en las aulas de primaria.",
             desc: "Descubra cómo estamos utilizando herramientas de IA generativa para personalizar el aprendizaje.",
-            image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800",
+            image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123382/1puesto_pblcfa.jpg",
             readTime: "5 min"
         },
         {
@@ -30,7 +30,7 @@ const PropuestaEducativa = () => {
             date: "28 de Enero, 2026",
             title: "Aprendizaje basado en proyectos vs. Enseñanza tradicional.",
             desc: "Por qué el ABP está revolucionando la forma en que los alumnos retienen el conocimiento.",
-            image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
+            image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123391/fot_grupal_fzlpng.jpg",
             readTime: "6 min"
         }
     ];
@@ -59,7 +59,7 @@ const PropuestaEducativa = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden rounded-[3rem] shadow-2xl bg-white">
                             <div className="lg:col-span-7 h-[50vh] lg:h-auto overflow-hidden">
                                 <img
-                                    src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1200"
+                                    src="https://res.cloudinary.com/droodoirh/image/upload/v1772123384/entrga_de_diplomas_alumnos_jd3dfe.jpg"
                                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
                                     alt="Featured"
                                 />

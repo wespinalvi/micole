@@ -13,13 +13,13 @@ const ArteCultura = () => {
             title: "Artes Visuales",
             desc: "Exploración de técnicas clásicas y contemporáneas para plasmar visiones únicas del mundo.",
             icon: <Palette className="w-8 h-8" />,
-            image: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&q=80&w=800"
+            image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123396/pinturas_alumnos_lhvn3g.jpg"
         },
         {
             title: "Artes Escénicas",
             desc: "Teatro y danza como canales de expresión corporal, confianza y conexión emocional.",
             icon: <Theater className="w-8 h-8" />,
-            image: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&q=80&w=800"
+            image: "https://res.cloudinary.com/droodoirh/image/upload/v1772123389/danzas_xyappt.jpg"
         },
         {
             title: "Música & Coro",
@@ -35,7 +35,7 @@ const ArteCultura = () => {
             <section className="relative h-[80vh] flex items-center overflow-hidden bg-slate-900">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=2000"
+                        src="https://res.cloudinary.com/droodoirh/image/upload/v1772123382/danza_jcqpvb.jpg"
                         alt="Arts and culture"
                         className="w-full h-full object-cover brightness-50 contrast-125 saturate-50 animate-slow-zoom"
                     />

@@ -1,25 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/axios";
-import { Card, CardContent } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+  FileText,
+  Download,
+  Search,
+  Calendar,
+  ChevronDown,
+  Clock
+} from "lucide-react";
 import { format } from "date-fns";
 
 interface Asistencia {
@@ -56,16 +44,11 @@ export default function HistorialAsistencia() {
 
   const ANIO_ACTUAL = "2026";
 
-  const getInitials = (nombre: string, ap_p: string) => {
-    return `${nombre[0]}${ap_p[0]}`.toUpperCase();
-  };
-
   useEffect(() => {
     const fetchAsignaciones = async () => {
       try {
         const { data } = await api.get(`/docente/mis-asignaciones-alumnos/${ANIO_ACTUAL}`);
         if (data.success) setAsignaciones(data.data || []);
-        else setAsignaciones([]);
       } catch { setAsignaciones([]); }
     };
     fetchAsignaciones();
@@ -77,7 +60,7 @@ export default function HistorialAsistencia() {
 
   const asignacionesFiltradas = grado ? (asignaciones || []).filter(a => a.id_grado.toString() === grado) : (asignaciones || []);
 
-  const handleBuscar = async () => {
+  const handleBuscar = useCallback(async () => {
     setError("");
     setLoading(true);
     try {
@@ -88,182 +71,208 @@ export default function HistorialAsistencia() {
       const { data } = await api.get("/docente/listar-asistencias", { params });
       if (data.success) {
         setAsistencias(data.data);
-        if (data.data.length === 0) setError("No se encontraron registros para estos filtros.");
       } else {
         setAsistencias([]);
         setError(data.message || "No se encontraron registros.");
       }
     } catch {
-      setError("Error al conectar con el servidor.");
+      setError("Error de conexión");
       setAsistencias([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [fecha, grado, curso]);
+
+  useEffect(() => {
+    if (fecha || grado || curso) {
+      handleBuscar();
+    }
+  }, [handleBuscar]);
 
   const stats = {
     total: asistencias.length,
     presentes: asistencias.filter(a => a.estado === "Presente").length,
-    faltas: asistencias.filter(a => a.estado === "Ausente").length
+    ausentes: asistencias.filter(a => a.estado === "Ausente").length
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-4 max-w-7xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">Historial de Asistencia</h1>
-          <p className="text-slate-500 text-sm">Consulta los registros de asistencia por fecha y curso</p>
+    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500 pb-8">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+            Historial de Asistencias
+          </h1>
+          <div className="flex items-center gap-2 mt-1">
+            <Calendar size={13} className="text-slate-400" />
+            <span className="text-xs text-slate-500 font-medium tracking-tight">Registro histórico por curso y ciclo académico</span>
+            <span className="w-1 h-1 rounded-full bg-slate-200 mx-1" />
+            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Periodo {ANIO_ACTUAL}</span>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <div className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg flex flex-col items-center min-w-[65px] shadow-sm">
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Registros</span>
+            <span className="text-base font-bold text-slate-800 leading-none">{stats.total}</span>
+          </div>
+          <div className="bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg flex flex-col items-center min-w-[65px] shadow-sm">
+            <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-tighter">Puntuales</span>
+            <span className="text-base font-bold text-emerald-700 leading-none">{stats.presentes}</span>
+          </div>
+          <div className="bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-lg flex flex-col items-center min-w-[65px] shadow-sm">
+            <span className="text-[9px] font-bold text-rose-600 uppercase tracking-tighter">Faltas</span>
+            <span className="text-base font-bold text-rose-700 leading-none">{stats.ausentes}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters Bar */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-end gap-4">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-tight ml-0.5">Fecha</label>
+            <div className="relative">
+              <input
+                type="date"
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-tight ml-0.5">Grado Académico</label>
+            <div className="relative">
+              <select
+                value={grado}
+                onChange={(e) => {
+                  setGrado(e.target.value);
+                  setCurso("");
+                }}
+                className="w-full appearance-none px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+              >
+                <option value="">Todos los grados</option>
+                {gradosDisponibles.map(g => (
+                  <option key={g.id} value={g.id.toString()}>{g.nombre}</option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-tight ml-0.5">Asignatura</label>
+            <div className="relative">
+              <select
+                value={curso}
+                onChange={(e) => setCurso(e.target.value)}
+                className="w-full appearance-none px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+              >
+                <option value="">Todas las materias</option>
+                {asignacionesFiltradas.map(a => (
+                  <option key={a.id_asignacion} value={a.id_curso.toString()}>
+                    {a.curso}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={handleBuscar}
+          disabled={loading}
+          className="bg-slate-800 text-white px-6 py-2 rounded-lg font-bold text-xs shadow-sm flex items-center gap-2 h-10 hover:bg-slate-900 transition-all shrink-0 uppercase tracking-wider"
+        >
+          {loading ? "..." : <><Search size={14} /> <span>Consultar</span></>}
+        </button>
+      </div>
+
+      {/* Table Content */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Registros Consolidados</h2>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Actualizado</span>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50/30 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-50">
+              <tr>
+                <th className="px-6 py-3">Estudiante</th>
+                <th className="px-6 py-3 text-center">Estado</th>
+                <th className="px-6 py-3 text-center">Marcaje</th>
+                <th className="px-6 py-3">Observaciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="py-20 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="h-6 w-6 border-2 border-slate-100 border-t-indigo-500 rounded-full animate-spin" />
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest tracking-tighter">Procesando...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : asistencias.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-20 text-center">
+                    <div className="flex flex-col items-center text-slate-300">
+                      <FileText className="h-10 w-10 opacity-10 mb-2" />
+                      <p className="text-xs font-bold uppercase tracking-widest">{error || "Seleccione filtros para mostrar datos"}</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                asistencias.map((a) => (
+                  <tr key={a.id} className="hover:bg-slate-50/20 transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded bg-slate-50 border border-slate-100 flex items-center justify-center font-bold text-slate-400 text-[10px]">
+                          {a.nombre[0]}{a.ap_p[0]}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-700 leading-tight group-hover:text-indigo-600 transition-colors">{a.nombre} {a.ap_p}</span>
+                          <span className="text-[10px] font-medium text-slate-400">ID Secundario: {a.dni}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border shadow-sm ${a.estado === "Presente" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"}`}>
+                          {a.estado}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-1.5 text-slate-500 font-bold text-xs">
+                        <Clock size={12} className="text-amber-500" />
+                        {a.hora_llegada || "--:--"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-xs text-slate-400 font-medium italic truncate max-w-[200px]">{a.observaciones || "---"}</p>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
         {asistencias.length > 0 && (
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-2 rounded-lg">
-            <div className="px-3 py-1.5 bg-white rounded border border-slate-100 flex flex-col items-center min-w-[60px]">
-              <span className="text-[9px] font-medium text-slate-500 uppercase">Total</span>
-              <span className="text-base font-semibold text-slate-700">{stats.total}</span>
-            </div>
-            <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 flex flex-col items-center rounded min-w-[60px]">
-              <span className="text-[9px] font-medium text-emerald-600 uppercase">Pres.</span>
-              <span className="text-base font-semibold text-emerald-700">{stats.presentes}</span>
-            </div>
-            <div className="px-3 py-1.5 bg-rose-50 border border-rose-200 flex flex-col items-center rounded min-w-[60px]">
-              <span className="text-[9px] font-medium text-rose-600 uppercase">Aus.</span>
-              <span className="text-base font-semibold text-rose-700">{stats.faltas}</span>
-            </div>
+          <div className="p-4 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center">
+            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic">Archivo MICole System © v2.0</p>
+            <button className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 hover:text-slate-800 transition-all uppercase tracking-wider">
+              <Download size={13} /> Descargar Reporte
+            </button>
           </div>
         )}
       </div>
-
-      <Card className="border border-slate-200 shadow-sm">
-        <CardContent className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-600">Fecha</label>
-              <Input
-                type="date"
-                value={fecha}
-                onChange={e => setFecha(e.target.value)}
-                className="h-9 text-sm"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-600">Grado</label>
-              <Select value={grado} onValueChange={setGrado}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder="Seleccionar grado" />
-                </SelectTrigger>
-                <SelectContent>
-                  {gradosDisponibles.map(g => (
-                    <SelectItem key={g.id as number} value={(g.id as number).toString()}>{g.nombre as string}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-600">Asignatura</label>
-              <Select value={curso} onValueChange={setCurso}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder="Seleccionar curso" />
-                </SelectTrigger>
-                <SelectContent>
-                  {asignacionesFiltradas.map(a => (
-                    <SelectItem key={a.id_asignacion} value={a.id_curso.toString()}>{a.curso}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-end">
-              <Button
-                onClick={handleBuscar}
-                disabled={loading}
-                className="w-full h-9 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium"
-              >
-                {loading ? (
-                  <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                ) : (
-                  <Search className="h-3.5 w-3.5 mr-2" />
-                )}
-                {loading ? "Buscando" : "Consultar"}
-              </Button>
-            </div>
-          </div>
-
-          <div className="border border-slate-200 rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader className="bg-slate-50">
-                <TableRow>
-                  <TableHead className="h-10 font-medium text-xs text-slate-600">Estudiante</TableHead>
-                  <TableHead className="h-10 font-medium text-xs text-slate-600 text-center">Estado</TableHead>
-                  <TableHead className="h-10 font-medium text-xs text-slate-600 text-center">Hora</TableHead>
-                  <TableHead className="h-10 font-medium text-xs text-slate-600">Observaciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {asistencias.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-16">
-                      <FileText className="h-10 w-10 text-slate-300 mx-auto mb-2" />
-                      <p className="text-slate-400 font-medium text-sm">
-                        {error || "Especifique los filtros para mostrar resultados"}
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  asistencias.map(a => (
-                    <TableRow key={a.id} className="hover:bg-slate-50">
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-medium text-slate-600">
-                            {getInitials(a.nombre, a.ap_p)}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="font-medium text-slate-700 text-sm">{`${a.nombre} ${a.ap_p} ${a.ap_m}`}</span>
-                            <span className="text-xs text-slate-400">DNI: {a.dni}</span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          className={`px-2 py-0.5 text-xs font-medium ${a.estado === "Presente"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"
-                            }`}
-                        >
-                          {a.estado}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="text-xs font-medium text-slate-600">
-                          {a.hora_llegada || "--:--:--"}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <p className="text-slate-500 text-xs truncate max-w-[200px]">
-                          {a.observaciones || "Sin observaciones"}
-                        </p>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          {asistencias.length > 0 && (
-            <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <span className="text-xs text-slate-400 italic">
-                Reporte generado el {format(new Date(), "dd/MM/yyyy HH:mm")}
-              </span>
-
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto h-9 px-4 text-xs font-medium"
-              >
-                <Download className="h-3.5 w-3.5 mr-2" /> Exportar Reporte
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
