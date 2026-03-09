@@ -31,8 +31,19 @@ export default function Login() {
         }
       );
 
-      const token = response.data.token;
-      let roleId = response.data.roleId || response.data.role || (response.data.user && response.data.user.roleId);
+      const token = response.data.token || response.data.data?.token;
+      let roleId =
+        response.data.roleId ||
+        response.data.role ||
+        response.data.data?.roleId ||
+        response.data.data?.role ||
+        (response.data.user && response.data.user.roleId);
+
+      if (!token) {
+        setError("Error: El servidor no devolvió un token de acceso.");
+        setIsLoading(false);
+        return;
+      }
 
       login(token, roleId);
       if (roleId === 1) {
@@ -43,24 +54,42 @@ export default function Login() {
         navigate("/");
       }
     } catch (error: unknown) {
+      console.error("Error en login:", error);
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { status: number; data: { message?: string; change_password_required?: boolean; token?: string; roleId?: number } } };
+        const axiosError = error as {
+          response: {
+            status: number;
+            data: {
+              message?: string;
+              change_password_required?: boolean;
+              cambiar_password?: boolean;
+              token?: string;
+              roleId?: number;
+              data?: { token?: string; roleId?: number }
+            }
+          }
+        };
         const { status, data } = axiosError.response;
 
         // Check if password change is required (by flag or message)
         const requiresPasswordChange =
+          data.cambiar_password ||
           data.change_password_required ||
           (data.message && data.message.toLowerCase().includes('debe cambiar su contraseña'));
 
         if ((status === 403 || status === 401) && requiresPasswordChange) {
-          if (data.token) {
-            login(data.token, data.roleId || null);
+          const tempToken = data.token || data.data?.token;
+          const tempRoleId = data.roleId || data.data?.roleId;
+
+          if (tempToken) {
+            // Guardamos el token para que la página de cambio de contraseña lo use
+            login(tempToken, tempRoleId || null);
           }
           // Redirect immediately without showing error
           navigate("/change-password");
           return;
         }
-        setError(data.message || "Credenciales incorrectas");
+        setError(data.message || "Credenciales incorrectas (400)");
       } else {
         setError("Error de conexión con el servidor");
       }
@@ -112,9 +141,8 @@ export default function Login() {
               </div>
             )}
 
-            {/* Input Usuario */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-700">Usuario</label>
+              <label className="text-xs font-medium text-slate-700">Usuario <span className="text-red-500">*</span></label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
@@ -129,9 +157,8 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Input Contraseña */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-700">Contraseña</label>
+              <label className="text-xs font-medium text-slate-700">Contraseña <span className="text-red-500">*</span></label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input

@@ -2,7 +2,6 @@ import * as React from "react";
 import {
   History,
   FileText,
-  TrendingUp,
   ShieldCheck,
   LogOut,
   UserCheck
@@ -12,8 +11,8 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
+  SidebarFooter,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -32,7 +31,6 @@ export function AppSidebarTeacher({
     { id: 'registro', label: 'Registro Asistencia', icon: UserCheck, url: 'registrar-asistencia' },
     { id: 'historial', label: 'Historial General', icon: History, url: 'ver-asistencia' },
     { id: 'reporte', label: 'Reporte Diario', icon: FileText, url: 'reporte-clases' },
-    { id: 'ingresos', label: 'Seguimiento Marcajes', icon: TrendingUp, url: 'seguimiento-ingresos' },
     { id: 'justificaciones', label: 'Justificaciones', icon: ShieldCheck, url: 'justificaciones' },
   ];
 
@@ -61,36 +59,27 @@ export function AppSidebarTeacher({
   };
 
   return (
-    <Sidebar className="border-r border-slate-200" {...props}>
-      <SidebarHeader className="p-5">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-white font-black text-base italic shadow-md shrink-0">
-            C
-          </div>
-          <div className="flex flex-col">
-            <h1 className="text-sm font-bold tracking-tight text-slate-800 leading-none uppercase">Crayons</h1>
-            <p className="text-[9px] font-bold text-indigo-600 uppercase tracking-widest mt-0.5">Academic System</p>
-          </div>
-        </div>
+    <Sidebar className="border-r border-slate-200 bg-white" {...props}>
+      <SidebarHeader className="h-14 flex items-center px-5 border-b border-slate-100">
+        <span className="text-sm font-semibold text-slate-800 tracking-tight uppercase">
+          CRAYONS
+        </span>
       </SidebarHeader>
 
-      <SidebarContent className="px-3">
+      <SidebarContent className="px-3 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-3 mt-2">
-            Panel de Control
-          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {menuItems.map((item) => {
                 const isActive = location.pathname.includes(item.url);
                 return (
-                  <SidebarMenuItem key={item.id} className="mb-0.5">
+                  <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton asChild>
                       <Link
                         to={item.url}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all font-bold text-xs ${isActive
-                          ? 'bg-slate-800 text-white shadow-sm'
-                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                        className={`flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm ${isActive
+                          ? 'bg-blue-50 text-blue-700 font-medium'
+                          : 'text-slate-600 hover:bg-slate-100'
                           }`}
                       >
                         <item.icon size={16} />
@@ -103,17 +92,17 @@ export function AppSidebarTeacher({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        <div className="mt-auto px-1 py-4 border-t border-slate-100">
-          <Button
-            onClick={handleLogout}
-            className="w-full bg-rose-50 text-rose-600 px-3 py-2 rounded-lg flex items-center gap-3 font-bold text-xs hover:bg-rose-600 hover:text-white transition-all border-none shadow-none"
-          >
-            <LogOut size={16} />
-            <span>Cerrar Sesión</span>
-          </Button>
-        </div>
       </SidebarContent>
+
+      <SidebarFooter className="p-4 border-t border-slate-100">
+        <Button
+          onClick={handleLogout}
+          className="w-full bg-slate-50 text-slate-500 px-3 py-2 rounded-md flex items-center gap-3 font-medium text-xs hover:bg-rose-50 hover:text-rose-600 transition-all border border-slate-100 shadow-none justify-start"
+        >
+          <LogOut size={14} />
+          <span>Cerrar Sesión</span>
+        </Button>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

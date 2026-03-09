@@ -16,7 +16,6 @@ import StudentPromotions from "@/view/private/StudentPromotions";
 import ProtectedRoute from "./ProtectedRoute";
 
 import TeacherDashboard from "@/view/private/teacher/teacherDashboard";
-import RegistrarAsistencia from "@/view/private/teacher/RegistrarAsistencia";
 import CuotasProgramar from "@/view/private/teacher/CuotasProgramar";
 import HistorialAsistencia from "@/view/private/teacher/HistorialAsistencia";
 import VisionMision from "@/view/public/VisionMision";
@@ -41,7 +40,11 @@ import DashboardHome from "@/view/private/DashboardHome";
 
 import JustificacionesDocente from "@/view/private/teacher/JustificacionesDocente";
 import ReporteAsistenciaClases from "@/view/private/teacher/ReporteAsistenciaClases";
-import SeguimientoIngresos from "@/view/private/teacher/SeguimientoIngresos";
+import AsistenciaBloquesDocente from "@/view/private/teacher/AsistenciaBloquesDocente";
+import ReporteAsistenciaBloques from "@/view/private/teacher/ReporteAsistenciaBloques";
+import ScheduleAssignment from "@/view/private/ScheduleAssignment";
+import ScheduleGrid from "@/view/private/ScheduleGrid";
+import TeacherHome from "@/view/private/teacher/TeacherHome";
 
 // Componente para protección de rutas
 
@@ -93,6 +96,8 @@ const router = createBrowserRouter([
       { path: "programar-cuotas", element: <CuotasProgramar /> },
       { path: "cuotas-detalle", element: <CuotasDetalle /> },
       { path: "promocion-alumnos", element: <StudentPromotions /> },
+      { path: "asignar-horarios", element: <ScheduleAssignment /> },
+      { path: "ver-horarios", element: <ScheduleGrid /> },
 
     ],
   },
@@ -104,12 +109,12 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      // { index: true, element: <ListStudent /> }, // Página por defecto del dashboard
-      { path: "registrar-asistencia", element: <RegistrarAsistencia /> },
+      { index: true, element: <TeacherHome /> },
+      { path: "registrar-asistencia", element: <AsistenciaBloquesDocente /> },
       { path: "ver-asistencia", element: <HistorialAsistencia /> },
       { path: "reporte-clases", element: <ReporteAsistenciaClases /> },
-      { path: "seguimiento-ingresos", element: <SeguimientoIngresos /> },
       { path: "justificaciones", element: <JustificacionesDocente /> },
+      { path: "reportes-bloques", element: <ReporteAsistenciaBloques /> },
     ],
     // children: [{ path: "list-teacher", element: <ListTeacher /> }],
   },

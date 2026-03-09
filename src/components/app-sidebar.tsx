@@ -94,6 +94,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Lista de Docentes",
             url: "/dashboard/list-teacher",
           },
+          {
+            title: "Asignar Horarios",
+            url: "/dashboard/asignar-horarios",
+          },
+          {
+            title: "Ver Horarios",
+            url: "/dashboard/ver-horarios",
+          },
         ],
       },
       {

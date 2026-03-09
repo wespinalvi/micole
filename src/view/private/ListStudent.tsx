@@ -64,6 +64,7 @@ export default function ListStudent() {
     text: string;
     isSuccess: boolean;
   } | null>(null);
+  const [grados, setGrados] = useState<{ id: number; nombre: string }[]>([]);
 
   // Función para actualizar un estudiante específico en la lista
   const updateStudentInList = (updatedStudent: any) => {
@@ -108,6 +109,7 @@ export default function ListStudent() {
 
   useEffect(() => {
     fetchYears();
+    fetchGrados();
   }, []);
 
   useEffect(() => {
@@ -116,12 +118,35 @@ export default function ListStudent() {
 
   const fetchYears = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/cuotas/periodos");
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:3000/api/cuotas/periodos", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (response.data.success) {
         setYearsAvailable(response.data.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al cargar años académicos:", error);
+      if (error.response?.status === 401) {
+        window.location.href = "/login";
+      }
+    }
+  };
+
+  const fetchGrados = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:3000/api/grado/lista-grado", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data.status) {
+        setGrados(response.data.data);
+      }
+    } catch (error: any) {
+      console.error("Error al cargar grados:", error);
+      if (error.response?.status === 401) {
+        window.location.href = "/login";
+      }
     }
   };
 
@@ -130,9 +155,13 @@ export default function ListStudent() {
 
     try {
       setLoading(true);
+      const token = localStorage.getItem("token");
+      console.log("Fetching students with token:", token?.substring(0, 15) + "...");
+
       const response = await axios.get(
         `http://localhost:3000/api/alumno/lista-alumnos/${year}/${grade}`,
         {
+          headers: { Authorization: `Bearer ${token}` },
           params: {
             page: pageToFetch,
             limit: pagination.limit
@@ -142,10 +171,21 @@ export default function ListStudent() {
 
       if (response.data.success) {
         setStudents(response.data.data || []);
-        setPagination(response.data.pagination);
+        // Asegurarnos de que pagination exista en la respuesta
+        if (response.data.pagination) {
+          setPagination(response.data.pagination);
+        }
+      } else {
+        console.warn("Respuesta sin éxito:", response.data);
+        setStudents([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al cargar estudiantes:", error);
+      if (error.response?.status === 401) {
+        console.warn("Token inválido o expirado. Redirigiendo a login...");
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
     } finally {
       setLoading(false);
     }
@@ -186,11 +226,20 @@ export default function ListStudent() {
               <SelectValue placeholder="Grado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1">1ro</SelectItem>
-              <SelectItem value="2">2do</SelectItem>
-              <SelectItem value="3">3ro</SelectItem>
-              <SelectItem value="4">4to</SelectItem>
-              <SelectItem value="5">5to</SelectItem>
+              {grados.map((g) => (
+                <SelectItem key={g.id} value={g.id.toString()}>
+                  {g.nombre}
+                </SelectItem>
+              ))}
+              {grados.length === 0 && (
+                <>
+                  <SelectItem value="1">1ro</SelectItem>
+                  <SelectItem value="2">2do</SelectItem>
+                  <SelectItem value="3">3ro</SelectItem>
+                  <SelectItem value="4">4to</SelectItem>
+                  <SelectItem value="5">5to</SelectItem>
+                </>
+              )}
             </SelectContent>
           </Select>
         </div>

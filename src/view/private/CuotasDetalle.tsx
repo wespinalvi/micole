@@ -49,11 +49,9 @@ interface PagoDetalle {
 
 interface ResumenEstudiante {
   id_matricula: number;
-  id_alumno: number;
-  id_periodo: number;
   total_cuotas: number;
   monto_total: string;
-  total_pagado: string;
+  monto_total_pagado: string;
   saldo_pendiente: string;
   cuotas_pagadas: string;
   cuotas_pendientes: string;
@@ -344,7 +342,9 @@ const CuotasDetalle = () => {
   };
 
   const matriculaInfo = datosEstudiante?.detalle.find(p => p.tipo.toLowerCase() === 'matricula');
-  const cuotasMensuales = datosEstudiante?.detalle.filter(p => p.tipo.toLowerCase() === 'cuota') || [];
+  const cuotasMensuales = datosEstudiante?.detalle.filter(p =>
+    p.tipo.toLowerCase() === 'cuota' || p.tipo.toLowerCase() === 'mensualidad'
+  ) || [];
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
@@ -436,7 +436,7 @@ const CuotasDetalle = () => {
                     <div className="mt-8 space-y-4">
                       <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                         <span className="text-sm text-gray-600">Total Pagado</span>
-                        <span className="font-bold text-green-600 font-mono">S/ {parseFloat(datosEstudiante.resumen.total_pagado).toFixed(2)}</span>
+                        <span className="font-bold text-green-600 font-mono">S/ {parseFloat(datosEstudiante.resumen.monto_total_pagado).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
                         <span className="text-sm text-red-600">Saldo Pendiente</span>

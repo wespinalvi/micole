@@ -288,7 +288,9 @@ export default function RegisterTeacher() {
           {/* DNI + Buscar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2">
-              <Label className="text-xs font-medium text-slate-700">DNI</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                DNI <span className="text-red-500">*</span>
+              </Label>
               <Input
                 name="dni"
                 value={formData.dni}
@@ -312,7 +314,9 @@ export default function RegisterTeacher() {
           {/* Nombres y Apellidos */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <Label className="text-xs font-medium text-slate-700">Nombres</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Nombres <span className="text-red-500">*</span>
+              </Label>
               <Input
                 name="nombres"
                 value={formData.nombres}
@@ -321,7 +325,9 @@ export default function RegisterTeacher() {
               />
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-700">Apellido Paterno</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Apellido Paterno <span className="text-red-500">*</span>
+              </Label>
               <Input
                 name="apellido_paterno"
                 value={formData.apellido_paterno}
@@ -330,7 +336,9 @@ export default function RegisterTeacher() {
               />
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-700">Apellido Materno</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Apellido Materno <span className="text-red-500">*</span>
+              </Label>
               <Input
                 name="apellido_materno"
                 value={formData.apellido_materno}
@@ -343,7 +351,9 @@ export default function RegisterTeacher() {
           {/* Fecha, Sexo, Email */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <Label className="text-xs font-medium text-slate-700">Fecha de Nacimiento</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Fecha de Nacimiento <span className="text-red-500">*</span>
+              </Label>
               <Input
                 name="fecha_nacimiento"
                 type="date"
@@ -353,7 +363,9 @@ export default function RegisterTeacher() {
               />
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-700">Sexo</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Sexo <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={formData.sexo}
                 onValueChange={(value) => setFormData((prev) => ({ ...prev, sexo: value }))}
@@ -368,7 +380,9 @@ export default function RegisterTeacher() {
               </Select>
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-700">Email</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Email <span className="text-slate-400 font-normal ml-1">(Opcional)</span>
+              </Label>
               <Input
                 name="email"
                 value={formData.email}
@@ -381,7 +395,9 @@ export default function RegisterTeacher() {
           {/* Teléfono y Dirección */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label className="text-xs font-medium text-slate-700">Teléfono</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Teléfono <span className="text-red-500">*</span>
+              </Label>
               <Input
                 name="telefono"
                 value={formData.telefono}
@@ -390,7 +406,9 @@ export default function RegisterTeacher() {
               />
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-700">Dirección</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Dirección <span className="text-red-500">*</span>
+              </Label>
               <Input
                 name="direccion"
                 value={formData.direccion}
@@ -403,7 +421,9 @@ export default function RegisterTeacher() {
           {/* Período Académico, Especialidad, Grado Académico */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <Label className="text-xs font-medium text-slate-700">Período Académico</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Período Académico <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={formData.id_periodo}
                 onValueChange={(value) => {
@@ -427,7 +447,9 @@ export default function RegisterTeacher() {
               </Select>
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-700">Especialidad</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Especialidad <span className="text-slate-400 font-normal ml-1">(Opcional)</span>
+              </Label>
               <Input
                 name="especialidad"
                 value={formData.especialidad}
@@ -436,7 +458,9 @@ export default function RegisterTeacher() {
               />
             </div>
             <div>
-              <Label className="text-xs font-medium text-slate-700">Grado Académico</Label>
+              <Label className="text-xs font-medium text-slate-700">
+                Grado Académico <span className="text-slate-400 font-normal ml-1">(Opcional)</span>
+              </Label>
               <Input
                 name="grado_academico"
                 value={formData.grado_academico}

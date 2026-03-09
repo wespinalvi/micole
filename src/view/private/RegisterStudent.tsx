@@ -306,30 +306,39 @@ export default function RegisterStudent() {
       case 'padre_dni':
       case 'madre_dni':
       case 'apoderado_dni':
-        if (!stringValue) return 'Este campo es obligatorio';
-        if (!/^\d{8}$/.test(stringValue)) return 'DNI debe tener 8 dígitos';
+        // DNI can be empty initially but if provided must be 8 digits (handled usually by submit validation)
+        if (stringValue && !/^\d{8}$/.test(stringValue)) return 'DNI debe tener 8 dígitos';
         return '';
       case 'alumno_nombre':
       case 'alumno_ap_p':
       case 'alumno_ap_m':
       case 'alumno_fecha_nacimiento':
-      case 'alumno_email':
       case 'alumno_sexo':
-      case 'alumno_lengua_materna':
       case 'alumno_direccion':
       case 'id_grado':
       case 'tipo_ingreso':
-      case 'alumno_religion':
         if (!stringValue) return 'Este campo es obligatorio';
         return '';
-      case 'padre_ocupacion':
+      // Optional fields for alumno
+      case 'alumno_email':
+      case 'alumno_religion':
+      case 'alumno_lengua_materna':
+        return '';
+      // Family fields (Required if section is used, but we validate at submit. Let's keep basic required if typed)
+      case 'padre_nombre':
+      case 'padre_ap_p':
+      case 'padre_ap_m':
+      case 'padre_fecha_nacimiento':
       case 'madre_nombre':
       case 'madre_ap_p':
       case 'madre_ap_m':
       case 'madre_fecha_nacimiento':
-      case 'madre_ocupacion':
       case 'año_academico':
         if (!stringValue) return 'Este campo es obligatorio';
+        return '';
+      // Optional family fields
+      case 'padre_ocupacion':
+      case 'madre_ocupacion':
         return '';
       case 'padre_telefono':
       case 'madre_telefono':
@@ -364,9 +373,12 @@ export default function RegisterStudent() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem("token");
+        const headers = { Authorization: `Bearer ${token}` };
+
         const [gradosRes, periodosRes] = await Promise.all([
-          axios.get("http://localhost:3000/api/grado/lista-grado"),
-          axios.get("http://localhost:3000/api/cuotas/periodos")
+          axios.get("http://localhost:3000/api/grado/lista-grado", { headers }),
+          axios.get("http://localhost:3000/api/cuotas/periodos", { headers })
         ]);
         setGrados(gradosRes.data.data);
         setPeriodos(periodosRes.data.data);
@@ -473,11 +485,10 @@ export default function RegisterStudent() {
     }));
   };
 
-  // Renderizado de inputs con diseño limpio y profesional
-  const renderInput = (name: Extract<keyof FormData, string>, label: string, type: string = "text", placeholder: string = "") => (
+  const renderInput = (name: Extract<keyof FormData, string>, label: string, type: string = "text", placeholder: string = "", isOptional: boolean = false) => (
     <div className="space-y-1">
       <Label htmlFor={name} className="text-xs font-medium text-slate-700">
-        {label} <span className="text-red-500">*</span>
+        {label} {!isOptional ? <span className="text-red-500"> *</span> : <span className="text-slate-400 font-normal ml-1">(Opcional)</span>}
       </Label>
       <Input
         id={name}
@@ -497,10 +508,10 @@ export default function RegisterStudent() {
     </div>
   );
 
-  const renderSelect = (name: Extract<keyof FormData, string>, label: string, options: { value: string; label: string }[]) => (
+  const renderSelect = (name: Extract<keyof FormData, string>, label: string, options: { value: string; label: string }[], isOptional: boolean = false) => (
     <div className="space-y-1">
       <Label className="text-xs font-medium text-slate-700">
-        {label} <span className="text-red-500">*</span>
+        {label} {!isOptional ? <span className="text-red-500"> *</span> : <span className="text-slate-400 font-normal ml-1">(Opcional)</span>}
       </Label>
       <Select
         value={String(formData[name])}
@@ -534,8 +545,10 @@ export default function RegisterStudent() {
 
     try {
       setSearchingFor('alumno');
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:3000/api/dni/buscar-dni/${formData.alumno_dni}`
+        `http://localhost:3000/api/dni/buscar-dni/${formData.alumno_dni}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.data.status) {
@@ -576,8 +589,10 @@ export default function RegisterStudent() {
 
     try {
       setSearchingFor(tipo);
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:3000/api/dni/buscar-dni/${dni}`
+        `http://localhost:3000/api/dni/buscar-dni/${dni}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.data.status) {
@@ -711,9 +726,11 @@ export default function RegisterStudent() {
         }
       };
 
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         "http://localhost:3000/api/matricula/matricula",
-        payload
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setMessage({
@@ -911,13 +928,13 @@ export default function RegisterStudent() {
                   { value: "M", label: "Masculino" },
                   { value: "F", label: "Femenino" },
                 ])}
-                {renderInput("alumno_email", "Email", "email")}
+                {renderInput("alumno_email", "Email", "email", "", true)}
               </div>
               {/* Dirección, Lengua, Religión */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {renderInput("alumno_direccion", "Dirección")}
-                {renderInput("alumno_lengua_materna", "Lengua Materna")}
-                {renderInput("alumno_religion", "Religión")}
+                {renderInput("alumno_lengua_materna", "Lengua Materna", "text", "", true)}
+                {renderInput("alumno_religion", "Religión", "text", "", true)}
               </div>
               {/* Tipo de Ingreso y Grado */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -968,7 +985,7 @@ export default function RegisterStudent() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
                   <Label className="text-xs font-medium text-slate-700">
-                    DNI <span className="text-red-500">*</span>
+                    DNI <span className="text-red-500"> *</span>
                   </Label>
                   <Input
                     type="text"
@@ -1004,48 +1021,68 @@ export default function RegisterStudent() {
               {/* Nombres y Apellidos */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <Label className="text-xs font-medium text-slate-700">Nombres</Label>
+                  <Label className="text-xs font-medium text-slate-700">
+                    Nombres <span className="text-red-500"> *</span>
+                  </Label>
                   <Input
                     type="text"
                     className="mt-1 h-9"
                     value={formData[`${activeTab}_nombre`] as string}
                     onChange={(e) => handleInputChange({ target: { name: `${activeTab}_nombre`, value: e.target.value } } as any)}
                   />
+                  {errors[`${activeTab}_nombre`] && (
+                    <p className="text-xs text-red-600 mt-0.5">{errors[`${activeTab}_nombre`]}</p>
+                  )}
                 </div>
                 <div>
-                  <Label className="text-xs font-medium text-slate-700">Apellido Paterno</Label>
+                  <Label className="text-xs font-medium text-slate-700">
+                    Apellido Paterno <span className="text-red-500"> *</span>
+                  </Label>
                   <Input
                     type="text"
                     className="mt-1 h-9"
                     value={formData[`${activeTab}_ap_p`] as string}
                     onChange={(e) => handleInputChange({ target: { name: `${activeTab}_ap_p`, value: e.target.value } } as any)}
                   />
+                  {errors[`${activeTab}_ap_p`] && (
+                    <p className="text-xs text-red-600 mt-0.5">{errors[`${activeTab}_ap_p`]}</p>
+                  )}
                 </div>
                 <div>
-                  <Label className="text-xs font-medium text-slate-700">Apellido Materno</Label>
+                  <Label className="text-xs font-medium text-slate-700">
+                    Apellido Materno <span className="text-red-500"> *</span>
+                  </Label>
                   <Input
                     type="text"
                     className="mt-1 h-9"
                     value={formData[`${activeTab}_ap_m`] as string}
                     onChange={(e) => handleInputChange({ target: { name: `${activeTab}_ap_m`, value: e.target.value } } as any)}
                   />
+                  {errors[`${activeTab}_ap_m`] && (
+                    <p className="text-xs text-red-600 mt-0.5">{errors[`${activeTab}_ap_m`]}</p>
+                  )}
                 </div>
               </div>
 
               {/* Fecha, Teléfono, Ocupación */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <Label className="text-xs font-medium text-slate-700">Fecha de Nacimiento</Label>
+                  <Label className="text-xs font-medium text-slate-700">
+                    Fecha de Nacimiento <span className="text-red-500"> *</span>
+                  </Label>
                   <Input
                     type="date"
                     className="mt-1 h-9"
                     value={formData[`${activeTab}_fecha_nacimiento`] as string}
                     onChange={(e) => handleInputChange({ target: { name: `${activeTab}_fecha_nacimiento`, value: e.target.value } } as any)}
                   />
+                  {errors[`${activeTab}_fecha_nacimiento`] && (
+                    <p className="text-xs text-red-600 mt-0.5">{errors[`${activeTab}_fecha_nacimiento`]}</p>
+                  )}
                 </div>
                 <div>
                   <Label className="text-xs font-medium text-slate-700">
-                    Teléfono <span className="text-red-500">*</span>
+                    Teléfono <span className="text-red-500"> *</span>
                   </Label>
                   <Input
                     type="tel"
@@ -1062,7 +1099,9 @@ export default function RegisterStudent() {
                   )}
                 </div>
                 <div>
-                  <Label className="text-xs font-medium text-slate-700">Ocupación</Label>
+                  <Label className="text-xs font-medium text-slate-700">
+                    Ocupación <span className="text-slate-400 font-normal ml-1">(Opcional)</span>
+                  </Label>
                   <Input
                     type="text"
                     placeholder="Ej. Agricultor, Docente, etc."

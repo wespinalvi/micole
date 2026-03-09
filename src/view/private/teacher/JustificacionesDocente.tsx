@@ -1,13 +1,17 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "@/lib/axios";
 import {
-  FileText,
   Calendar,
   CheckCircle,
   XCircle,
   ExternalLink,
   Filter
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Dialog,
   DialogContent
@@ -29,9 +33,11 @@ interface Justificacion {
   comentario_revision: string | null;
   created_at: string;
   updated_at: string;
-  alumno_nombres: string;
-  alumno_ap_p: string;
-  alumno_ap_m: string;
+  nombre_alumno: string;
+  curso: string | null;
+  grado: string | null;
+  fecha_falta: string | null;
+  observacion_falta: string | null;
 }
 
 const estados = {
@@ -43,17 +49,30 @@ const estados = {
 export default function JustificacionesDocente() {
   const [justificaciones, setJustificaciones] = useState<Justificacion[]>([]);
   const [loading, setLoading] = useState(false);
-  const [fechaInput, setFechaInput] = useState(new Date().toISOString().split('T')[0]);
+  const today = new Date();
+  const localDateStr = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+  const [fechaInput, setFechaInput] = useState(localDateStr);
   const [showDialog, setShowDialog] = useState(false);
   const [justificacionSeleccionada, setJustificacionSeleccionada] = useState<Justificacion | null>(null);
   const [accionSeleccionada, setAccionSeleccionada] = useState<"aceptar" | "rechazar" | null>(null);
   const [comentario, setComentario] = useState("");
 
+  const [activeTab, setActiveTab] = useState<"pendientes" | "historial">("pendientes");
+  const [estadoFiltro, setEstadoFiltro] = useState<"Todos" | "Aprobada" | "Rechazada">("Todos");
+
   const fetchJustificaciones = useCallback(async () => {
     setLoading(true);
     try {
-      const [year, month, day] = fechaInput.split("-");
-      const urlApi = `/justificacion/docente/pendientes?anio=${year}&mes=${parseInt(month)}&dia=${parseInt(day)}`;
+      let urlApi = "";
+      if (activeTab === "pendientes") {
+        const [year, month, day] = fechaInput.split("-");
+        urlApi = `/justificacion/docente/pendientes?anio=${year}&mes=${parseInt(month)}&dia=${parseInt(day)}`;
+      } else {
+        urlApi = `/justificacion/docente/historial`;
+        if (estadoFiltro !== "Todos") {
+          urlApi += `?estado=${estadoFiltro}`;
+        }
+      }
       const res = await api.get(urlApi);
       if (res.data.success) {
         let rawData = res.data.data;
@@ -70,7 +89,7 @@ export default function JustificacionesDocente() {
     } finally {
       setLoading(false);
     }
-  }, [fechaInput]);
+  }, [fechaInput, activeTab, estadoFiltro]);
 
   useEffect(() => {
     fetchJustificaciones();
@@ -103,192 +122,262 @@ export default function JustificacionesDocente() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500 pb-8">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight">
-            Gestión de Justificaciones
-          </h1>
-          <div className="flex items-center gap-2 mt-1">
-            <FileText size={13} className="text-slate-400" />
-            <span className="text-xs text-slate-500 font-medium tracking-tight">Revision de solicitudes de ausencia por estudiantes</span>
-            <span className="w-1 h-1 rounded-full bg-slate-200 mx-1" />
-            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Pendientes: {justificaciones.length}</span>
+    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
+      {/* Topbar Compact */}
+      <div className="h-14 border-b border-slate-200 flex items-center justify-between px-6 bg-white sticky top-0 z-10">
+        <div className="flex items-center gap-4">
+          <SidebarTrigger className="text-slate-400 hover:text-slate-600 transition-colors" />
+          <div className="h-4 w-px bg-slate-200 mx-2" />
+          <div>
+            <h1 className="text-sm font-semibold text-slate-900">
+              Justificaciones de Estudiantes
+            </h1>
+            <div className="flex items-center gap-2 mt-0.5">
+              <Calendar size={12} className="text-slate-400" />
+              <span className="text-[11px] text-slate-500 font-medium">Revisión de solicitudes pendientes</span>
+              <span className="w-1 h-1 rounded-full bg-slate-200 mx-0.5" />
+              <span className="text-[10px] font-bold text-amber-600 uppercase tracking-tight">Periodo Lectivo 2026</span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-3 shadow-sm">
-          <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter leading-none">Corte Actual</span>
-            <span className="text-sm font-bold text-slate-700">Ciclo 2026</span>
+        <div className="flex items-center gap-3">
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-md border ${activeTab === 'pendientes' ? 'bg-amber-50 border-amber-100' : 'bg-slate-50 border-slate-200'}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${activeTab === 'pendientes' ? 'bg-amber-500 animate-pulse' : 'bg-slate-400'}`} />
+            <span className={`text-[10px] font-bold uppercase tracking-tight ${activeTab === 'pendientes' ? 'text-amber-700' : 'text-slate-600'}`}>
+              {activeTab === 'pendientes' ? 'Pendientes:' : 'Registros:'} {justificaciones.length}
+            </span>
           </div>
-          <div className="w-px h-6 bg-slate-200" />
-          <Filter size={16} className="text-slate-400" />
         </div>
       </div>
 
-      {/* Filters Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-end gap-4">
-        <div className="flex-1 space-y-1.5 w-full">
-          <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-tight ml-0.5">Fecha de Solicitud</label>
-          <div className="relative">
-            <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="date"
-              value={fechaInput}
-              onChange={(e) => setFechaInput(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50/50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-600"
-            />
+      {/* Content */}
+      <div className="flex-1 p-6 space-y-4">
+        {/* Compact Filters row */}
+        <div className="flex items-end justify-between">
+          <div className="flex gap-4">
+            <div className="flex bg-slate-100 p-1 rounded-md h-8 self-end mr-4">
+              <button
+                onClick={() => setActiveTab("pendientes")}
+                className={`px-4 text-[11px] font-bold rounded-sm transition-all ${activeTab === "pendientes" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                Pendientes
+              </button>
+              <button
+                onClick={() => setActiveTab("historial")}
+                className={`px-4 text-[11px] font-bold rounded-sm transition-all ${activeTab === "historial" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                Historial
+              </button>
+            </div>
+
+            {activeTab === "pendientes" ? (
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Fecha de Solicitud</label>
+                <div className="relative">
+                  <Input
+                    type="date"
+                    value={fechaInput}
+                    onChange={(e) => setFechaInput(e.target.value)}
+                    className="h-8 w-44 text-xs rounded-md bg-white border-slate-200"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Filtrar por Estado</label>
+                <select
+                  value={estadoFiltro}
+                  onChange={(e) => setEstadoFiltro(e.target.value as "Todos" | "Aprobada" | "Rechazada")}
+                  className="h-8 w-44 px-3 text-xs font-semibold text-slate-700 rounded-md bg-white border border-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-300"
+                >
+                  <option value="Todos">Todas las Justificaciones</option>
+                  <option value="Aprobada">Solo Aprobadas</option>
+                  <option value="Rechazada">Solo Rechazadas</option>
+                </select>
+              </div>
+            )}
           </div>
-        </div>
-        <button
-          onClick={fetchJustificaciones}
-          className="bg-slate-800 text-white px-8 py-2 rounded-lg font-bold text-xs shadow-sm hover:bg-slate-900 transition-all uppercase tracking-wider h-10 w-full md:w-auto"
-        >
-          FILTRAR
-        </button>
-      </div>
 
-      {/* Table Content */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 bg-slate-100/10">
-          <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nómina de Solicitudes</h2>
+          <Button
+            onClick={fetchJustificaciones}
+            disabled={loading}
+            className="h-8 px-6 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-none border-none transition-all active:scale-95 uppercase tracking-wider"
+          >
+            {loading ? "..." : <><Filter size={14} className="mr-2" /> Filtrar Registros</>}
+          </Button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-              <tr>
-                <th className="px-6 py-3">Estudiante</th>
-                <th className="px-6 py-3">Motivo y Detalle</th>
-                <th className="px-6 py-3">Documento</th>
-                <th className="px-6 py-3 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="py-20 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="h-6 w-6 border-2 border-slate-100 border-t-indigo-500 rounded-full animate-spin" />
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sincronizando...</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : justificaciones.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="py-20 text-center text-slate-400">
-                    <div className="flex flex-col items-center">
-                      <CheckCircle className="h-10 w-10 opacity-10 mb-2" />
-                      <p className="text-xs font-bold uppercase tracking-widest">Sin solicitudes pendientes</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                justificaciones.map((j) => (
-                  <tr key={j.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-400 text-[10px] uppercase">
-                          {j.alumno_nombres[0]}{j.alumno_ap_p[0]}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-slate-700 leading-snug">{j.alumno_nombres} {j.alumno_ap_p}</span>
-                          <div className={`inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-tighter mt-0.5 ${estados[j.estado as keyof typeof estados]?.color || estados.Pendiente.color} bg-transparent border-none`}>
-                            <div className={`w-1.5 h-1.5 rounded-full ${estados[j.estado as keyof typeof estados]?.dot || estados.Pendiente.dot}`} />
-                            {j.estado}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col max-w-xs">
-                        <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">{j.tipo}</span>
-                        <span className="text-[13px] font-bold text-slate-600 truncate">{j.titulo}</span>
-                        <p className="text-[11px] text-slate-400 italic truncate overflow-hidden font-medium">{j.descripcion}</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <a
-                        href={j.url_documento}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 bg-indigo-50/50 px-2.5 py-1 rounded border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-all shadow-sm uppercase tracking-tighter"
-                      >
-                        Adjunto <ExternalLink size={11} />
-                      </a>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => handleAccion(j, "aceptar")}
-                          className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
-                          title="Aprobar"
-                        >
-                          <CheckCircle size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleAccion(j, "rechazar")}
-                          className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
-                          title="Rechazar"
-                        >
-                          <XCircle size={16} />
-                        </button>
-                      </div>
-                    </td>
+        {/* Table Clean Professional */}
+        <Card className="border border-slate-200 rounded-md shadow-none bg-white overflow-hidden">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead className="border-b border-slate-200 bg-slate-50/50">
+                  <tr className="text-left text-slate-600">
+                    <th className="px-5 py-2.5 font-semibold">Estudiante</th>
+                    <th className="px-5 py-2.5 font-semibold">Falta Registrada</th>
+                    <th className="px-5 py-2.5 font-semibold">Motivo y Detalle</th>
+                    <th className="px-5 py-2.5 font-semibold text-center">Documento</th>
+                    <th className="px-5 py-2.5 font-semibold text-right pr-12">Acciones</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} className="px-5 py-12 text-center text-slate-400 font-medium bg-white">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="h-5 w-5 border-2 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Sincronizando...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : justificaciones.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-5 py-16 text-center text-slate-300 font-medium bg-white uppercase tracking-widest text-[10px]">
+                        Cero solicitudes pendientes para este día
+                      </td>
+                    </tr>
+                  ) : (
+                    justificaciones.map((j) => (
+                      <motion.tr
+                        key={j.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="hover:bg-slate-50/50 transition-colors"
+                      >
+                        <td className="px-5 py-3">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-slate-900 leading-tight">
+                              {j.nombre_alumno}
+                            </span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              {j.grado && <span className="text-[9px] font-medium text-slate-400">{j.grado}</span>}
+                              {j.grado && j.curso && <span className="text-slate-200">·</span>}
+                              {j.curso && <span className="text-[9px] font-medium text-blue-500">{j.curso}</span>}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <div className={`w-1 h-1 rounded-full ${estados[j.estado as keyof typeof estados]?.dot || "bg-slate-300"}`} />
+                              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">{j.estado}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex flex-col max-w-[180px]">
+                            {j.fecha_falta ? (
+                              <span className="text-[10px] font-semibold text-slate-700">
+                                {new Date(j.fecha_falta).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-slate-300">Sin fecha</span>
+                            )}
+                            {j.observacion_falta && (
+                              <p className="text-[10px] text-slate-400 italic truncate font-medium mt-0.5">{j.observacion_falta}</p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex flex-col max-w-xs">
+                            <span className="text-[9px] font-bold text-amber-600 uppercase tracking-tight">{j.tipo}</span>
+                            <span className="text-[11px] font-semibold text-slate-700 truncate">{j.titulo}</span>
+                            <p className="text-[10px] text-slate-400 italic truncate font-medium">{j.descripcion}</p>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3 text-center">
+                          <a
+                            href={j.url_documento}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 bg-blue-50/50 px-2 py-1 rounded border border-blue-100 hover:bg-blue-600 hover:text-white transition-all uppercase"
+                          >
+                            PDF <ExternalLink size={10} />
+                          </a>
+                        </td>
+                        <td className="px-5 py-3 text-right">
+                          <div className="flex justify-end gap-2 pr-8">
+                            {j.estado === "Pendiente" ? (
+                              <>
+                                <button
+                                  onClick={() => handleAccion(j, "aceptar")}
+                                  className="w-7 h-7 rounded bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all active:scale-90"
+                                >
+                                  <CheckCircle size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleAccion(j, "rechazar")}
+                                  className="w-7 h-7 rounded bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all active:scale-90"
+                                >
+                                  <XCircle size={14} />
+                                </button>
+                              </>
+                            ) : (
+                              <span className={`text-[10px] font-bold uppercase tracking-widest ${j.estado === "Aprobada" ? "text-emerald-500" : "text-rose-500"}`}>
+                                {j.estado}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Footer Compact */}
+      <div className="h-10 bg-white border-t border-slate-200 flex items-center justify-between px-6 text-[9px] font-black text-slate-300 uppercase tracking-widest">
+        <p>Request Ledger v2.5</p>
+        <p>© 2026 Academic Intel</p>
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl border-none shadow-2xl">
-          <div className={`p-5 ${accionSeleccionada === "aceptar" ? "bg-emerald-600" : "bg-rose-600"}`}>
-            <h3 className="text-white text-lg font-bold tracking-tight flex items-center gap-2">
+          <div className={`p-6 ${accionSeleccionada === "aceptar" ? "bg-emerald-600" : "bg-rose-600"} relative`}>
+            <h3 className="text-white text-lg font-bold tracking-tight">
               {accionSeleccionada === "aceptar" ? "Aprobar Solicitud" : "Rechazar Solicitud"}
             </h3>
             <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest mt-0.5">Sistema de Gestión Académica</p>
           </div>
           <div className="p-6 space-y-5">
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Estudiante</span>
-              <p className="text-base font-bold text-slate-800 leading-tight">{justificacionSeleccionada?.alumno_nombres} {justificacionSeleccionada?.alumno_ap_p}</p>
+              <p className="text-base font-bold text-slate-800 leading-tight">{justificacionSeleccionada?.nombre_alumno}</p>
+              {justificacionSeleccionada?.grado && (
+                <p className="text-[10px] text-slate-500 mt-0.5">{justificacionSeleccionada.grado} {justificacionSeleccionada.curso && `· ${justificacionSeleccionada.curso}`}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Comentario de Revisión</label>
-                <span className="text-[9px] text-slate-300 font-bold uppercase italic">Opcional</span>
-              </div>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Comentario de Revisión</label>
               <textarea
                 value={comentario}
                 onChange={(e) => setComentario(e.target.value)}
-                placeholder="Escriba sus observaciones aquí..."
-                className="w-full min-h-[100px] p-3 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none resize-none placeholder:text-slate-300"
+                placeholder="Indique los motivos de la decisión..."
+                className="w-full min-h-[100px] p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:bg-white focus:border-blue-500 transition-all outline-none resize-none placeholder:text-slate-300"
               />
             </div>
 
-            <div className="flex gap-3">
-              <button
+            <div className="flex gap-2 pt-1">
+              <Button
+                variant="outline"
                 onClick={() => setShowDialog(false)}
-                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-50 transition-all uppercase tracking-tight"
+                className="flex-1 h-10 border-slate-200 text-slate-500 font-bold text-[10px] uppercase tracking-widest"
               >
-                Cerrar
-              </button>
-              <button
+                Cancelar
+              </Button>
+              <Button
                 onClick={confirmarAccion}
-                className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg transition-all active:scale-95 uppercase tracking-wider ${accionSeleccionada === "aceptar" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}`}
+                className={`flex-1 h-10 font-bold text-[10px] uppercase tracking-widest text-white ${accionSeleccionada === "aceptar" ? "bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-100" : "bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-100"}`}
               >
-                Confirmar {accionSeleccionada === "aceptar" ? "Aprobación" : "Rechazo"}
-              </button>
+                Confirmar
+              </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }

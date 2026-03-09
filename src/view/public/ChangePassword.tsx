@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function ChangePassword() {
   const [form, setForm] = useState({
@@ -20,7 +21,15 @@ export default function ChangePassword() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { token } = useAuth(); // 🔐 token desde AuthContext
+  const { token, logout } = useAuth(); // 🔐 token desde AuthContext
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Si no hay token, no deberían estar aquí (deberían venir después de un login fallido/requerido)
+    if (!token) {
+      navigate("/login");
+    }
+  }, [token, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -51,7 +60,7 @@ export default function ChangePassword() {
       );
 
       setMessage(
-        response.data.message || "Contraseña actualizada correctamente."
+        (response.data.message || "Contraseña actualizada correctamente.") + " Redirigiendo al login..."
       );
       setForm({
         username: "",
@@ -60,6 +69,13 @@ export default function ChangePassword() {
         newPassword: "",
         repeatPassword: "",
       });
+
+      // Después de cambiar la contraseña, cerramos sesión (limpiamos token temporal)
+      // y redirigimos al login tras un breve delay para que vean el mensaje
+      setTimeout(() => {
+        logout();
+        navigate("/login");
+      }, 2000);
     } catch (err: any) {
       console.error("Error al cambiar la contraseña:", err);
       setError(

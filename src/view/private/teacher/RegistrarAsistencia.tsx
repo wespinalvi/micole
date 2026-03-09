@@ -7,6 +7,10 @@ import {
   Save,
   AlertCircle
 } from 'lucide-react';
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 interface Student {
   id_alumno: number;
@@ -38,6 +42,7 @@ export default function RegistrarAsistencia() {
   const [mensaje, setMensaje] = useState<{ text: string; isError: boolean } | null>(null);
   const [loading, setLoading] = useState(false);
   const [gradoSeleccionado, setGradoSeleccionado] = useState<string>("");
+  const [yaRegistrada, setYaRegistrada] = useState(false);
 
   useEffect(() => {
     const fetchAsignaciones = async () => {
@@ -60,24 +65,50 @@ export default function RegistrarAsistencia() {
   }, [anioSeleccionado]);
 
   useEffect(() => {
-    if (!asignacionSeleccionada) {
-      setAlumnos([]);
-      return;
-    }
+    const checkAsistencia = async () => {
+      if (!asignacionSeleccionada) {
+        setAlumnos([]);
+        setYaRegistrada(false);
+        return;
+      }
 
-    const selected = asignaciones.find(a => a.id_asignacion.toString() === asignacionSeleccionada);
-    if (selected) {
-      setAlumnos(
-        selected.alumnos.map(al => ({
-          ...al,
-          asistio: true,
-          observacion: ""
-        }))
-      );
-      setMensaje(null);
-    } else {
-      setAlumnos([]);
-    }
+      setLoading(true);
+      try {
+        const today = new Date();
+        const fechaHoy = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+        const { data } = await api.get('/docente/verificar-asistencia', {
+          params: { id_asignacion: asignacionSeleccionada, fecha: fechaHoy }
+        });
+
+        if (data.success && data.ya_registrada) {
+          setYaRegistrada(true);
+          // Si ya existe, podríamos cargar los datos existentes si quisiéramos, 
+          // pero por ahora solo bloqueamos para cumplir el requerimiento.
+        } else {
+          setYaRegistrada(false);
+        }
+
+        const selected = asignaciones.find(a => a.id_asignacion.toString() === asignacionSeleccionada);
+        if (selected) {
+          setAlumnos(
+            selected.alumnos.map(al => ({
+              ...al,
+              asistio: true,
+              observacion: ""
+            }))
+          );
+          setMensaje(null);
+        } else {
+          setAlumnos([]);
+        }
+      } catch (error) {
+        console.error("Error verificando asistencia:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAsistencia();
   }, [asignacionSeleccionada, asignaciones]);
 
   const handleAsistenciaChange = (id: number, checked: boolean) => {
@@ -93,12 +124,13 @@ export default function RegistrarAsistencia() {
     setLoading(true);
     setMensaje(null);
     try {
-      const fechaHoy = new Date().toISOString().split('T')[0];
+      const today = new Date();
+      const fechaHoy = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
       const horaActual = new Date().toLocaleTimeString('en-GB');
 
       const payload = {
-        asistencias: alumnos.map((alumno) => ({
-          id_matricula: alumno.id_matricula,
+        asistencia: alumnos.map((alumno) => ({
+          id_alumno: alumno.id_alumno,
           id_asignacion: parseInt(asignacionSeleccionada),
           fecha: fechaHoy,
           estado: alumno.asistio ? "Presente" : "Ausente",
@@ -111,6 +143,7 @@ export default function RegistrarAsistencia() {
 
       if (data.success) {
         setMensaje({ text: data.message || "¡Asistencia registrada con éxito!", isError: false });
+        setYaRegistrada(true);
       } else {
         setMensaje({ text: data.message || "Error al registrar la asistencia.", isError: true });
       }
@@ -141,198 +174,223 @@ export default function RegistrarAsistencia() {
     : asignaciones;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500 pb-8">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight">
-            Registro de Asistencia
-          </h1>
-          <div className="flex items-center gap-2 mt-1">
-            <Calendar size={13} className="text-slate-400" />
-            <span className="text-xs text-slate-500 font-medium capitalize">
-              {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </span>
-            <span className="w-1 h-1 rounded-full bg-slate-200 mx-1" />
-            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Sede Central</span>
+    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
+      {/* Topbar Compact */}
+      <div className="h-14 border-b border-slate-200 flex items-center justify-between px-6 bg-white sticky top-0 z-10">
+        <div className="flex items-center gap-4">
+          <SidebarTrigger className="text-slate-400 hover:text-slate-600 transition-colors" />
+          <div className="h-4 w-px bg-slate-200 mx-2" />
+          <div>
+            <h1 className="text-sm font-semibold text-slate-900">
+              Control de Asistencia
+            </h1>
+            <div className="flex items-center gap-2 mt-0.5">
+              <Calendar size={12} className="text-slate-400" />
+              <span className="text-[11px] text-slate-500 font-medium capitalize">
+                {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-slate-200 mx-0.5" />
+              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-tight">Directorio Activo</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <div className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg flex flex-col items-center min-w-[65px] shadow-sm">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Total</span>
-            <span className="text-base font-bold text-slate-800 leading-tight">{stats.total}</span>
-          </div>
-          <div className="bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg flex flex-col items-center min-w-[65px] shadow-sm">
-            <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-tighter">Pres.</span>
-            <span className="text-base font-bold text-emerald-700 leading-tight">{stats.presentes}</span>
-          </div>
-          <div className="bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-lg flex flex-col items-center min-w-[65px] shadow-sm">
-            <span className="text-[9px] font-bold text-rose-600 uppercase tracking-tighter">Aus.</span>
-            <span className="text-base font-bold text-rose-700 leading-tight">{stats.ausentes}</span>
-          </div>
+        <div className="flex items-center gap-2">
+          {yaRegistrada && (
+            <div className="mr-2 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-md flex items-center gap-2">
+              <UserCheck size={12} />
+              <span className="font-bold text-[10px] uppercase tracking-tight">Asistencia ya Registrada</span>
+            </div>
+          )}
+          {mensaje && (
+            <div className={`mr-4 px-3 py-1 rounded-md flex items-center gap-2 border animate-in fade-in slide-in-from-right-2 ${mensaje.isError ? "bg-rose-50 text-rose-700 border-rose-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"}`}>
+              {mensaje.isError ? <AlertCircle size={12} /> : <UserCheck size={12} />}
+              <span className="font-bold text-[10px] uppercase tracking-tight">{mensaje.text}</span>
+            </div>
+          )}
+          <Button
+            onClick={handleGuardarAsistencia}
+            disabled={loading || alumnos.length === 0 || yaRegistrada}
+            className="h-8 px-4 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-xs shadow-none border-none transition-all active:scale-95 disabled:opacity-50"
+          >
+            {loading ? "Procesando..." : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Guardar Registro
+              </>
+            )}
+          </Button>
         </div>
       </div>
 
-      {/* Selectors Card */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider ml-0.5">Año Académico</label>
-            <div className="relative">
+      {/* Content */}
+      <div className="flex-1 p-6 space-y-4">
+        {/* Compact Stats row */}
+        <div className="flex items-center gap-6 text-[11px]">
+          <div className="flex gap-1.5 items-center">
+            <span className="text-slate-500">Nómina Total:</span>
+            <span className="font-bold text-slate-900">{stats.total}</span>
+          </div>
+          <div className="flex gap-1.5 items-center">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-slate-500">Presentes:</span>
+            <span className="font-bold text-emerald-600">{stats.presentes}</span>
+          </div>
+          <div className="flex gap-1.5 items-center">
+            <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+            <span className="text-slate-500">Faltas:</span>
+            <span className="font-bold text-rose-600">{stats.ausentes}</span>
+          </div>
+        </div>
+
+        {/* Filters Row Compact */}
+        <div className="flex items-center justify-between">
+          <div className="flex gap-4">
+            <div className="relative w-40">
               <select
                 value={anioSeleccionado}
                 onChange={(e) => setAnioSeleccionado(e.target.value)}
-                className="w-full appearance-none px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                className="w-full h-8 px-3 pr-8 bg-white border border-slate-200 rounded-md text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
               >
                 <option value="2026">Ciclo 2026</option>
                 <option value="2025">Ciclo 2025</option>
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider ml-0.5">Grado</label>
-            <div className="relative">
+
+            <div className="relative w-48">
               <select
                 value={gradoSeleccionado}
                 onChange={(e) => {
                   setGradoSeleccionado(e.target.value);
                   setAsignacionSeleccionada("");
                 }}
-                className="w-full appearance-none px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                className="w-full h-8 px-3 pr-8 bg-white border border-slate-200 rounded-md text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
               >
-                <option value="">Seleccionar grado</option>
+                <option value="">Seleccionar Grado</option>
                 {gradosDisponibles.map(g => (
                   <option key={g.id} value={g.id.toString()}>{g.nombre}</option>
                 ))}
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider ml-0.5">Asignatura</label>
-            <div className="relative">
+
+            <div className="relative w-64">
               <select
                 value={asignacionSeleccionada}
                 onChange={(e) => setAsignacionSeleccionada(e.target.value)}
-                className="w-full appearance-none px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                disabled={!gradoSeleccionado}
+                className="w-full h-8 px-3 pr-8 bg-white border border-slate-200 rounded-md text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer disabled:bg-slate-50 disabled:text-slate-400"
               >
-                <option value="">Seleccionar curso</option>
+                <option value="">Seleccionar Curso / Asignatura</option>
                 {asignacionesFiltradas.map(a => (
                   <option key={a.id_asignacion} value={a.id_asignacion.toString()}>
                     {a.curso}
                   </option>
                 ))}
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
           </div>
+
+          <div className="flex items-center gap-3">
+            {alumnos.length > 0 && (
+              <button
+                onClick={() => setAlumnos(alumnos.map(al => ({ ...al, asistio: true })))}
+                className="text-[10px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest bg-blue-50 px-3 py-1.5 rounded-md transition-all active:scale-95"
+              >
+                Asistencia Masiva
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Student Table Compact Professional */}
+        <Card className="border border-slate-200 rounded-md shadow-none bg-white overflow-hidden">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead className="border-b border-slate-200 bg-slate-50/50">
+                  <tr className="text-left text-slate-600">
+                    <th className="px-5 py-2.5 font-semibold">DNI</th>
+                    <th className="px-5 py-2.5 font-semibold">Estudiante</th>
+                    <th className="px-5 py-2.5 font-semibold">Observación</th>
+                    <th className="px-5 py-2.5 font-semibold text-center">Estado</th>
+                    <th className="px-5 py-2.5 font-semibold text-right pr-12">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {alumnos.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-20 bg-white">
+                        <div className="flex flex-col items-center opacity-30">
+                          <UserCheck className="h-12 w-12 mb-3 text-slate-400" />
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em]">Seleccione parámetros de carga</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    alumnos.map((alumno) => (
+                      <motion.tr
+                        key={alumno.id_alumno}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="hover:bg-slate-50/50 transition-colors"
+                      >
+                        <td className="px-5 py-3 text-slate-400 font-mono tracking-tighter">
+                          {alumno.dni}
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-slate-900 tracking-tight leading-tight">
+                              {alumno.nombre_completo}
+                            </span>
+                            <span className="text-[10px] text-slate-500">
+                              {asignaciones.find(a => a.id_asignacion.toString() === asignacionSeleccionada)?.grado}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3">
+                          <input
+                            type="text"
+                            placeholder="Nota..."
+                            value={alumno.observacion}
+                            onChange={(e) => handleObservacionChange(alumno.id_alumno, e.target.value)}
+                            className="w-full bg-slate-50/50 text-[11px] font-medium border border-transparent rounded px-3 py-1.5 focus:bg-white focus:border-blue-100 outline-none transition-all placeholder:text-slate-300"
+                          />
+                        </td>
+                        <td className="px-5 py-3 text-center">
+                          <span className={`px-2 py-0.5 text-[10px] font-medium rounded border ${alumno.asistio ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"}`}>
+                            {alumno.asistio ? "Presente" : "Inasistencia"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex justify-end pr-8">
+                            <label className="relative inline-flex items-center cursor-pointer scale-90">
+                              <input
+                                type="checkbox"
+                                checked={alumno.asistio}
+                                onChange={(e) => handleAsistenciaChange(alumno.id_alumno, e.target.checked)}
+                                className="sr-only peer"
+                              />
+                              <div className="w-9 h-5 bg-slate-100 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {mensaje && (
-        <div className={`p-3 rounded-lg flex items-center gap-3 border animate-in fade-in slide-in-from-top-1 ${mensaje.isError ? "bg-red-50 text-red-700 border-red-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"}`}>
-          {mensaje.isError ? <AlertCircle size={16} /> : <UserCheck size={16} />}
-          <span className="font-semibold text-xs tracking-tight">{mensaje.text}</span>
-        </div>
-      )}
-
-      {/* Table Card */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 bg-slate-100/10 flex justify-between items-center">
-          <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nómina de Estudiantes</h2>
-          {alumnos.length > 0 && (
-            <button
-              onClick={() => setAlumnos(alumnos.map(al => ({ ...al, asistio: true })))}
-              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-wider bg-indigo-50 px-2.5 py-1 rounded-full transition-colors"
-            >
-              Marcar todos presentes
-            </button>
-          )}
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-50">
-              <tr>
-                <th className="px-6 py-3">Estudiante</th>
-                <th className="px-6 py-3">Observación</th>
-                <th className="px-6 py-3 text-right">Asistencia</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {alumnos.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="text-center py-20">
-                    <div className="flex flex-col items-center">
-                      <UserCheck className="h-10 w-10 opacity-10 mb-2 text-slate-400" />
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Seleccione curso para cargar datos</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                alumnos.map((alumno) => (
-                  <tr key={alumno.id_alumno} className="hover:bg-slate-50/30 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400 uppercase">
-                          {alumno.nombre_completo[0]}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-slate-700 leading-snug">{alumno.nombre_completo}</span>
-                          <span className="text-[10px] font-medium text-slate-400">DNI: {alumno.dni}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <input
-                        type="text"
-                        placeholder="Nota opcional..."
-                        value={alumno.observacion}
-                        onChange={(e) => handleObservacionChange(alumno.id_alumno, e.target.value)}
-                        className="w-full bg-slate-50/50 text-xs border border-transparent rounded-lg px-3 py-1.5 focus:bg-white focus:border-indigo-100 outline-none transition-all placeholder:text-slate-300 font-medium"
-                      />
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end items-center gap-4">
-                        <span className={`text-[10px] font-bold uppercase tracking-tight ${alumno.asistio ? "text-emerald-500" : "text-rose-400"}`}>
-                          {alumno.asistio ? "Presente" : "Ausencia"}
-                        </span>
-                        <input
-                          type="checkbox"
-                          checked={alumno.asistio}
-                          onChange={(e) => handleAsistenciaChange(alumno.id_alumno, e.target.checked)}
-                          className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shadow-sm"
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {alumnos.length > 0 && (
-          <div className="px-6 py-4 bg-slate-100/20 border-t border-slate-50 flex flex-col sm:flex-row gap-4 justify-between items-center">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider italic text-center sm:text-left">
-              Verifique los marcajes antes de realizar el registro oficial
-            </p>
-            <button
-              onClick={handleGuardarAsistencia}
-              disabled={loading}
-              className="bg-indigo-600 text-white px-10 py-2.5 rounded-lg font-bold text-xs shadow-md hover:bg-indigo-700 active:transform active:scale-95 transition-all flex items-center gap-2 w-full sm:w-auto justify-center"
-            >
-              {loading ? "PROCESANDO..." : (
-                <>
-                  <Save size={14} />
-                  <span>GUARDAR REGISTRO</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
+      {/* Footer Compact */}
+      <div className="h-10 bg-white border-t border-slate-200 flex items-center justify-between px-6 text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+        <p>System Ledger v3.0</p>
+        <p>© 2026 Academic Intel</p>
       </div>
     </div>
   );

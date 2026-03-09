@@ -1,43 +1,65 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Bot, X, Send, Loader2, Sparkles, ChevronDown } from "lucide-react";
 import api from "@/lib/axios";
 
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   text: string;
-  payload?: any;
+  data?: any[];
 };
+
+const SUGGESTIONS = [
+  "¿Cuántos alumnos hay?",
+  "¿Cuántos docentes activos hay?",
+  "¿Cuánto se ha recaudado este mes?",
+  "¿Cuántos alumnos deben cuotas?",
+];
 
 export default function ChatBot() {
   const [open, setOpen] = React.useState(false);
-  const [messages, setMessages] = React.useState<ChatMessage[]>([]);
+  const [messages, setMessages] = React.useState<ChatMessage[]>([
+    {
+      id: "welcome",
+      role: "assistant",
+      text: "¡Hola! Soy el asistente inteligente de Crayon's. Puedes preguntarme sobre alumnos, docentes, pagos, asistencia y más. ¿En qué te puedo ayudar?",
+    },
+  ]);
   const [input, setInput] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const bottomRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 100);
+  }, [open]);
+
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
 
   const sendMessage = async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      text: trimmed,
-    };
-    setMessages((prev) => [...prev, userMessage]);
+
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: "user", text: trimmed },
+    ]);
     setInput("");
     setLoading(true);
+
     try {
-      const { data } = await api.post("/chat", { message: trimmed });
-      const text: string = data?.message ?? "Sin respuesta";
-      const assistantMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        text,
-        payload: data,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      const { data } = await api.post("/ai-assistant", { pregunta: trimmed });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          text: data.respuesta || "No pude obtener una respuesta.",
+          data: data.datos,
+        },
+      ]);
     } catch (error: any) {
       setMessages((prev) => [
         ...prev,
@@ -46,7 +68,7 @@ export default function ChatBot() {
           role: "assistant",
           text:
             error?.response?.data?.message ||
-            "Ocurrió un error al consultar el chat.",
+            "Ocurrió un error al consultar el asistente. Inténtalo de nuevo.",
         },
       ]);
     } finally {
@@ -61,99 +83,179 @@ export default function ChatBot() {
     }
   };
 
-  const renderAssistantBlock = (m: ChatMessage) => {
-    const payload = m.payload;
-    if (payload?.intent === "cuotas" && Array.isArray(payload?.data) && payload.data.length > 0) {
-      const alumno = payload.data[0];
-      return (
-        <div className="space-y-2">
-          <p className="whitespace-pre-line">{m.text}</p>
-          <div className="rounded-md border p-3 bg-muted/40">
-            <div className="text-sm font-medium">{alumno.nombre} {alumno.ap_p} {alumno.ap_m} — DNI {alumno.dni}</div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-              <div>Matrícula: {alumno.matricula_precio} — {alumno.matricula_estado ? "pagado" : "pendiente"}</div>
-              {Array.from({ length: 10 }).map((_, i) => {
-                const keyMonto = `c${i + 1}` as keyof typeof alumno;
-                const keyEstado = `c${i + 1}_estado` as keyof typeof alumno;
-                // @ts-ignore index via template
-                const monto = alumno[keyMonto];
-                // @ts-ignore index via template
-                const estado = alumno[keyEstado];
-                return (
-                  <div key={i}>Cuota {i + 1}: {monto} — {estado ? "pagado" : "pendiente"}</div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return <p className="whitespace-pre-line">{m.text}</p>;
-  };
-
   return (
     <>
-      <Button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-4 right-4 shadow-lg"
+      {/* Floating Button */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 ${open
+            ? "bg-slate-800"
+            : "bg-gradient-to-br from-blue-600 to-indigo-600 hover:scale-105 hover:shadow-2xl hover:shadow-blue-200"
+          }`}
+        title="Asistente IA"
       >
-        Asistente
-      </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Asistente del Director</DialogTitle>
-          </DialogHeader>
-          <div className="flex h-[420px] flex-col">
-            <div className="mb-2 text-xs text-muted-foreground">
-              Escribe instrucciones como: "muestrame las cuotas de los alumnos 73683521".
-            </div>
-            <div className="flex-1 overflow-hidden rounded-md border">
-              <div className="h-full overflow-y-auto p-3 space-y-3">
-                {messages.length === 0 ? (
-                  <div className="text-center text-sm text-muted-foreground mt-12">
-                    No hay mensajes. ¡Empieza a chatear!
-                  </div>
-                ) : (
-                  messages.map((m) => (
-                    <div
-                      key={m.id}
-                      className={
-                        m.role === "user"
-                          ? "ml-auto max-w-[85%] rounded-lg bg-primary text-primary-foreground px-3 py-2"
-                          : "mr-auto max-w-[85%] rounded-lg bg-muted px-3 py-2"
-                      }
-                    >
-                      {m.role === "assistant" ? renderAssistantBlock(m) : (
-                        <p className="whitespace-pre-line">{m.text}</p>
+        {open ? (
+          <ChevronDown className="w-6 h-6 text-white" />
+        ) : (
+          <>
+            <Bot className="w-6 h-6 text-white" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white animate-pulse" />
+          </>
+        )}
+      </button>
+
+      {/* Chat Panel */}
+      <div
+        className={`fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col transition-all duration-300 origin-bottom-right ${open
+            ? "opacity-100 scale-100 pointer-events-auto"
+            : "opacity-0 scale-95 pointer-events-none"
+          }`}
+        style={{ maxHeight: "520px" }}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl flex-shrink-0">
+          <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-bold text-white">Asistente Inteligente</p>
+            <p className="text-[10px] text-blue-100 font-medium">Crayon's AI · Datos en tiempo real</p>
+          </div>
+          <button
+            onClick={() => setOpen(false)}
+            className="text-white/70 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Messages */}
+        <div
+          className="flex-1 overflow-y-auto p-4 space-y-3"
+          style={{ minHeight: 0, maxHeight: "340px" }}
+        >
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              {msg.role === "assistant" && (
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">
+                  <Bot className="w-3 h-3 text-white" />
+                </div>
+              )}
+              <div
+                className={`max-w-[80%] rounded-xl px-3 py-2 text-xs leading-relaxed ${msg.role === "user"
+                    ? "bg-blue-600 text-white rounded-br-none"
+                    : "bg-slate-100 text-slate-800 rounded-bl-none"
+                  }`}
+              >
+                <p>{msg.text}</p>
+                {msg.data && msg.data.length > 0 && (
+                  <div className="mt-2 border-t border-slate-200 pt-2">
+                    <div className="overflow-x-auto">
+                      <table className="text-[10px] w-full">
+                        <thead>
+                          <tr>
+                            {Object.keys(msg.data[0]).map((k) => (
+                              <th
+                                key={k}
+                                className="text-left font-bold text-slate-500 pr-3 pb-1 uppercase"
+                              >
+                                {k}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {msg.data.slice(0, 5).map((row, ri) => (
+                            <tr key={ri}>
+                              {Object.values(row).map((val: any, vi) => (
+                                <td key={vi} className="pr-3 py-0.5 text-slate-700">
+                                  {String(val)}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {msg.data.length > 5 && (
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          +{msg.data.length - 5} registros más
+                        </p>
                       )}
                     </div>
-                  ))
-                )}
-                {loading && (
-                  <div className="mr-auto max-w-[85%] rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
-                    Pensando...
                   </div>
                 )}
               </div>
             </div>
-            <div className="mt-2 flex items-center gap-2">
-              <Input
-                placeholder="Escribe tu mensaje y presiona Enter"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={loading}
-              />
-              <Button onClick={sendMessage} disabled={loading || !input.trim()}>
-                Enviar
-              </Button>
+          ))}
+
+          {loading && (
+            <div className="flex justify-start">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center mr-2 mt-0.5">
+                <Bot className="w-3 h-3 text-white" />
+              </div>
+              <div className="bg-slate-100 rounded-xl rounded-bl-none px-3 py-2">
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
             </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Suggestions */}
+        {messages.length <= 1 && (
+          <div className="px-4 pb-2 flex flex-wrap gap-1.5 flex-shrink-0">
+            {SUGGESTIONS.map((s, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setInput(s);
+                  inputRef.current?.focus();
+                }}
+                className="text-[10px] font-medium bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 rounded-full px-2.5 py-1 transition-colors border border-slate-200 hover:border-blue-200"
+              >
+                {s}
+              </button>
+            ))}
           </div>
-        </DialogContent>
-      </Dialog>
+        )}
+
+        {/* Input */}
+        <div className="px-3 pb-3 pt-1 flex-shrink-0">
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Escribe tu pregunta..."
+              className="flex-1 bg-transparent text-xs text-slate-800 placeholder:text-slate-400 outline-none"
+              disabled={loading}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || loading}
+              className="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
+            >
+              {loading ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Send className="w-3 h-3" />
+              )}
+            </button>
+          </div>
+          <p className="text-[9px] text-slate-300 text-center mt-1.5 font-medium uppercase tracking-widest">
+            AI · Datos en tiempo real
+          </p>
+        </div>
+      </div>
     </>
   );
 }
-
-
