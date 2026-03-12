@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import clsx from "clsx";
 import axios, { AxiosError } from "axios";
+import { useQuery } from "@tanstack/react-query";
 import { FileText, RefreshCw, Loader2, Search, CheckCircle2, ChevronLeft } from "lucide-react";
 
 const steps = [
@@ -112,8 +113,6 @@ interface ErrorResponse {
 export default function RegisterStudent() {
   const [step, setStep] = useState(0);
   const [activeTab, setActiveTab] = useState<'padre' | 'madre'>('padre');
-  const [grados, setGrados] = useState<Grado[]>([]);
-  const [periodos, setPeriodos] = useState<Periodo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchingFor, setSearchingFor] = useState<'alumno' | 'padre' | 'madre' | null>(null);
   const [message, setMessage] = useState<{
@@ -303,11 +302,14 @@ export default function RegisterStudent() {
 
     switch (name) {
       case 'alumno_dni':
+        if (!stringValue) return 'Este campo es obligatorio';
+        if (!/^\d{8}$/.test(stringValue)) return 'El DNI debe tener exactamente 8 dígitos numéricos';
+        return '';
       case 'padre_dni':
       case 'madre_dni':
       case 'apoderado_dni':
-        // DNI can be empty initially but if provided must be 8 digits (handled usually by submit validation)
-        if (stringValue && !/^\d{8}$/.test(stringValue)) return 'DNI debe tener 8 dígitos';
+        if (!stringValue) return 'Este campo es obligatorio';
+        if (!/^\d{8}$/.test(stringValue)) return 'El DNI debe tener exactamente 8 dígitos numéricos';
         return '';
       case 'alumno_nombre':
       case 'alumno_ap_p':
@@ -319,8 +321,10 @@ export default function RegisterStudent() {
       case 'tipo_ingreso':
         if (!stringValue) return 'Este campo es obligatorio';
         return '';
-      // Optional fields for alumno
       case 'alumno_email':
+        if (!stringValue) return 'El email del alumno es obligatorio';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(stringValue)) return 'Formato de email inválido';
+        return '';
       case 'alumno_religion':
       case 'alumno_lengua_materna':
         return '';
@@ -344,7 +348,7 @@ export default function RegisterStudent() {
       case 'madre_telefono':
       case 'apoderado_telefono':
         if (!stringValue) return 'Este campo es obligatorio';
-        if (!/^\d{9}$/.test(stringValue)) return 'Teléfono debe tener 9 dígitos';
+        if (!/^\d{9}$/.test(stringValue)) return 'El teléfono debe tener exactamente 9 dígitos numéricos';
         return '';
       case 'matricula_precio':
       case 'costo_cuota':
@@ -356,38 +360,91 @@ export default function RegisterStudent() {
     }
   };
 
+  const validateStep = (currentStep: number) => {
+    const newErrors: { [key: string]: string } = {};
+    let isValid = true;
+
+    if (currentStep === 0) {
+      const requiredFields = [
+        'alumno_dni', 'alumno_nombre', 'alumno_ap_p', 'alumno_ap_m',
+        'alumno_fecha_nacimiento', 'alumno_sexo', 'alumno_email',
+        'alumno_direccion', 'id_grado', 'tipo_ingreso'
+      ];
+      requiredFields.forEach(field => {
+        const error = validateField(field, formData[field]);
+        if (error) {
+          newErrors[field] = error;
+          isValid = false;
+        }
+      });
+    } else if (currentStep === 1) {
+      // Al menos uno debe estar presente
+      const hasPadre = formData.padre_dni && formData.padre_nombre;
+      const hasMadre = formData.madre_dni && formData.madre_nombre;
+
+      if (!hasPadre && !hasMadre) {
+        newErrors[activeTab + '_dni'] = 'Debe registrar al menos un padre o madre';
+        isValid = false;
+      } else {
+        const prefix = hasPadre ? 'padre' : 'madre';
+        const fields = [`${prefix}_dni`, `${prefix}_nombre`, `${prefix}_ap_p`, `${prefix}_ap_m`, `${prefix}_fecha_nacimiento`, `${prefix}_telefono`];
+        fields.forEach(field => {
+          const error = validateField(field, formData[field]);
+          if (error) {
+            newErrors[field] = error;
+            isValid = false;
+          }
+        });
+      }
+    } else if (currentStep === 2) {
+      const fields = ['año_academico', 'matricula_precio', 'costo_cuota'];
+      fields.forEach(field => {
+        const error = validateField(field, formData[field]);
+        if (error) {
+          newErrors[field] = error;
+          isValid = false;
+        }
+      });
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
 
 
   const nextStep = () => {
-    // Validación temporalmente deshabilitada por solicitud del usuario
-    // if (validateStep(step)) {
-    setStep((s) => Math.min(s + 1, steps.length - 1));
-    setMessage(null);
-    // } else {
-    //   setMessage({ text: "Por favor complete todos los campos obligatorios (*) correctamente.", isError: true });
-    // }
+    if (validateStep(step)) {
+      setStep((s) => Math.min(s + 1, steps.length - 1));
+      setMessage(null);
+    } else {
+      setMessage({ text: "Por favor complete todos los campos obligatorios (*) correctamente.", isError: true });
+    }
   };
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
-  // Cargar grados y periodos al montar el componente
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const headers = { Authorization: `Bearer ${token}` };
+  // Cargar grados y periodos usando React Query con caché
+  const { data: grados = [] } = useQuery<Grado[]>({
+    queryKey: ['grados'],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const headers = { Authorization: `Bearer ${token}` };
+      const response = await axios.get("http://localhost:3000/api/grado/lista-grado", { headers });
+      return response.data.data;
+    },
+    staleTime: 60 * 60 * 1000, // 1 hora
+  });
 
-        const [gradosRes, periodosRes] = await Promise.all([
-          axios.get("http://localhost:3000/api/grado/lista-grado", { headers }),
-          axios.get("http://localhost:3000/api/cuotas/periodos", { headers })
-        ]);
-        setGrados(gradosRes.data.data);
-        setPeriodos(periodosRes.data.data);
-      } catch {
-        setMessage({ text: "No se pudieron cargar los datos iniciales", isError: true });
-      }
-    };
-    fetchData();
-  }, []);
+  const { data: periodos = [] } = useQuery<Periodo[]>({
+    queryKey: ['periodosA'],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const headers = { Authorization: `Bearer ${token}` };
+      const response = await axios.get("http://localhost:3000/api/cuotas/periodos", { headers });
+      return response.data.data;
+    },
+    staleTime: 60 * 60 * 1000, // 1 hora
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -633,10 +690,11 @@ export default function RegisterStudent() {
       !formData.alumno_nombre ||
       !formData.alumno_ap_p ||
       !formData.alumno_ap_m ||
-      !formData.alumno_fecha_nacimiento
+      !formData.alumno_fecha_nacimiento ||
+      !formData.alumno_email
     ) {
       setMessage({
-        text: "Complete todos los campos obligatorios del alumno",
+        text: "Complete todos los campos obligatorios del alumno (incluyendo email)",
         isError: true,
       });
       return;
@@ -928,7 +986,7 @@ export default function RegisterStudent() {
                   { value: "M", label: "Masculino" },
                   { value: "F", label: "Femenino" },
                 ])}
-                {renderInput("alumno_email", "Email", "email", "", true)}
+                {renderInput("alumno_email", "Email", "email", "ejemplo@correo.com")}
               </div>
               {/* Dirección, Lengua, Religión */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

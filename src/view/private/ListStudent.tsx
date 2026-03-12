@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/table";
 import axios from "axios";
 import EditarDatosButton from "@/components/EditarDatosButton";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 interface Periodo {
   id: number;
@@ -45,51 +47,101 @@ type Student = {
   apoderados: Apoderado[];
 };
 
+const EMPTY_ARRAY: any[] = [];
+
 export default function ListStudent() {
+  const queryClient = useQueryClient();
   const [year, setYear] = useState("2026");
   const [grade, setGrade] = useState("3");
   const [dniSearch, setDniSearch] = useState("");
   const [showParent, setShowParent] = useState<number | null>(null);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
-  const [yearsAvailable, setYearsAvailable] = useState<Periodo[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
+  const [appliedFilters, setAppliedFilters] = useState<{ year: string; grade: string } | null>(null);
   const [updateMessage, setUpdateMessage] = useState<{
     text: string;
     isSuccess: boolean;
   } | null>(null);
-  const [grados, setGrados] = useState<{ id: number; nombre: string }[]>([]);
+
+  // Queries para datos estáticos (cacheados)
+  const { data: yearsAvailable = EMPTY_ARRAY } = useQuery<Periodo[]>({
+    queryKey: ['periodosA'],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:3000/api/cuotas/periodos", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data.success ? response.data.data : [];
+    },
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const { data: grados = [] } = useQuery<{ id: number; nombre: string }[]>({
+    queryKey: ['grados'],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:3000/api/grado/lista-grado", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data.status ? response.data.data : [];
+    },
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const { data: studentsResponse, isLoading: isLoadingStudents, isFetching } = useQuery({
+    queryKey: ['studentsList', appliedFilters?.year, appliedFilters?.grade, page, limit],
+    queryFn: async () => {
+      if (!appliedFilters?.year || !appliedFilters?.grade) return null;
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `http://localhost:3000/api/alumno/lista-alumnos/${appliedFilters.year}/${appliedFilters.grade}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { page, limit }
+        }
+      );
+      if (response.data.success) {
+        return { data: response.data.data || [], pagination: response.data.pagination };
+      }
+      return null;
+    },
+    enabled: !!appliedFilters,
+    placeholderData: keepPreviousData,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const students = studentsResponse?.data ?? EMPTY_ARRAY;
+  const currentPagination = studentsResponse?.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 };
+  const loading = isLoadingStudents || isFetching;
 
   // Función para actualizar un estudiante específico en la lista
   const updateStudentInList = (updatedStudent: any) => {
-    // Actualizar la lista inmediatamente
-    setStudents(prevStudents =>
-      prevStudents.map(student =>
-        student.alumno_id === updatedStudent.alumno_id
-          ? {
-            ...student,
-            alumno_nombre: updatedStudent.nombre,
-            alumno_apellido_paterno: updatedStudent.ap_p,
-            alumno_apellido_materno: updatedStudent.ap_m,
-            fecha_nacimiento: updatedStudent.fecha_nacimiento
-          }
-          : student
-      )
-    );
+    // Actualizar la caché localmente
+    queryClient.setQueryData(['studentsList', appliedFilters?.year, appliedFilters?.grade, page, limit], (oldData: any) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        data: oldData.data.map((student: any) =>
+          student.alumno_id === updatedStudent.alumno_id
+            ? {
+              ...student,
+              alumno_nombre: updatedStudent.nombre,
+              alumno_apellido_paterno: updatedStudent.ap_p,
+              alumno_apellido_materno: updatedStudent.ap_m,
+              fecha_nacimiento: updatedStudent.fecha_nacimiento
+            }
+            : student
+        )
+      };
+    });
 
-    // Mostrar mensaje de éxito inmediatamente
     setUpdateMessage({
       text: `✅ Datos actualizados: ${updatedStudent.nombre} ${updatedStudent.ap_p}`,
       isSuccess: true
     });
 
-    // Ocultar mensaje después de 2 segundos (más rápido)
     setTimeout(() => {
       setUpdateMessage(null);
     }, 2000);
@@ -100,101 +152,28 @@ export default function ListStudent() {
     if (dniSearch.trim() === "") {
       setFilteredStudents(students);
     } else {
-      const filtered = students.filter(student =>
+      const filtered = students.filter((student: Student) =>
         student.alumno_dni.toLowerCase().includes(dniSearch.toLowerCase())
       );
       setFilteredStudents(filtered);
     }
   }, [dniSearch, students]);
 
-  useEffect(() => {
-    fetchYears();
-    fetchGrados();
-  }, []);
-
-  useEffect(() => {
-    fetchStudents(1);
-  }, [year, grade, pagination.limit]);
-
-  const fetchYears = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3000/api/cuotas/periodos", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (response.data.success) {
-        setYearsAvailable(response.data.data);
-      }
-    } catch (error: any) {
-      console.error("Error al cargar años académicos:", error);
-      if (error.response?.status === 401) {
-        window.location.href = "/login";
-      }
-    }
-  };
-
-  const fetchGrados = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3000/api/grado/lista-grado", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (response.data.status) {
-        setGrados(response.data.data);
-      }
-    } catch (error: any) {
-      console.error("Error al cargar grados:", error);
-      if (error.response?.status === 401) {
-        window.location.href = "/login";
-      }
-    }
-  };
-
-  const fetchStudents = async (pageToFetch: number = pagination.page) => {
-    if (!year || !grade) return;
-
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      console.log("Fetching students with token:", token?.substring(0, 15) + "...");
-
-      const response = await axios.get(
-        `http://localhost:3000/api/alumno/lista-alumnos/${year}/${grade}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            page: pageToFetch,
-            limit: pagination.limit
-          }
-        }
-      );
-
-      if (response.data.success) {
-        setStudents(response.data.data || []);
-        // Asegurarnos de que pagination exista en la respuesta
-        if (response.data.pagination) {
-          setPagination(response.data.pagination);
-        }
-      } else {
-        console.warn("Respuesta sin éxito:", response.data);
-        setStudents([]);
-      }
-    } catch (error: any) {
-      console.error("Error al cargar estudiantes:", error);
-      if (error.response?.status === 401) {
-        console.warn("Token inválido o expirado. Redirigiendo a login...");
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= pagination.totalPages) {
-      fetchStudents(newPage);
+    if (newPage >= 1 && newPage <= currentPagination.totalPages) {
+      setPage(newPage);
     }
+  };
+
+  // Reset page when year or grade changes (from applied filters)
+  useEffect(() => {
+    setPage(1);
+  }, [appliedFilters]);
+
+  const handleSearch = () => {
+    setAppliedFilters({ year, grade });
+    setPage(1);
   };
 
   return (
@@ -254,11 +233,16 @@ export default function ListStudent() {
           />
         </div>
         <Button
-          className="mt-2 h-9"
-          onClick={() => fetchStudents(1)}
+          onClick={handleSearch}
+          className="mt-2 h-9 bg-slate-900 text-white hover:bg-slate-800"
           disabled={loading}
         >
-          {loading ? "Cargando..." : "Buscar"}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Cargando...
+            </>
+          ) : "Buscar"}
         </Button>
       </div>
 
@@ -275,11 +259,11 @@ export default function ListStudent() {
       {/* Información de resultados */}
       <div className="flex justify-between items-center text-sm text-gray-600">
         <div>
-          Mostrando {students.length} de {pagination.total} estudiantes
+          Mostrando {students.length} de {currentPagination.total} estudiantes
           {dniSearch.trim() !== "" && ` (filtrados por DNI: ${dniSearch})`}
         </div>
         <div className="flex items-center gap-2 font-medium">
-          Página {pagination.page} de {pagination.totalPages || 1}
+          Página {currentPagination.page} de {currentPagination.totalPages || 1}
         </div>
       </div>
 
@@ -315,22 +299,22 @@ export default function ListStudent() {
       </div>
 
       {/* Controles de Paginación */}
-      {pagination.totalPages > 1 && (
+      {currentPagination.totalPages > 1 && (
         <div className="flex justify-center items-center gap-2 mt-4">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handlePageChange(pagination.page - 1)}
-            disabled={pagination.page === 1 || loading}
+            onClick={() => handlePageChange(currentPagination.page - 1)}
+            disabled={currentPagination.page === 1 || loading}
           >
             Anterior
           </Button>
 
           <div className="flex gap-1">
-            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+            {Array.from({ length: currentPagination.totalPages }, (_, i) => i + 1).map((p) => (
               <Button
                 key={p}
-                variant={pagination.page === p ? "default" : "outline"}
+                variant={currentPagination.page === p ? "default" : "outline"}
                 size="sm"
                 className="w-8 h-8 p-0"
                 onClick={() => handlePageChange(p)}
@@ -344,8 +328,8 @@ export default function ListStudent() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handlePageChange(pagination.page + 1)}
-            disabled={pagination.page === pagination.totalPages || loading}
+            onClick={() => handlePageChange(currentPagination.page + 1)}
+            disabled={currentPagination.page === currentPagination.totalPages || loading}
           >
             Siguiente
           </Button>

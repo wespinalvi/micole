@@ -1,785 +1,707 @@
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
-import {
-    Users,
-    CheckCircle2,
-    Calendar,
-    LockOpen,
-    ChevronRight,
-    LayoutDashboard,
-    ArrowUpCircle,
-    MoreVertical,
-    GraduationCap,
-    Search,
-    Loader2,
-    AlertCircle,
-    ArrowRight
-} from "lucide-react";
-import axios from "axios";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
+import { useState, useMemo, useEffect } from "react";
+import api from "@/lib/axios";
 
-// --- Tipos ---
-interface GradeInfo {
-    id: string;
-    name: string;
-    level: string;
-    studentCount: number;
-    promotedCount: number;
-    blockedCount: number;
-    capacity: number;
-    progress: number;
+const estadoBadge = (estado: string) => {
+  if (estado?.toLowerCase() === "activo") return { label: "Activo", bg: "#e8f5e9", color: "#2e7d32" };
+  if (estado?.toLowerCase() === "egresado") return { label: "Egresado", bg: "#fff3e0", color: "#e65100" };
+  if (estado?.toLowerCase() === "inactivo") return { label: "Sin acceso", bg: "#fce4ec", color: "#c62828" };
+  if (estado?.toLowerCase() === "promovido") return { label: "Promovido", bg: "#eff6ff", color: "#2563eb" };
+  return { label: estado, bg: "#f5f5f5", color: "#555" };
+};
+
+interface Alumno {
+  id_matricula: number;
+  nombre_completo: string;
+  seccion: string;
+  promedio: string | number;
+  estado: string;
+  alumno_estado: string;
+  puede_promover: boolean;
+  grado?: string;
 }
 
-interface AcademicPeriod {
-    id: string;
-    year: string;
-    status: "active" | "closed" | "upcoming";
+interface Grado {
+  id: number;
+  nombre: string;
+  numero_grado: number;
 }
 
-interface Student {
-    id: string;
-    alumnoId: string;
-    dni: string;
-    name: string;
-    lastName: string;
-    currentGrade: string;
-    status: "pending" | "ready" | "promoted" | "needs_review" | "failed";
-    hasDebt: boolean;
-    puede_promover: boolean;
+interface Periodo {
+  id: number;
+  anio: number;
+  activo: number;
 }
 
-const BASE_URL = "http://localhost:3000/api/promocion";
+interface HistorialItem {
+  fecha: string;
+  tipo: string;
+  alumnos: (string | undefined)[];
+  de: string;
+  a: string | null;
+}
 
-// --- Componentes Pequeños ---
-const StatCard = ({ title, value, icon: Icon, colorClass, subtext }: any) => (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 transition-all hover:shadow-md group">
-        <div className="flex justify-between items-start mb-4">
-            <div className={`p-2.5 rounded-lg ${colorClass} bg-opacity-10`}>
-                <Icon size={20} className={colorClass.replace("bg-", "text-")} />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-500">
-                Info
-            </span>
-        </div>
-        <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
-            <div className="flex items-baseline gap-2">
-                <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
-                {subtext && (
-                    <span className="text-xs text-slate-400 font-normal">{subtext}</span>
-                )}
-            </div>
-        </div>
-    </div>
-);
+export default function PromocionAlumnos() {
+  const [alumnos, setAlumnos] = useState<Alumno[]>([]);
+  const [grados, setGrados] = useState<Grado[]>([]);
+  const [gradoOrigenId, setGradoOrigenId] = useState<string>("");
+  const [seccionFiltro, setSeccionFiltro] = useState<string>("Todas");
+  const [seleccionados, setSeleccionados] = useState<number[]>([]);
+  const [periodoActual, setPeriodoActual] = useState<Periodo | null>(null);
+  const [periodoSiguiente, setPeriodoSiguiente] = useState<Periodo | null>(null);
+  const [todoPeriodos, setTodoPeriodos] = useState<Periodo[]>([]);
+  const [confirmando, setConfirmando] = useState<string | null>(null); // null | "seleccion" | "grado" | "egreso" | "individual"
+  const [historial, setHistorial] = useState<HistorialItem[]>([]);
+  const [tab, setTab] = useState<string>("promover"); // "promover" | "historial" | "egresados"
 
-const GradeCard = ({ title, level, students, progress, onManage }: any) => (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-blue-300 transition-all hover:shadow-sm group">
-        <div className="p-5">
-            <div className="flex justify-between items-start mb-4">
-                <div>
-                    <h4 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
-                        {title}
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">{level}</p>
-                </div>
-                <div className="bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
-                    <span className="text-xs font-bold text-slate-600">
-                        {students} Est.
-                    </span>
-                </div>
-            </div>
+  const [esUltimoGrado, setEsUltimoGrado] = useState<boolean>(false);
+  const [nombreGradoActual, setNombreGradoActual] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [idIndividual, setIdIndividual] = useState<number | null>(null);
 
-            <div className="space-y-2 mb-6">
-                <div className="flex justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                    <span>Progreso de promoción</span>
-                    <span className={progress > 0 ? "text-blue-600" : ""}>{progress}%</span>
-                </div>
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                    <div
-                        className="bg-blue-600 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${progress}%` }}
-                    />
-                </div>
-            </div>
+  // Cargar Catálogos (Grados y Periodos)
+  useEffect(() => {
+    const fetchCatalogos = async () => {
+      try {
+        const [gradosRes, catalogoRes] = await Promise.all([
+          api.get("/grado/lista-grado"),
+          api.get("/horario/catalogos")
+        ]);
 
-            <button
-                onClick={onManage}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-slate-50 text-slate-700 text-sm font-medium border border-slate-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all"
-            >
-                Gestionar Alumnos
-                <ChevronRight size={14} />
-            </button>
-        </div>
-    </div>
-);
-
-// --- Componente Principal ---
-export default function AcademicManagement() {
-    const [activeTab, setActiveTab] = useState<"resumen" | "promocion">("resumen");
-    const [headerPortalTarget, setHeaderPortalTarget] = useState<HTMLElement | null>(null);
-
-    // States for data
-    const [periods, setPeriods] = useState<AcademicPeriod[]>([]);
-    const [selectedPeriod, setSelectedPeriod] = useState<string>("");
-    const [grades, setGrades] = useState<GradeInfo[]>([]);
-    const [students, setStudents] = useState<Student[]>([]);
-    const [selectedGradeId, setSelectedGradeId] = useState<string>("");
-    const [allGradesList, setAllGradesList] = useState<any[]>([]);
-
-    // UI States
-    const [loading, setLoading] = useState(false);
-    const [loadingStudents, setLoadingStudents] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [isPromoting, setIsPromoting] = useState(false);
-    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-    const [promotionProgress, setPromotionProgress] = useState(0);
-    const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-    // Initial Data Fetching
-    useEffect(() => {
-        const fetchInitialData = async () => {
-            try {
-                setLoading(true);
-                const [periodsRes, gradesRes] = await Promise.all([
-                    axios.get(`${BASE_URL}/periodos`),
-                    axios.get("http://localhost:3000/api/grado/lista-grado"),
-                ]);
-
-                if (gradesRes.data.status) {
-                    setAllGradesList(gradesRes.data.data);
-                }
-
-                if (periodsRes.data.status) {
-                    const mappedPeriods = periodsRes.data.data.map((p: any) => ({
-                        id: p.id.toString(),
-                        year: p.anio.toString(),
-                        status: p.activo === 1 ? "active" : "closed",
-                    }));
-                    setPeriods(mappedPeriods);
-
-                    const active = mappedPeriods.find((p: any) => p.status === "active");
-                    if (active) setSelectedPeriod(active.id);
-                    else if (mappedPeriods.length > 0) setSelectedPeriod(mappedPeriods[0].id);
-                }
-            } catch (err) {
-                console.error("Error fetching initial data:", err);
-                setError("No se pudieron cargar los datos iniciales.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchInitialData();
-    }, []);
-
-    useEffect(() => {
-        setHeaderPortalTarget(document.getElementById("header-right-slot"));
-    }, []);
-
-    const fetchStats = async () => {
-        if (!selectedPeriod || allGradesList.length === 0) return;
-        try {
-            setLoading(true);
-            const response = await axios.get(`${BASE_URL}/estadisticas/${selectedPeriod}`);
-            if (response.data.status) {
-                const mappedGrades = response.data.data.map((g: any, index: number) => {
-                    const realGrade = allGradesList.find((ag) => ag.nombre === g.nombre);
-                    const id = (
-                        realGrade?.id ||
-                        g.id ||
-                        g.grado_id ||
-                        `grade-${index}`
-                    ).toString();
-
-                    const total = g.total || 0;
-                    const promoted = g.promovidos || 0;
-                    return {
-                        id,
-                        name: g.nombre || "Grado",
-                        level: "Secundaria",
-                        studentCount: total,
-                        promotedCount: promoted,
-                        blockedCount: g.repitentes_bloqueados || 0,
-                        capacity: 30,
-                        progress: total > 0 ? Math.round((promoted / total) * 100) : 0,
-                    };
-                });
-                setGrades(mappedGrades);
-            }
-        } catch (err) {
-            console.error("Error fetching stats:", err);
-        } finally {
-            setLoading(false);
+        if (gradosRes.data.status) {
+          setGrados(gradosRes.data.data);
+          if (gradosRes.data.data.length > 0) {
+            setGradoOrigenId(String(gradosRes.data.data[0].id));
+          }
         }
-    };
 
-    useEffect(() => {
-        fetchStats();
-    }, [selectedPeriod, allGradesList]);
+        if (catalogoRes.data.success) {
+          const rawPeriodos: Periodo[] = catalogoRes.data.data.periodos || [];
+          const ordenados = [...rawPeriodos].sort((a, b) => a.anio - b.anio);
+          setTodoPeriodos(ordenados);
 
-    const fetchStudents = async () => {
-        if (!selectedGradeId || !selectedPeriod || activeTab !== "promocion") return;
-        if (selectedGradeId.startsWith("grade-")) return;
-
-        try {
-            setLoadingStudents(true);
-            const response = await axios.get(
-                `${BASE_URL}/alumnos-estado?periodId=${selectedPeriod}&gradoId=${selectedGradeId}`
-            );
-            if (response.data.status) {
-                const mappedStudents = response.data.data.map((s: any, index: number) => ({
-                    id: (s.id_matricula || s.id || `student-${index}`).toString(),
-                    alumnoId: (s.id_alumno || "").toString(),
-                    dni: s.dni || "",
-                    name: s.nombre_completo ? s.nombre_completo.split(", ")[1] || "" : "",
-                    lastName: s.nombre_completo
-                        ? s.nombre_completo.split(", ")[0] || s.nombre_completo
-                        : "",
-                    currentGrade: grades.find((g) => g.id === selectedGradeId)?.name || "",
-                    status: s.hasDebt ? "needs_review" : "ready",
-                    hasDebt: s.hasDebt === 1 || s.hasDebt === true,
-                    puede_promover: s.puede_promover === 1 || s.puede_promover === true,
-                }));
-                setStudents(mappedStudents);
-            }
-        } catch (err) {
-            console.error("Error fetching students:", err);
-        } finally {
-            setLoadingStudents(false);
+          const actual = ordenados.find((p: Periodo) => p.activo === 1);
+          if (actual) {
+            setPeriodoActual(actual);
+            const idx = ordenados.findIndex(p => p.id === actual.id);
+            setPeriodoSiguiente(ordenados[idx + 1] || null);
+          }
         }
+      } catch (error) {
+        console.error("Error al cargar catálogos:", error);
+      }
     };
+    fetchCatalogos();
+  }, []);
 
-    useEffect(() => {
-        fetchStudents();
-    }, [selectedGradeId, selectedPeriod, activeTab]);
-
-    const togglePromotionPermission = async (id: string, currentStatus: boolean) => {
-        try {
-            const response = await axios.patch(
-                `${BASE_URL}/matricula/${id}/toggle-promocion`,
-                {
-                    puede_promover: currentStatus ? 0 : 1,
-                }
-            );
-            if (response.data.status) {
-                fetchStudents();
-            }
-        } catch (err) {
-            console.error("Error toggling promotion:", err);
-            setError("Error al cambiar el permiso de promoción.");
+  // Cargar Alumnos del Grado seleccionado
+  const fetchAlumnosGrado = async () => {
+    if (!gradoOrigenId || !periodoActual) return;
+    setLoading(true);
+    try {
+      const { data } = await api.get(`/promocion/alumnos-estado`, {
+        params: {
+          periodId: periodoActual.id,
+          gradoId: gradoOrigenId
         }
-    };
+      });
 
-    const handlePromoteAll = async () => {
-        setConfirmDialogOpen(false);
-        setIsPromoting(true);
-        setError(null);
-        setPromotionProgress(5);
+      if (data.status) {
+        setAlumnos(data.data || []);
+        setEsUltimoGrado(data.esUltimoGrado);
+        setNombreGradoActual(data.nombreGrado);
+      }
+    } catch (error) {
+      console.error("Error fetching alumnos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        try {
-            const sortedPeriods = [...periods].sort(
-                (a, b) => parseInt(a.year) - parseInt(b.year)
-            );
-            const currentIndex = sortedPeriods.findIndex((p) => p.id === selectedPeriod);
-            const nextPeriod = sortedPeriods[currentIndex + 1];
+  useEffect(() => {
+    fetchAlumnosGrado();
+  }, [gradoOrigenId, periodoActual]);
 
-            if (!nextPeriod) {
-                throw new Error(
-                    "No se encontró un período académico destino (Año Siguiente). Debe crearlo primero."
-                );
-            }
+  const gradoDestinoNombre = useMemo(() => {
+    if (esUltimoGrado) return null;
+    const currentIdx = grados.findIndex(g => String(g.id) === gradoOrigenId);
+    if (currentIdx !== -1 && currentIdx < grados.length - 1) {
+      return grados[currentIdx + 1].nombre;
+    }
+    return "Siguiente Grado";
+  }, [gradoOrigenId, grados, esUltimoGrado]);
 
-            setPromotionProgress(30);
-            const response = await axios.post(`${BASE_URL}/procesar-masivo`, {
-                periodIdActual: parseInt(selectedPeriod),
-                periodIdSiguiente: parseInt(nextPeriod.id),
-            });
-
-            if (response.data.status) {
-                setPromotionProgress(100);
-                setSuccessMessage(
-                    `¡Promoción exitosa! Alumnos trasladados al año ${nextPeriod.year}.`
-                );
-                setTimeout(() => {
-                    setIsPromoting(false);
-                    setPromotionProgress(0);
-                    fetchStats();
-                    setActiveTab("resumen");
-                    setSuccessMessage(null);
-                }, 2000);
-            }
-        } catch (err: any) {
-            console.error("Error in promotion process:", err);
-            setError(
-                err.response?.data?.message ||
-                err.message ||
-                "Ocurrió un error crítico durante la promoción."
-            );
-            setIsPromoting(false);
-            setPromotionProgress(0);
-        }
-    };
-
-    const totalStudents = grades.reduce((acc, curr) => acc + curr.studentCount, 0);
-    const totalPromoted = grades.reduce((acc, curr) => acc + curr.promotedCount, 0);
-    const currentPeriodInfo = periods.find((p) => p.id === selectedPeriod);
-
-    return (
-        <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans antialiased">
-            {headerPortalTarget && createPortal(
-                <div className="relative hidden md:block">
-                    <Search
-                        size={16}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Buscar grado o alumno..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-9 pr-4 py-1.5 bg-slate-100 border-transparent focus:bg-white focus:border-blue-300 rounded-lg text-sm transition-all outline-none w-64"
-                    />
-                </div>,
-                headerPortalTarget
-            )}
-
-            <main className="max-w-7xl mx-auto p-6 lg:p-10 space-y-8">
-                {/* Mensajes de error/éxito */}
-                {error && (
-                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl flex items-center gap-3 text-rose-800 text-sm animate-in slide-in-from-top-2">
-                        <AlertCircle className="h-5 w-5" />
-                        <p className="flex-1">{error}</p>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-rose-800 hover:bg-rose-100"
-                            onClick={() => setError(null)}
-                        >
-                            Cerrar
-                        </Button>
-                    </div>
-                )}
-
-                {successMessage && (
-                    <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-center gap-3 text-emerald-800 text-sm animate-in slide-in-from-top-2">
-                        <CheckCircle2 className="h-5 w-5" />
-                        <p>{successMessage}</p>
-                    </div>
-                )}
-
-                {/* Encabezado de Página */}
-                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="bg-blue-600 p-2 rounded-lg shadow-blue-200 shadow-lg">
-                                <GraduationCap className="text-white" size={24} />
-                            </div>
-                            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-                                Gestión de Grados Académicos
-                            </h1>
-                        </div>
-                        <p className="text-slate-500 max-w-xl text-[15px] leading-relaxed">
-                            Planifica períodos lectivos, promueve estudiantes de forma masiva y revisa
-                            el historial académico centralizado.
-                        </p>
-                    </div>
-
-                    <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-                        <button
-                            onClick={() => setActiveTab("resumen")}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === "resumen"
-                                ? "bg-slate-900 text-white shadow-md"
-                                : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-                                }`}
-                        >
-                            <LayoutDashboard size={16} />
-                            Resumen
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("promocion")}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === "promocion"
-                                ? "bg-slate-900 text-white shadow-md"
-                                : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-                                }`}
-                        >
-                            <ArrowUpCircle size={16} />
-                            Promoción
-                        </button>
-                        <div className="w-px h-6 bg-slate-200 mx-1" />
-
-                        <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                            <SelectTrigger className="flex items-center gap-2 px-4 py-2 h-9 border-none bg-transparent text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:ring-0">
-                                <Calendar size={16} />
-                                <SelectValue placeholder="Periodo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {periods.map((p) => (
-                                    <SelectItem key={p.id} value={p.id}>
-                                        Año {p.year} {p.status === "active" ? "(Activo)" : ""}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </header>
-
-                {activeTab === "resumen" && (
-                    <>
-                        {/* Indicadores Clave */}
-                        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                            <StatCard
-                                title="Total Estudiantes"
-                                value={loading ? "..." : totalStudents}
-                                icon={Users}
-                                colorClass="bg-blue-600"
-                                subtext="Matriculados"
-                            />
-                            <StatCard
-                                title="Habilitados"
-                                value={loading ? "..." : totalPromoted}
-                                icon={CheckCircle2}
-                                colorClass="bg-emerald-600"
-                                subtext="Para promover"
-                            />
-                            <StatCard
-                                title="Período Actual"
-                                value={`Año ${currentPeriodInfo?.year || "---"}`}
-                                icon={Calendar}
-                                colorClass="bg-amber-600"
-                            />
-                            <StatCard
-                                title="Estado del Sistema"
-                                value={currentPeriodInfo?.status === "active" ? "Abierto" : "Cerrado"}
-                                icon={LockOpen}
-                                colorClass="bg-indigo-600"
-                            />
-                        </section>
-
-                        {/* Sección de Contenido */}
-                        <section className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <h2 className="text-lg font-bold text-slate-800">
-                                        Explorador de Grados
-                                    </h2>
-                                    <span className="bg-slate-200 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded">
-                                        SECUNDARIA
-                                    </span>
-                                </div>
-                                <button className="text-slate-400 hover:text-slate-600 p-1">
-                                    <MoreVertical size={20} />
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {loading && grades.length === 0 ? (
-                                    Array(6)
-                                        .fill(0)
-                                        .map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="h-48 bg-slate-100 animate-pulse rounded-xl"
-                                            />
-                                        ))
-                                ) : (
-                                    grades
-                                        .filter(g => g.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                                        .map((grade) => (
-                                            <GradeCard
-                                                key={grade.id}
-                                                title={grade.name}
-                                                level={grade.level}
-                                                students={grade.studentCount}
-                                                progress={grade.progress}
-                                                onManage={() => {
-                                                    setSelectedGradeId(grade.id);
-                                                    setActiveTab("promocion");
-                                                }}
-                                            />
-                                        ))
-                                )}
-                            </div>
-                        </section>
-                    </>
-                )}
-
-                {activeTab === "promocion" && (
-                    <div className="space-y-6 animate-in slide-in-from-bottom-5 duration-500">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                            <div>
-                                <h3 className="text-lg font-bold text-slate-900">
-                                    Configuración de Promoción
-                                </h3>
-                                <p className="text-sm text-slate-500">
-                                    Habilita a los alumnos aptos para el proceso masivo.
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
-                                        Grado
-                                    </p>
-                                    <Select
-                                        value={selectedGradeId || ""}
-                                        onValueChange={setSelectedGradeId}
-                                    >
-                                        <SelectTrigger className="w-[200px] h-9 bg-slate-50">
-                                            <SelectValue placeholder="Seleccionar Grado" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {grades.map((g) => (
-                                                <SelectItem key={g.id} value={g.id}>
-                                                    {g.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="pt-5 hidden md:block">
-                                    <ArrowRight className="h-4 w-4 text-slate-300" />
-                                </div>
-                                <div className="pt-4">
-                                    <Dialog
-                                        open={confirmDialogOpen}
-                                        onOpenChange={setConfirmDialogOpen}
-                                    >
-                                        <DialogTrigger asChild>
-                                            <Button
-                                                className="h-9 bg-slate-900 hover:bg-blue-600 text-xs shadow-md transition-all"
-                                                disabled={currentPeriodInfo?.status !== "active" || isPromoting}
-                                            >
-                                                <ArrowUpCircle className="h-3.5 w-3.5 mr-2" />
-                                                PROCESAR PROMOCIÓN MASIVA
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Confirmar Promoción Masiva</DialogTitle>
-                                                <DialogDescription>
-                                                    Este proceso trasladará a TODOS los alumnos habilitados al
-                                                    siguiente año académico de forma automática.
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                            <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-sm">
-                                                <div className="flex justify-between">
-                                                    <span>Origen:</span>
-                                                    <span className="font-bold">{currentPeriodInfo?.year}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span>Destino:</span>
-                                                    <span className="font-bold">
-                                                        {parseInt(currentPeriodInfo?.year || "0") + 1}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <DialogFooter className="pt-4">
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() => setConfirmDialogOpen(false)}
-                                                >
-                                                    Cancelar
-                                                </Button>
-                                                <Button
-                                                    onClick={handlePromoteAll}
-                                                    className="bg-slate-900 hover:bg-blue-600"
-                                                >
-                                                    Iniciar Proceso
-                                                </Button>
-                                            </DialogFooter>
-                                        </DialogContent>
-                                    </Dialog>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm relative min-h-[400px]">
-                            {isPromoting && (
-                                <div className="absolute inset-0 z-30 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center p-8">
-                                    <div className="w-full max-w-sm space-y-6">
-                                        <div className="flex flex-col items-center">
-                                            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
-                                            <h4 className="text-lg font-bold text-slate-900">
-                                                Ejecutando Promoción Masiva
-                                            </h4>
-                                            <p className="text-xs text-slate-500 text-center mt-1">
-                                                Generando matrículas y cuotas para el nuevo año...
-                                            </p>
-                                        </div>
-                                        <Progress value={promotionProgress} className="h-2 bg-slate-100" />
-                                    </div>
-                                </div>
-                            )}
-
-                            {loadingStudents ? (
-                                <div className="flex flex-col items-center justify-center h-64 gap-3">
-                                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                                    <p className="text-sm text-slate-500">Cargando lista de alumnos...</p>
-                                </div>
-                            ) : (
-                                <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader className="bg-slate-50/50">
-                                            <TableRow>
-                                                <TableHead className="w-[100px] text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                                    DNI
-                                                </TableHead>
-                                                <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                                    Estudiante
-                                                </TableHead>
-                                                <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                                    Deuda
-                                                </TableHead>
-                                                <TableHead className="text-center text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                                    Estado
-                                                </TableHead>
-                                                <TableHead className="text-center text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                                    Permitir Promoción
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {students
-                                                .filter(
-                                                    (s) =>
-                                                        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                        s.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                        s.dni.includes(searchTerm)
-                                                )
-                                                .map((student) => (
-                                                    <TableRow key={student.id} className="hover:bg-slate-50/50">
-                                                        <TableCell className="text-xs font-medium text-slate-600">
-                                                            {student.dni}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <div className="flex flex-col">
-                                                                <span className="font-bold text-slate-900 leading-tight">
-                                                                    {student.lastName}
-                                                                </span>
-                                                                <span className="text-xs text-slate-500">
-                                                                    {student.name}
-                                                                </span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Badge
-                                                                variant="secondary"
-                                                                className={
-                                                                    student.hasDebt
-                                                                        ? "bg-rose-50 text-rose-600 border-none"
-                                                                        : "bg-emerald-50 text-emerald-600 border-none"
-                                                                }
-                                                            >
-                                                                {student.hasDebt ? "CON DEUDA" : "AL DÍA"}
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell className="text-center">
-                                                            <Badge
-                                                                variant="secondary"
-                                                                className={
-                                                                    student.puede_promover
-                                                                        ? "bg-blue-50 text-blue-700 border-none"
-                                                                        : "bg-amber-50 text-amber-700 border-none"
-                                                                }
-                                                            >
-                                                                {student.puede_promover ? "Habilitado" : "Retenido"}
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell className="text-center">
-                                                            <Switch
-                                                                checked={student.puede_promover}
-                                                                onCheckedChange={() =>
-                                                                    togglePromotionPermission(
-                                                                        student.id,
-                                                                        student.puede_promover
-                                                                    )
-                                                                }
-                                                                className="data-[state=checked]:bg-blue-600"
-                                                            />
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            {selectedGradeId && students.length === 0 && (
-                                                <TableRow>
-                                                    <TableCell
-                                                        colSpan={5}
-                                                        className="h-64 text-center text-slate-400"
-                                                    >
-                                                        No se encontraron alumnos para este grado en el año {currentPeriodInfo?.year}.
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                            {!selectedGradeId && (
-                                                <TableRow>
-                                                    <TableCell
-                                                        colSpan={5}
-                                                        className="h-64 text-center text-slate-400 font-medium"
-                                                    >
-                                                        Selecciona un grado para comenzar la gestión de alumnos.
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </main>
-
-            {/* Botón Flotante de Resumen (Solo en tab de promoción) */}
-            {activeTab === "promocion" && selectedGradeId && students.length > 0 && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 bg-slate-900 text-white border border-slate-700 shadow-2xl rounded-full px-6 py-3 flex items-center gap-6 animate-in slide-in-from-bottom-10">
-                    <span className="text-sm font-bold">{students.length} Estudiantes</span>
-                    <div className="h-4 w-[px] bg-slate-700" />
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-emerald-400 rounded-full" />
-                        <span className="text-xs font-bold text-emerald-400">
-                            {students.filter((s) => s.puede_promover).length} Habilitados
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-amber-400 rounded-full" />
-                        <span className="text-xs font-bold text-amber-400">
-                            {students.filter((s) => !s.puede_promover).length} Retenidos
-                        </span>
-                    </div>
-                </div>
-            )}
-
-            {/* Botón Flotante de Asistencia */}
-            <button className="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-full shadow-2xl hover:bg-blue-600 transition-all flex items-center gap-3 font-medium text-sm group z-40">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                Soporte
-            </button>
-        </div>
+  const alumnosFiltrados = useMemo(() => {
+    return alumnos.filter(
+      (a) => {
+        const matchesSeccion = seccionFiltro === "Todas" || a.seccion === seccionFiltro;
+        // En la pestaña promover, solo mostramos los que no han sido procesados (Promovido)
+        const isNotProcessed = a.estado !== "Promovido";
+        return matchesSeccion && isNotProcessed;
+      }
     );
+  }, [alumnos, seccionFiltro]);
+
+  const secciones = useMemo(() => {
+    const s = [...new Set(alumnos.map((a) => a.seccion))];
+    return ["Todas", ...s.sort()];
+  }, [alumnos]);
+
+  const egresados = useMemo(() => alumnos.filter((a) => a.alumno_estado?.toLowerCase() === "egresado"), [alumnos]);
+
+  const toggleSeleccion = (id: number) => {
+    setSeleccionados((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleTodos = () => {
+    if (seleccionados.length === alumnosFiltrados.length) {
+      setSeleccionados([]);
+    } else {
+      setSeleccionados(alumnosFiltrados.map((a) => a.id_matricula));
+    }
+  };
+
+  const ejecutarPromocionIndividual = async (idMatricula: number) => {
+    if (!periodoSiguiente && !esUltimoGrado) {
+      alert("No se ha definido un periodo siguiente para la promoción.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data } = await api.post(`/promocion/promover-individual/${idMatricula}`, {
+        periodIdSiguiente: periodoSiguiente?.id || null
+      });
+
+      if (data.success || data.status) {
+        // Actualizamos localmente o volvemos a cargar
+        await fetchAlumnosGrado();
+        const alumno = alumnos.find(a => a.id_matricula === idMatricula);
+        const ahora = new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" });
+        setHistorial(prev => [
+          {
+            fecha: ahora,
+            tipo: esUltimoGrado ? "Egreso" : "Promoción",
+            alumnos: [alumno?.nombre_completo],
+            de: nombreGradoActual,
+            a: esUltimoGrado ? "Egresado" : gradoDestinoNombre,
+          },
+          ...prev
+        ]);
+      }
+    } catch (error) {
+      console.error("Error en promoción individual:", error);
+    } finally {
+      setLoading(false);
+      setConfirmando(null);
+    }
+  };
+
+  const ejecutarProcesarMasivo = async () => {
+    if (!periodoActual || (!periodoSiguiente && !esUltimoGrado)) {
+      alert("No se han definido periodos para procesar promociones o repeticiones.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data } = await api.post(`/promocion/procesar-masivo`, {
+        periodIdActual: periodoActual.id,
+        periodIdSiguiente: periodoSiguiente?.id || null,
+        gradoId: parseInt(gradoOrigenId),
+        idsPromovidos: seleccionados // Solo los marcados pasarán al siguiente grado
+      });
+
+      if (data.success || data.status) {
+        await fetchAlumnosGrado();
+        setHistorial(prev => [
+          {
+            fecha: new Date().toLocaleDateString("es-PE"),
+            tipo: esUltimoGrado ? "Egreso/Repetición" : "Promoción/Repetición",
+            alumnos: [`Todo el grado ${nombreGradoActual}`],
+            de: nombreGradoActual,
+            a: esUltimoGrado ? "Egreso/Mismo Grado" : `Siguiente Grado / Mismo Grado`,
+          },
+          ...prev
+        ]);
+      }
+    } catch (error) {
+      console.error("Error en procesamiento masivo:", error);
+    } finally {
+      setLoading(false);
+      setConfirmando(null);
+    }
+  };
+
+
+  return (
+    <div style={{ fontFamily: "'DM Sans', system-ui, sans-serif", background: "#f4f5f7", minHeight: "100vh", color: "#1a1d23" }}>
+      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+      {/* Header */}
+      <div style={{ background: "#fff", borderBottom: "1px solid #e2e4e9", padding: "0 32px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 0 0" }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#2563eb" }} />
+                <span style={{ fontSize: 12, color: "#6b7280", fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase" }}>Sistema Escolar</span>
+              </div>
+              <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, color: "#111827" }}>Promoción de Alumnos</h1>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ position: "relative" }}>
+                <select
+                  value={periodoActual?.id || ""}
+                  onChange={(e) => {
+                    const p = todoPeriodos.find(x => String(x.id) === e.target.value);
+                    if (p) {
+                      setPeriodoActual(p);
+                      const idx = todoPeriodos.findIndex(x => x.id === p.id);
+                      setPeriodoSiguiente(todoPeriodos[idx + 1] || null);
+                      setSeleccionados([]);
+                    }
+                  }}
+                  style={{
+                    appearance: "none",
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
+                    borderRadius: 6,
+                    padding: "5px 32px 5px 12px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "#1d4ed8",
+                    cursor: "pointer",
+                    outline: "none",
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231d4ed8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 8px center",
+                    backgroundSize: "16px"
+                  }}
+                >
+                  {todoPeriodos.map((p) => (
+                    <option key={p.id} value={p.id}>Año Escolar {p.anio}</option>
+                  ))}
+                </select>
+              </div>
+              {periodoActual && (
+                <div style={{ color: "#9ca3af", fontSize: 13, fontWeight: 500 }}>
+                  {periodoSiguiente ? `→ Destino Próximo` : ""}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display: "flex", gap: 0, marginTop: 16 }}>
+            {[
+              { key: "promover", label: "Promover Alumnos" },
+              { key: "historial", label: `Historial (${historial.length})` },
+              { key: "egresados", label: `Egresados (${egresados.length})` },
+            ].map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                style={{
+                  background: "none", border: "none", cursor: "pointer", padding: "10px 18px",
+                  fontSize: 14, fontWeight: 600, color: tab === t.key ? "#1d4ed8" : "#6b7280",
+                  borderBottom: tab === t.key ? "2px solid #2563eb" : "2px solid transparent",
+                  transition: "all 0.15s",
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 32px" }}>
+
+        {/* Resumen de grados */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 24, overflowX: "auto", paddingBottom: 8 }}>
+          {grados.map((g) => (
+            <div
+              key={g.id}
+              style={{
+                flex: "0 0 160px", background: "#fff", border: String(g.id) === gradoOrigenId && tab === "promover" ? "1.5px solid #2563eb" : "1px solid #e2e4e9",
+                borderRadius: 8, padding: "12px 16px", cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+              onClick={() => { setGradoOrigenId(String(g.id)); setSeleccionados([]); setTab("promover"); }}
+            >
+              <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.06em" }}>Grado</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: String(g.id) === gradoOrigenId && tab === "promover" ? "#2563eb" : "#111827" }}>{g.nombre}</div>
+              <div style={{ fontSize: 13, color: "#6b7280", marginTop: 2 }}>
+                Periodo {periodoActual?.anio || "..."}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* TAB: PROMOVER */}
+        {tab === "promover" && (
+          <>
+            {/* Barra de acción */}
+            <div style={{ background: "#fff", border: "1px solid #e2e4e9", borderRadius: 10, padding: "16px 20px", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, color: "#9ca3af", fontWeight: 500, display: "block", marginBottom: 4 }}>GRADO ORIGEN</label>
+                  <select
+                    value={gradoOrigenId}
+                    onChange={(e) => { setGradoOrigenId(e.target.value); setSeleccionados([]); }}
+                    style={{ border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 10px", fontSize: 14, fontWeight: 600, color: "#111827", background: "#f9fafb", outline: "none" }}
+                  >
+                    {grados.map((g) => <option key={g.id} value={g.id}>{g.nombre}</option>)}
+                  </select>
+                </div>
+
+                <div style={{ color: "#9ca3af", fontSize: 18, paddingTop: 18 }}>→</div>
+
+                <div>
+                  <label style={{ fontSize: 12, color: "#9ca3af", fontWeight: 500, display: "block", marginBottom: 4 }}>DESTINO</label>
+                  {esUltimoGrado ? (
+                    <div style={{ border: "1px solid #bfdbfe", borderRadius: 6, padding: "6px 14px", fontSize: 14, fontWeight: 600, color: "#1d4ed8", background: "#eff6ff" }}>
+                      Egreso
+                    </div>
+                  ) : (
+                    <select
+                      value={periodoSiguiente?.id || ""}
+                      onChange={(e) => {
+                        const p = todoPeriodos.find(x => String(x.id) === e.target.value);
+                        setPeriodoSiguiente(p || null);
+                      }}
+                      style={{ border: "1px solid #bfdbfe", borderRadius: 6, padding: "6px 10px", fontSize: 14, fontWeight: 600, color: "#1d4ed8", background: "#eff6ff", outline: "none" }}
+                    >
+                      {todoPeriodos
+                        .filter(p => !periodoActual || p.anio > periodoActual.anio)
+                        .map(p => (
+                          <option key={p.id} value={p.id}>
+                            {gradoDestinoNombre} · {p.anio}
+                          </option>
+                        ))
+                      }
+                      {todoPeriodos.filter(p => !periodoActual || p.anio >= periodoActual.anio).length === 0 && (
+                        <option value="">No hay periodos disponibles</option>
+                      )}
+                    </select>
+                  )}
+                </div>
+
+                <div style={{ borderLeft: "1px solid #e2e4e9", paddingLeft: 16, marginLeft: 4 }}>
+                  <label style={{ fontSize: 12, color: "#9ca3af", fontWeight: 500, display: "block", marginBottom: 4 }}>SECCIÓN</label>
+                  <select
+                    value={seccionFiltro}
+                    onChange={(e) => { setSeccionFiltro(e.target.value); setSeleccionados([]); }}
+                    style={{ border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 10px", fontSize: 14, color: "#374151", background: "#f9fafb", outline: "none" }}
+                  >
+                    {secciones.map((s) => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 8 }}>
+                {seleccionados.length > 0 && (
+                  <>
+                    {!esUltimoGrado ? (
+                      <button
+                        onClick={() => setConfirmando("seleccion")}
+                        style={{ background: "#2563eb", color: "#fff", border: "none", borderRadius: 7, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                      >
+                        Promover {seleccionados.length} seleccionado{seleccionados.length > 1 ? "s" : ""}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmando("egreso")}
+                        style={{ background: "#dc2626", color: "#fff", border: "none", borderRadius: 7, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                      >
+                        Egresar {seleccionados.length} seleccionado{seleccionados.length > 1 ? "s" : ""}
+                      </button>
+                    )}
+                  </>
+                )}
+                {alumnosFiltrados.length > 0 && !esUltimoGrado && (
+                  <button
+                    onClick={() => setConfirmando("grado")}
+                    style={{ background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0", borderRadius: 7, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Procesar todo {nombreGradoActual}
+                  </button>
+                )}
+                {alumnosFiltrados.length > 0 && esUltimoGrado && (
+                  <button
+                    onClick={() => { setConfirmando("grado"); }}
+                    style={{ background: "#fff5f5", color: "#dc2626", border: "1px solid #fecaca", borderRadius: 7, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Egresar todos de {nombreGradoActual}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Aviso 5to */}
+            {esUltimoGrado && (
+              <div style={{ background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 8, padding: "12px 16px", marginBottom: 14, display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <span style={{ fontSize: 16 }}>⚠️</span>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: "#9a3412" }}>{nombreGradoActual} — Egreso al finalizar {periodoActual?.anio}</div>
+                  <div style={{ fontSize: 12, color: "#c2410c", marginTop: 2 }}>Al egresar, los alumnos ya no figurarán como activos para el próximo ciclo. Esta acción no se puede deshacer fácilmente.</div>
+                </div>
+              </div>
+            )}
+
+            {/* Tabla */}
+            <div style={{ background: "#fff", border: "1px solid #e2e4e9", borderRadius: 10, overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#f8f9fb", borderBottom: "1px solid #e2e4e9" }}>
+                    <th style={{ padding: "11px 16px", textAlign: "left", width: 40 }}>
+                      <input
+                        type="checkbox"
+                        checked={alumnosFiltrados.length > 0 && seleccionados.length === alumnosFiltrados.length}
+                        onChange={toggleTodos}
+                        style={{ cursor: "pointer", accentColor: "#2563eb" }}
+                      />
+                    </th>
+                    <th style={{ padding: "11px 8px", textAlign: "left", fontSize: 12, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>#</th>
+                    <th style={{ padding: "11px 8px", textAlign: "left", fontSize: 12, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Alumno</th>
+                    <th style={{ padding: "11px 8px", textAlign: "left", fontSize: 12, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Sección</th>
+                    <th style={{ padding: "11px 8px", textAlign: "left", fontSize: 12, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Promedio</th>
+                    <th style={{ padding: "11px 8px", textAlign: "left", fontSize: 12, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Estado</th>
+                    <th style={{ padding: "11px 16px", textAlign: "right", fontSize: 12, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: "40px", textAlign: "center", color: "#6b7280", fontSize: 14 }}>
+                        Cargando alumnos...
+                      </td>
+                    </tr>
+                  ) : alumnosFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: "40px", textAlign: "center", color: "#9ca3af", fontSize: 14 }}>
+                        No hay alumnos activos en {nombreGradoActual} {seccionFiltro !== "Todas" ? `· Sección ${seccionFiltro}` : ""} para {periodoActual?.anio}
+                      </td>
+                    </tr>
+                  ) : (
+                    alumnosFiltrados.map((a, i) => {
+                      const badge = estadoBadge(a.estado);
+                      const sel = seleccionados.includes(a.id_matricula);
+                      const promedio = parseFloat(String(a.promedio || 0));
+                      return (
+                        <tr key={a.id_matricula} style={{ borderBottom: "1px solid #f0f1f3", background: sel ? "#eff6ff" : "transparent", transition: "background 0.1s" }}>
+                          <td style={{ padding: "11px 16px" }}>
+                            <input type="checkbox" checked={sel} onChange={() => toggleSeleccion(a.id_matricula)} style={{ cursor: "pointer", accentColor: "#2563eb" }} />
+                          </td>
+                          <td style={{ padding: "11px 8px", fontSize: 13, color: "#9ca3af", fontFamily: "'DM Mono', monospace" }}>{String(i + 1).padStart(2, "0")}</td>
+                          <td style={{ padding: "11px 8px" }}>
+                            <div style={{ fontWeight: 600, fontSize: 14, color: "#111827" }}>{a.nombre_completo}</div>
+                          </td>
+                          <td style={{ padding: "11px 8px" }}>
+                            <span style={{ background: "#f1f5f9", borderRadius: 4, padding: "3px 8px", fontSize: 12, fontWeight: 600, color: "#475569" }}>Sec. {a.seccion}</span>
+                          </td>
+                          <td style={{ padding: "11px 8px" }}>
+                            <span style={{
+                              fontWeight: 700, fontSize: 14,
+                              color: promedio >= 9 ? "#16a34a" : promedio >= 7 ? "#d97706" : "#dc2626"
+                            }}>{promedio.toFixed(1)}</span>
+                          </td>
+                          <td style={{ padding: "11px 8px" }}>
+                            <span style={{ background: badge.bg, color: badge.color, borderRadius: 4, padding: "3px 8px", fontSize: 11, fontWeight: 600 }}>{badge.label}</span>
+                          </td>
+                          <td style={{ padding: "11px 16px", textAlign: "right" }}>
+                            {esUltimoGrado ? (
+                              <button
+                                onClick={() => { setIdIndividual(a.id_matricula); setConfirmando("individual"); }}
+                                style={{ background: "none", border: "1px solid #fecaca", borderRadius: 6, padding: "5px 12px", fontSize: 12, fontWeight: 600, color: "#dc2626", cursor: "pointer" }}
+                                disabled={!a.puede_promover}
+                              >
+                                Egresar
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => { setIdIndividual(a.id_matricula); setConfirmando("individual"); }}
+                                style={{ background: "none", border: "1px solid #bfdbfe", borderRadius: 6, padding: "5px 12px", fontSize: 12, fontWeight: 600, color: "#2563eb", cursor: "pointer" }}
+                                disabled={!a.puede_promover}
+                              >
+                                Promover →
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+              {alumnosFiltrados.length > 0 && (
+                <div style={{ padding: "10px 16px", borderTop: "1px solid #f0f1f3", background: "#f8f9fb", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 12, color: "#6b7280" }}>{alumnosFiltrados.length} alumnos · {seleccionados.length} seleccionados</span>
+                  <span style={{ fontSize: 12, color: "#9ca3af" }}>Periodo {periodoActual?.anio}</span>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* TAB: HISTORIAL */}
+        {tab === "historial" && (
+          <div style={{ background: "#fff", border: "1px solid #e2e4e9", borderRadius: 10, overflow: "hidden" }}>
+            {historial.length === 0 ? (
+              <div style={{ padding: 48, textAlign: "center", color: "#9ca3af", fontSize: 14 }}>No hay movimientos registrados aún</div>
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#f8f9fb", borderBottom: "1px solid #e2e4e9" }}>
+                    {["Fecha", "Tipo", "De", "A", "Alumnos"].map((h) => (
+                      <th key={h} style={{ padding: "11px 16px", textAlign: "left", fontSize: 12, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {historial.map((h, i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid #f0f1f3" }}>
+                      <td style={{ padding: "12px 16px", fontSize: 13, color: "#6b7280", fontFamily: "'DM Mono', monospace" }}>{h.fecha}</td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <span style={{
+                          background: h.tipo === "Egreso" ? "#fff5f5" : "#eff6ff",
+                          color: h.tipo === "Egreso" ? "#dc2626" : "#2563eb",
+                          borderRadius: 4, padding: "3px 8px", fontSize: 11, fontWeight: 600
+                        }}>{h.tipo}</span>
+                      </td>
+                      <td style={{ padding: "12px 16px", fontWeight: 600, fontSize: 14 }}>{h.de}</td>
+                      <td style={{ padding: "12px 16px", fontWeight: 600, fontSize: 14, color: h.a === "Egresado" ? "#dc2626" : "#16a34a" }}>{h.a}</td>
+                      <td style={{ padding: "12px 16px", fontSize: 13, color: "#374151" }}>
+                        {h.alumnos.length > 2 ? `${h.alumnos[0]}, ${h.alumnos[1]} y ${h.alumnos.length - 2} más` : h.alumnos.join(", ")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {/* TAB: EGRESADOS */}
+        {tab === "egresados" && (
+          <div style={{ background: "#fff", border: "1px solid #e2e4e9", borderRadius: 10, overflow: "hidden" }}>
+            {egresados.length === 0 ? (
+              <div style={{ padding: 48, textAlign: "center", color: "#9ca3af", fontSize: 14 }}>No hay alumnos egresados todavía</div>
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#f8f9fb", borderBottom: "1px solid #e2e4e9" }}>
+                    {["Alumno", "Último grado", "Sección", "Promedio", "Acceso al sistema"].map((h) => (
+                      <th key={h} style={{ padding: "11px 16px", textAlign: "left", fontSize: 12, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {egresados.map((a) => (
+                    <tr key={a.id_matricula} style={{ borderBottom: "1px solid #f0f1f3" }}>
+                      <td style={{ padding: "12px 16px", fontWeight: 600, fontSize: 14, color: "#111827" }}>{a.nombre_completo}</td>
+                      <td style={{ padding: "12px 16px", fontSize: 14, color: "#374151" }}>{a.grado === "5to" ? "5to" : a.grado}</td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <span style={{ background: "#f1f5f9", borderRadius: 4, padding: "3px 8px", fontSize: 12, fontWeight: 600, color: "#475569" }}>Sec. {a.seccion}</span>
+                      </td>
+                      <td style={{ padding: "12px 16px", fontWeight: 700, fontSize: 14, color: "#d97706" }}>{parseFloat(String(a.promedio || 0)).toFixed(1)}</td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <span style={{ background: "#fce4ec", color: "#c62828", borderRadius: 4, padding: "3px 10px", fontSize: 11, fontWeight: 600 }}>
+                          🚫 Sin acceso {periodoSiguiente?.anio}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Modal de confirmación */}
+      {confirmando && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 28, width: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "#111827", marginBottom: 8 }}>
+                {confirmando === "egreso" || (confirmando === "individual" && esUltimoGrado) ? "⚠️ Confirmar Egreso" : "Confirmar Promoción"}
+              </div>
+              <div style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.6 }}>
+                {confirmando === "egreso" || (confirmando === "individual" && esUltimoGrado) ? (
+                  <>
+                    Vas a egresar <strong style={{ color: "#111827" }}>{confirmando === "individual" ? "al alumno" : `${seleccionados.length} alumnos`}</strong> de {nombreGradoActual}.<br />
+                    <span style={{ color: "#dc2626", fontWeight: 500 }}>Los alumnos finalizados ya no podrán registrarse en el siguiente ciclo escolar.</span>
+                  </>
+                ) : confirmando === "grado" ? (
+                  <>
+                    Vas a procesar <strong style={{ color: "#111827" }}>todo el grado</strong> de <strong>{nombreGradoActual}</strong>.<br />
+                    • <strong style={{ color: "#16a34a" }}>{seleccionados.length}</strong> {esUltimoGrado ? "egresarán" : `pasarán a ${gradoDestinoNombre}`}.<br />
+                    • <strong style={{ color: "#d97706" }}>{alumnosFiltrados.length - seleccionados.length}</strong> {esUltimoGrado ? "permanecerán en el sistema" : `repitirán ${nombreGradoActual}`} {periodoSiguiente ? `para ${periodoSiguiente.anio}` : ""}.
+                  </>
+                ) : (
+                  <>
+                    Vas a promover <strong style={{ color: "#111827" }}>{confirmando === "individual" ? "al alumno" : `${seleccionados.length} alumnos`}</strong> de{" "}
+                    <strong>{nombreGradoActual}</strong> a <strong style={{ color: "#2563eb" }}>{gradoDestinoNombre} · {periodoSiguiente?.anio}</strong>.
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div style={{ background: "#f8f9fb", borderRadius: 8, padding: "12px 14px", marginBottom: 20, maxHeight: 150, overflowY: "auto" }}>
+              {(confirmando === "grado" ? alumnosFiltrados : confirmando === "individual" ? alumnos.filter(a => a.id_matricula === idIndividual) : alumnos.filter((a) => seleccionados.includes(a.id_matricula))).map((a) => {
+                const isPromoted = confirmando === "grado" ? seleccionados.includes(a.id_matricula) : true;
+                return (
+                  <div key={a.id_matricula} style={{ fontSize: 13, color: "#374151", padding: "4px 0", borderBottom: "1px solid #f0f1f3", display: "flex", justifyContent: "space-between" }}>
+                    <span>{a.nombre_completo}</span>
+                    <span style={{ fontWeight: 600, color: isPromoted ? "#16a34a" : "#d97706", fontSize: 11 }}>
+                      {confirmando === "grado" ? (isPromoted ? (esUltimoGrado ? "EGRESO" : "PASA") : "REPITE") : (esUltimoGrado ? "EGRESO" : "PASA")}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button
+                onClick={() => { setConfirmando(null); }}
+                style={{ background: "#f3f4f6", border: "none", borderRadius: 7, padding: "9px 18px", fontSize: 14, fontWeight: 600, cursor: "pointer", color: "#374151" }}
+                disabled={loading}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  if (confirmando === "grado") {
+                    ejecutarProcesarMasivo();
+                  } else if (confirmando === "individual") {
+                    if (idIndividual !== null) ejecutarPromocionIndividual(idIndividual);
+                  } else {
+                    // Para selección múltiple, podríamos iterar o el API podría soportarlo. 
+                    // El usuario pidió masivo (todo el grado) e individual.
+                    // Para selección múltiple usaremos el individual por ahora si es uno solo, o avisar.
+                    if (seleccionados.length === 1) {
+                      ejecutarPromocionIndividual(seleccionados[0]);
+                    } else if (seleccionados.length > 1) {
+                      // Si el API de masivo no soporta lista de IDs, podríamos tener que iterar.
+                      // Pero el usuario proporcionó endpoints específicos.
+                      alert("La promoción de múltiples seleccionados se procesará individualmente.");
+                      Promise.all(seleccionados.map(id => ejecutarPromocionIndividual(id))).then(() => setConfirmando(null));
+                    }
+                  }
+                }}
+                disabled={loading}
+                style={{
+                  background: (confirmando === "egreso" || (confirmando === "individual" && esUltimoGrado)) ? "#dc2626" : "#2563eb",
+                  color: "#fff", border: "none", borderRadius: 7, padding: "9px 20px", fontSize: 14, fontWeight: 600, cursor: "pointer"
+                }}
+              >
+                {loading ? "Procesando..." : (confirmando === "egreso" || (confirmando === "individual" && esUltimoGrado)) ? "Sí, egresar" : "Confirmar Proceso"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

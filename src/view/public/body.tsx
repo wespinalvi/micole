@@ -78,7 +78,7 @@ const Body = () => {
   return (
     <div className="flex flex-col w-full overflow-hidden bg-white">
       {/* Hero Section - Diseño de Autor Full Width */}
-      <section className="relative min-h-[90vh] flex items-center justify-center bg-[#0a0a0c] text-white overflow-hidden selection:bg-orange-500/40 w-full pt-32 pb-20 lg:pt-40">
+      <section className="relative min-h-[90vh] flex items-center justify-center bg-[#0a0a0c] text-white overflow-hidden selection:bg-orange-500/40 w-full pt-24 pb-16 lg:pt-40 lg:pb-20">
         {/* Background con Textura y Profundidad */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0c] via-[#0a0a0c]/80 to-transparent z-10" />
@@ -105,7 +105,7 @@ const Body = () => {
             </div>
 
             {/* Título Principal */}
-            <h1 className={`text-6xl md:text-8xl font-light leading-[0.9] tracking-tighter mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <h1 className={`text-4xl md:text-6xl lg:text-8xl font-light leading-[0.9] tracking-tighter mb-8 transition-all duration-1000 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
               Formando Líderes <br />
               <span className="font-serif italic text-orange-500 block mt-2">con Propósito</span>
               <span className="text-white/90">& Excelencia.</span>
@@ -147,7 +147,7 @@ const Body = () => {
       </section>
 
       {/* Sección: Nuestros Pilares y Propuesta Diferenciada */}
-      <div className="bg-[#fcfcfd] text-[#0a0a0c] py-24 px-6 overflow-hidden selection:bg-orange-500/20 w-full">
+      <div className="bg-[#fcfcfd] text-[#0a0a0c] py-16 lg:py-24 px-4 lg:px-6 overflow-hidden selection:bg-orange-500/20 w-full">
 
         {/* Nuestros Pilares */}
         <section className="max-w-7xl mx-auto mb-32">
@@ -155,7 +155,7 @@ const Body = () => {
             <span className="text-orange-600 font-bold tracking-[0.3em] text-[10px] uppercase mb-4 block">
               ¿Por qué elegir Crayon's?
             </span>
-            <h2 className="text-4xl md:text-5xl font-light tracking-tight text-[#0a0a0c]">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-tight text-[#0a0a0c]">
               Nuestros <span className="font-serif italic text-orange-600/80">Pilares</span>
             </h2>
             <div className="w-12 h-[2px] bg-orange-200 mx-auto mt-6"></div>
@@ -225,7 +225,7 @@ const Body = () => {
                 <span className="text-orange-600 font-bold tracking-[0.2em] text-[10px] uppercase block">
                   Propuesta Diferenciada
                 </span>
-                <h2 className="text-4xl md:text-6xl font-light leading-[1.1] text-[#0a0a0c]">
+                <h2 className="text-3xl md:text-4xl lg:text-6xl font-light leading-[1.1] text-[#0a0a0c]">
                   Educación que <br />
                   <span className="font-serif italic text-orange-600/80">trasciende</span> las aulas.
                 </h2>
@@ -266,7 +266,7 @@ const Body = () => {
       </div>
 
       {/* Niveles Educativos Section - Rediseño Artístico/Editorial */}
-      <section className="relative py-32 bg-[#0a0a0c] text-[#e5e5e5] overflow-hidden selection:bg-orange-500/30 w-full">
+      <section className="relative py-16 lg:py-32 bg-[#0a0a0c] text-[#e5e5e5] overflow-hidden selection:bg-orange-500/30 w-full">
         {/* Grano de textura sutil */}
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
 
@@ -277,7 +277,7 @@ const Body = () => {
               <h3 className="text-orange-500 font-medium tracking-[0.2em] text-xs uppercase italic">
                 Nuestra Metodología
               </h3>
-              <h2 className="text-5xl md:text-7xl font-light tracking-tight text-white leading-[0.9]">
+              <h2 className="text-4xl md:text-5xl lg:text-7xl font-light tracking-tight text-white leading-[0.9]">
                 Formando el <br />
                 <span className="font-serif italic font-normal text-orange-100/90">mañana hoy.</span>
               </h2>
@@ -306,7 +306,7 @@ const Body = () => {
                 </span>
 
                 {/* Contenedor de Imagen */}
-                <div className="relative aspect-[4/5] rounded-tl-[60px] rounded-br-[60px] overflow-hidden mb-8 shadow-2xl">
+                <div className="relative aspect-[4/5] md:aspect-[3/4] rounded-tl-[60px] rounded-br-[60px] overflow-hidden mb-8 shadow-2xl">
                   <img
                     src={level.image}
                     alt={level.name}
@@ -358,7 +358,7 @@ const Body = () => {
       {/* Stats Section */}
       <section className="py-8 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-12">
             {[
               { label: "Años de Excelencia", value: "13+" },
               { label: "Estudiantes Felices", value: "500+" },
@@ -366,7 +366,7 @@ const Body = () => {
               { label: "Tasa de Ingreso Univ.", value: "98%" }
             ].map((stat, i) => (
               <div key={i} className="text-center space-y-1">
-                <div className="text-3xl md:text-4xl font-bold text-[#1e2a5a] tracking-tighter">{stat.value}</div>
+                <div className="text-2xl md:text-4xl font-bold text-[#1e2a5a] tracking-tighter">{stat.value}</div>
                 <div className="text-gray-500 font-medium uppercase tracking-widest text-[10px]">{stat.label}</div>
               </div>
             ))}
@@ -377,7 +377,7 @@ const Body = () => {
 
 
       {/* SECCIÓN TESTIMONIOS (Diseño de Red Social Premium / Ecos de Comunidad) */}
-      <section className="py-36 px-6 bg-[#0a0f1d] relative overflow-hidden">
+      <section className="py-20 lg:py-36 px-4 lg:px-6 bg-[#0a0f1d] relative overflow-hidden">
         {/* Grano de película sutil */}
         <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
@@ -385,7 +385,7 @@ const Body = () => {
           <div className="flex flex-col md:flex-row justify-between items-center mb-24 text-center md:text-left">
             <div>
               <span className="text-orange-500 text-[10px] font-bold tracking-[0.6em] uppercase mb-4 block">Ecos de Comunidad</span>
-              <h2 className="text-4xl md:text-6xl font-bold tracking-tighter leading-none text-white">
+              <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold tracking-tighter leading-none text-white">
                 Voces que nos <br />
                 <span className="text-white/40 italic font-serif font-light lowercase">definen.</span>
               </h2>
@@ -442,13 +442,13 @@ const Body = () => {
       </section>
 
       {/* 1. SECCIÓN DE INSTALACIONES */}
-      <section className="max-w-7xl mx-auto px-6 py-20 lg:py-32">
+      <section className="max-w-7xl mx-auto px-6 py-16 lg:py-32">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div className="max-w-2xl">
             <span className="inline-block px-4 py-1.5 rounded-full bg-orange-600 text-white text-[10px] font-black uppercase tracking-[0.2em] mb-6">
               Nuestras Instalaciones
             </span>
-            <h2 className="text-5xl md:text-7xl font-serif leading-[1.1] text-slate-900">
+            <h2 className="text-4xl md:text-5xl lg:text-7xl font-serif leading-[1.1] text-slate-900">
               Espacios diseñados para <span className="italic text-orange-600">inspirar</span>
             </h2>
           </div>
@@ -513,7 +513,7 @@ const Body = () => {
       </section>
 
       {/* 2. SECCIÓN FINAL REDISEÑADA (Estilo Editorial Abierto) */}
-      <section className="relative py-32 overflow-hidden bg-white">
+      <section className="relative py-16 lg:py-32 overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-6 relative">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
 
@@ -524,7 +524,7 @@ const Body = () => {
                 <span className="text-orange-600 font-bold text-xs uppercase tracking-[0.4em]">Próximo Ciclo Escolar</span>
               </div>
 
-              <h2 className="text-6xl md:text-8xl font-serif text-slate-900 leading-[0.95] mb-12">
+              <h2 className="text-4xl md:text-6xl lg:text-8xl font-serif text-slate-900 leading-[0.95] mb-8 lg:mb-12">
                 ¿Listo para <br />
                 formar <span className="italic text-orange-600">parte</span> <br />
                 <span className="text-slate-300">de nosotros?</span>
@@ -558,7 +558,7 @@ const Body = () => {
             </div>
 
             {/* Imagen Flotante Asimétrica */}
-            <div className="relative h-[600px] w-full mt-12 lg:mt-0">
+            <div className="relative h-[400px] lg:h-[600px] w-full mt-12 lg:mt-0">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-orange-50 rounded-full blur-[120px] opacity-50 -z-10"></div>
 
               {/* Marco de Imagen tipo Galería de Arte */}
@@ -581,7 +581,7 @@ const Body = () => {
       </section>
 
       {/* Footer Industrial/Premium */}
-      <footer className="w-full bg-[#080B16] text-white pt-24 pb-8 font-sans overflow-hidden">
+      <footer className="w-full bg-[#080B16] text-white pt-16 lg:pt-24 pb-8 font-sans overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
 
           {/* Rejilla de Información Principal */}

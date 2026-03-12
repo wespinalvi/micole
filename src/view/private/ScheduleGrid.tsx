@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "@/lib/axios";
-import { CalendarDays, Filter } from "lucide-react";
+import { CalendarDays, Filter, Loader2 } from "lucide-react";
 
 type PeriodoItem = { id: number; anio: number; activo: number };
 type DocenteItem = { id: number; nombre_completo: string };
@@ -172,9 +172,12 @@ export default function ScheduleGrid() {
     if (!exists) setIdCurso("");
   }, [cursosFiltrados, idCurso]);
 
+  const [searched, setSearched] = useState(false);
+
   const cargarReporte = async () => {
     setLoading(true);
     setError("");
+    setSearched(true);
     try {
       const params: Record<string, string> = {};
       if (idPeriodo) params.id_periodo = idPeriodo;
@@ -196,11 +199,6 @@ export default function ScheduleGrid() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    cargarReporte();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idPeriodo]);
 
   const grupos = useMemo(() => {
     const map = new Map<string, Grupo>();
@@ -299,9 +297,19 @@ export default function ScheduleGrid() {
       )}
 
       {loading ? (
-        <div className="bg-white border rounded p-6 text-sm text-slate-500">Cargando horarios...</div>
+        <div className="bg-white border rounded p-12 text-center text-slate-500 space-y-3">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
+          <p className="text-sm">Cargando horarios...</p>
+        </div>
+      ) : !searched ? (
+        <div className="bg-white border rounded p-20 text-center text-slate-400 space-y-4">
+          <CalendarDays className="w-16 h-16 mx-auto opacity-10" />
+          <p className="text-sm">Selecciona los filtros y haz clic en <strong>Filtrar</strong> para visualizar los horarios.</p>
+        </div>
       ) : grupos.length === 0 ? (
-        <div className="bg-white border rounded p-6 text-sm text-slate-500">No hay horarios para los filtros seleccionados.</div>
+        <div className="bg-white border rounded p-12 text-center text-slate-500">
+          No se encontraron horarios con los criterios seleccionados.
+        </div>
       ) : (
         <div className="space-y-4">
           {grupos.map((g) => (

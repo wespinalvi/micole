@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useQuery } from "@tanstack/react-query";
 
 // Tipo para los datos de grado desde el API
 interface GradoData {
@@ -101,31 +102,28 @@ export default function BulkEnrollment() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // Estados para asignación masiva de grado y sección desde API
-    const [gradosDisponibles, setGradosDisponibles] = useState<GradoData[]>([]);
     const [selectedGradoId, setSelectedGradoId] = useState<number | null>(null);
 
-    // Cargar grados disponibles desde el API
-    useEffect(() => {
-        const fetchGrados = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/api/grado/lista-grado');
-                const data = await response.json();
-
-                if (data.status && data.data) {
-                    setGradosDisponibles(data.data);
-                    // Seleccionar el primer grado por defecto
-                    if (data.data.length > 0) {
-                        setSelectedGradoId(data.data[0].id);
-                    }
-                }
-            } catch (error) {
-                console.error('Error al cargar grados:', error);
-                setErrorMessage('Error al cargar los grados disponibles');
+    // Cargar grados disponibles desde el API con React Query
+    const { data: gradosDisponibles = [] } = useQuery<GradoData[]>({
+        queryKey: ['grados'],
+        queryFn: async () => {
+            const response = await fetch('http://localhost:3000/api/grado/lista-grado');
+            const data = await response.json();
+            if (data.status && data.data) {
+                return data.data;
             }
-        };
+            return [];
+        },
+        staleTime: 60 * 60 * 1000, // 1 hora
+    });
 
-        fetchGrados();
-    }, []);
+    // Seleccionar el primer grado por defecto cuando cargan
+    useEffect(() => {
+        if (gradosDisponibles.length > 0 && !selectedGradoId) {
+            setSelectedGradoId(gradosDisponibles[0].id);
+        }
+    }, [gradosDisponibles, selectedGradoId]);
 
     // Función para obtener los costos del año
     const obtenerCostosAnio = async (anio: string, index: number) => {

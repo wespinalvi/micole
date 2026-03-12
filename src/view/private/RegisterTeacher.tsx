@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import axios from "axios";
 import { Search, Loader2 } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface CursoAsignado {
   idCurso: number;
@@ -70,7 +71,10 @@ interface DniResponse {
 
 import { useEffect } from "react";
 
+const EMPTY_ARRAY: any[] = [];
+
 export default function RegisterTeacher() {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     dni: "",
     nombres: "",
@@ -87,57 +91,85 @@ export default function RegisterTeacher() {
   });
 
   const [cursosAsignados, setCursosAsignados] = useState<CursoAsignado[]>([]);
-  const [cursosDisponibles, setCursosDisponibles] = useState<CursoItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [credenciales, setCredenciales] = useState<Credenciales | null>(null);
 
   const [currentYear, setCurrentYear] = useState<string>("");
-  const [periodos, setPeriodos] = useState<any[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  useEffect(() => {
-    const initializePeriods = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/promocion/periodos");
-        if (response.data.status) {
-          const periods = response.data.data;
-          setPeriodos(periods);
-
-          const active = periods.find((p: any) => p.activo === 1);
-          if (active) {
-            setCurrentYear(active.anio.toString());
-            setFormData(prev => ({ ...prev, id_periodo: active.id.toString() }));
-          }
-        }
-      } catch (error) {
-        console.error("Error al obtener periodos academicos:", error);
-      }
-    };
-    initializePeriods();
-  }, []);
-
-  useEffect(() => {
-    if (currentYear) {
-      fetchDisponibilidad(currentYear);
-    }
-  }, [currentYear]);
-
-  const fetchDisponibilidad = async (year: string) => {
-    try {
-      const response = await axios.get(`http://localhost:3000/api/docente/disponibilidad-cursos/${year}`);
-      if (response.data.success) {
-        setCursosDisponibles(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error al cargar disponibilidad:", error);
+  const validateField = (name: string, value: string) => {
+    switch (name) {
+      case 'dni':
+        if (!value) return 'El DNI es obligatorio';
+        if (!/^\d{8}$/.test(value)) return 'El DNI debe tener exactamente 8 dígitos numéricos';
+        return '';
+      case 'telefono':
+        if (!value) return 'El teléfono es obligatorio';
+        if (!/^\d{9}$/.test(value)) return 'El teléfono debe tener exactamente 9 dígitos numéricos';
+        return '';
+      case 'email':
+        if (!value) return 'El email es obligatorio';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Formato de email inválido';
+        return '';
+      case 'nombres':
+      case 'apellido_paterno':
+      case 'apellido_materno':
+      case 'fecha_nacimiento':
+      case 'direccion':
+        if (!value) return 'Este campo es obligatorio';
+        return '';
+      default:
+        return '';
     }
   };
+
+  // 1) Fetch periodos con useQuery
+  const { data: periodos = EMPTY_ARRAY } = useQuery<any[]>({
+    queryKey: ['periodosPromocion'],
+    queryFn: async () => {
+      const response = await axios.get("http://localhost:3000/api/promocion/periodos");
+      if (response.data.status) {
+        return response.data.data;
+      }
+      return [];
+    },
+    staleTime: 60 * 60 * 1000,
+  });
+
+  // Ajustar el active period y currentYear cuando cargan los periodos
+  useEffect(() => {
+    if (periodos.length > 0 && !currentYear) {
+      const active = periodos.find((p: any) => p.activo === 1) || periodos[0];
+      if (active) {
+        setCurrentYear(active.anio.toString());
+        setFormData(prev => ({ ...prev, id_periodo: active.id.toString() }));
+      }
+    }
+  }, [periodos, currentYear]);
+
+  // 2) Fetch disponibilidad dependiente de currentYear
+  const { data: cursosDisponibles = [] } = useQuery<CursoItem[]>({
+    queryKey: ['disponibilidadCursos', currentYear],
+    queryFn: async () => {
+      if (!currentYear) return [];
+      const response = await axios.get(`http://localhost:3000/api/docente/disponibilidad-cursos/${currentYear}`);
+      if (response.data.success) {
+        return response.data.data;
+      }
+      return [];
+    },
+    enabled: !!currentYear,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === "dni") setSuccessMessage(null);
     setFormData((prev) => ({ ...prev, [name]: value }));
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
   };
 
   const handleBuscar = async () => {
@@ -210,6 +242,24 @@ export default function RegisterTeacher() {
   };
 
   const handleGuardar = async () => {
+    // Validar todos los campos antes de guardar
+    const newErrors: { [key: string]: string } = {};
+    let isValid = true;
+
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, (formData as any)[key]);
+      if (error) {
+        newErrors[key] = error;
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      setErrors(newErrors);
+      alert("Por favor corrija los errores en el formulario");
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -242,7 +292,9 @@ export default function RegisterTeacher() {
         });
         setSuccessMessage(null);
         setCursosAsignados([]);
-        fetchDisponibilidad(currentYear);
+
+        // Refetch cursos disponibles usando el queryClient cache
+        queryClient.invalidateQueries({ queryKey: ['disponibilidadCursos', currentYear] });
       }
     } catch (error) {
       alert("Error al registrar el docente");
@@ -296,8 +348,9 @@ export default function RegisterTeacher() {
                 value={formData.dni}
                 onChange={handleInputChange}
                 placeholder="Número de documento"
-                className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                className={`mt-1 h-9 bg-white border ${errors.dni ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-300 focus-visible:ring-blue-500'} rounded px-3 text-sm focus-visible:ring-1 focus-visible:border-blue-500`}
               />
+              {errors.dni && <p className="text-[10px] text-red-500 mt-1">{errors.dni}</p>}
             </div>
             <div className="flex items-end">
               <Button onClick={handleBuscar} className="h-9 w-full" disabled={searching}>
@@ -321,8 +374,9 @@ export default function RegisterTeacher() {
                 name="nombres"
                 value={formData.nombres}
                 onChange={handleInputChange}
-                className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                className={`mt-1 h-9 bg-white border ${errors.nombres ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-300 focus-visible:ring-blue-500'} rounded px-3 text-sm focus-visible:ring-1 focus-visible:border-blue-500`}
               />
+              {errors.nombres && <p className="text-[10px] text-red-500 mt-1">{errors.nombres}</p>}
             </div>
             <div>
               <Label className="text-xs font-medium text-slate-700">
@@ -332,8 +386,9 @@ export default function RegisterTeacher() {
                 name="apellido_paterno"
                 value={formData.apellido_paterno}
                 onChange={handleInputChange}
-                className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                className={`mt-1 h-9 bg-white border ${errors.apellido_paterno ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-300 focus-visible:ring-blue-500'} rounded px-3 text-sm focus-visible:ring-1 focus-visible:border-blue-500`}
               />
+              {errors.apellido_paterno && <p className="text-[10px] text-red-500 mt-1">{errors.apellido_paterno}</p>}
             </div>
             <div>
               <Label className="text-xs font-medium text-slate-700">
@@ -343,8 +398,9 @@ export default function RegisterTeacher() {
                 name="apellido_materno"
                 value={formData.apellido_materno}
                 onChange={handleInputChange}
-                className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                className={`mt-1 h-9 bg-white border ${errors.apellido_materno ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-300 focus-visible:ring-blue-500'} rounded px-3 text-sm focus-visible:ring-1 focus-visible:border-blue-500`}
               />
+              {errors.apellido_materno && <p className="text-[10px] text-red-500 mt-1">{errors.apellido_materno}</p>}
             </div>
           </div>
 
@@ -359,8 +415,9 @@ export default function RegisterTeacher() {
                 type="date"
                 value={formData.fecha_nacimiento}
                 onChange={handleInputChange}
-                className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                className={`mt-1 h-9 bg-white border ${errors.fecha_nacimiento ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-300 focus-visible:ring-blue-500'} rounded px-3 text-sm focus-visible:ring-1 focus-visible:border-blue-500`}
               />
+              {errors.fecha_nacimiento && <p className="text-[10px] text-red-500 mt-1">{errors.fecha_nacimiento}</p>}
             </div>
             <div>
               <Label className="text-xs font-medium text-slate-700">
@@ -381,14 +438,16 @@ export default function RegisterTeacher() {
             </div>
             <div>
               <Label className="text-xs font-medium text-slate-700">
-                Email <span className="text-slate-400 font-normal ml-1">(Opcional)</span>
+                Email <span className="text-red-500">*</span>
               </Label>
               <Input
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                placeholder="ejemplo@correo.com"
+                className={`mt-1 h-9 bg-white border ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-300 focus-visible:ring-blue-500'} rounded px-3 text-sm focus-visible:ring-1 focus-visible:border-blue-500`}
               />
+              {errors.email && <p className="text-[10px] text-red-500 mt-1">{errors.email}</p>}
             </div>
           </div>
 
@@ -402,8 +461,10 @@ export default function RegisterTeacher() {
                 name="telefono"
                 value={formData.telefono}
                 onChange={handleInputChange}
-                className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                placeholder="999888777"
+                className={`mt-1 h-9 bg-white border ${errors.telefono ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-300 focus-visible:ring-blue-500'} rounded px-3 text-sm focus-visible:ring-1 focus-visible:border-blue-500`}
               />
+              {errors.telefono && <p className="text-[10px] text-red-500 mt-1">{errors.telefono}</p>}
             </div>
             <div>
               <Label className="text-xs font-medium text-slate-700">
@@ -413,8 +474,9 @@ export default function RegisterTeacher() {
                 name="direccion"
                 value={formData.direccion}
                 onChange={handleInputChange}
-                className="mt-1 h-9 bg-white border border-slate-300 rounded px-3 text-sm focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500"
+                className={`mt-1 h-9 bg-white border ${errors.direccion ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-300 focus-visible:ring-blue-500'} rounded px-3 text-sm focus-visible:ring-1 focus-visible:border-blue-500`}
               />
+              {errors.direccion && <p className="text-[10px] text-red-500 mt-1">{errors.direccion}</p>}
             </div>
           </div>
 
@@ -438,7 +500,7 @@ export default function RegisterTeacher() {
                   <SelectValue placeholder="Seleccione período..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {periodos.map((p) => (
+                  {periodos.map((p: any) => (
                     <SelectItem key={p.id} value={p.id.toString()} className="text-sm">
                       Año {p.anio} {p.activo === 1 ? "(Actual)" : ""}
                     </SelectItem>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import {
   Table,
@@ -29,6 +29,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Plus, Loader2 } from "lucide-react";
+
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Interface matching the user's data structure
 interface FeeSchedule {
@@ -64,38 +66,50 @@ const initialFormData: FeeFormData = {
   activo: true,
 };
 
+const EMPTY_ARRAY: any[] = [];
+
 export default function CuotasProgramar() {
-  const [fees, setFees] = useState<FeeSchedule[]>([]);
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<FeeFormData>(initialFormData);
 
-  const fetchFees = async () => {
-    setLoading(true);
-    try {
+  // Fetch fees using React Query
+  const { data: fees = EMPTY_ARRAY } = useQuery<FeeSchedule[]>({
+    queryKey: ['periodosCuotas'],
+    queryFn: async () => {
       const response = await axios.get('http://localhost:3000/api/cuotas/periodos');
       if (response.data.success) {
-        const sortedData = response.data.data.sort((a: FeeSchedule, b: FeeSchedule) => b.anio - a.anio);
-        setFees(sortedData);
+        return response.data.data.sort((a: FeeSchedule, b: FeeSchedule) => b.anio - a.anio);
       }
-    } catch (error) {
-      console.error("Error fetching fees:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchFees();
-  }, []);
+      return [];
+    },
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'number' ? Number(value) : value
-    }));
+
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === 'number' ? Number(value) : value
+      };
+
+      // Si cambia el año, actualizar las fechas de inicio y fin para que el calendario se posicione en ese año
+      if (name === 'anio' && value) {
+        const year = value;
+        // Solo actualizar si las fechas están vacías o no coinciden con el año
+        if (!prev.fecha_inicio || !prev.fecha_inicio.startsWith(year)) {
+          newData.fecha_inicio = `${year}-01-01`;
+        }
+        if (!prev.fecha_fin || !prev.fecha_fin.startsWith(year)) {
+          newData.fecha_fin = `${year}-12-31`;
+        }
+      }
+
+      return newData;
+    });
   };
 
   const handleSwitchChange = (checked: boolean) => {
@@ -151,7 +165,8 @@ export default function CuotasProgramar() {
         const response = await axios.post('http://localhost:3000/api/cuotas/agregar-periodo', payload);
         if (response.status === 200 || response.status === 201) {
           alert("Creado correctamente");
-          fetchFees(); // Refresh list
+          // Invalidar caché para refetch de la tabla
+          queryClient.invalidateQueries({ queryKey: ['periodosCuotas'] });
         }
       }
       setIsDialogOpen(false);

@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import {
-  Menu, X, Phone, Mail, MapPin, Facebook, Instagram, Youtube,
-  GraduationCap, ChevronDown, Users, Star, Heart,
-  History, Shield, Globe, Laptop, Trophy, Music,
-  UserCheck, Briefcase, Home as HomeIcon, MessageSquare
+  Menu, X, Phone, Mail, Facebook, Instagram, Youtube,
+  ChevronDown, ArrowRight, UserCheck
 } from "lucide-react";
 
 const HomePage = () => {
@@ -15,7 +13,7 @@ const HomePage = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      setScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -27,244 +25,229 @@ const HomePage = () => {
     window.scrollTo(0, 0);
   }, [location]);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = () => { setIsMenuOpen(!isMenuOpen); };
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => { document.body.style.overflow = "unset"; };
+  }, [isMenuOpen]);
 
   const navItems = [
     {
-      title: "Nuestro Colegio",
-      icon: <HomeIcon size={18} />,
+      title: "Colegio",
       items: [
-        { name: "Bienvenida", icon: <UserCheck size={16} />, path: "/bienvenida" },
-        { name: "Nuestros valores", icon: <Heart size={16} />, path: "/valores" },
-        { name: "Nuestros pilares", icon: <Shield size={16} />, path: "/pilares" },
-        { name: "Nuestro espacio", icon: <MapPin size={16} />, path: "/espacio" },
-        { name: "Nuestra historia", icon: <History size={16} />, path: "/vision-mision" },
+        { name: "Bienvenida", path: "/bienvenida" },
+        { name: "Nuestros Valores", path: "/valores" },
+        { name: "Nuestros Pilares", path: "/pilares" },
+        { name: "Instalaciones", path: "/espacio" },
+        { name: "Historia y Visión", path: "/vision-mision" },
       ]
     },
     {
-      title: "¿Qué Ofrecemos?",
-      icon: <Star size={18} />,
+      title: "Propuesta",
       items: [
-        { name: "Inicial", icon: <Globe size={16} />, path: "/inicial" },
-        { name: "Excelencia académica", icon: <Trophy size={16} />, path: "/excelencia" },
-        { name: "Idiomas", icon: <MessageSquare size={16} />, path: "/idiomas" },
-        { name: "Tecnología e innovación", icon: <Laptop size={16} />, path: "/tecnologia" },
-        { name: "Deporte", icon: <Trophy size={16} />, path: "/deporte" },
-        { name: "Arte y cultura", icon: <Music size={16} />, path: "/arte" },
+        { name: "Nivel Inicial", path: "/inicial" },
+        { name: "Excelencia Académica", path: "/excelencia" },
+        { name: "Idiomas", path: "/idiomas" },
+        { name: "Tecnología e Innovación", path: "/tecnologia" },
+        { name: "Deporte", path: "/deporte" },
+        { name: "Arte y Cultura", path: "/arte" },
       ]
     },
     {
       title: "Comunidad",
-      icon: <Users size={18} />,
       items: [
-        { name: "Alumnos", icon: <Users size={16} />, path: "/alumnos" },
-        { name: "Padres de familia", icon: <Users size={16} />, path: "/padres" },
-        { name: "Profesores", icon: <Briefcase size={16} />, path: "/profesores" },
-        { name: "Exalumnos", icon: <GraduationCap size={16} />, path: "/exalumnos" },
+        { name: "Alumnos", path: "/alumnos" },
+        { name: "Padres de Familia", path: "/padres" },
+        { name: "Profesores", path: "/profesores" },
+        { name: "Exalumnos", path: "/exalumnos" },
       ]
     },
-
   ];
 
   return (
-    <div className="min-h-screen font-sans bg-white text-[#0D0D0D] flex flex-col">
-      {/* Top Bar */}
-      <div className="bg-[#0f172a] text-white py-2.5 px-6 text-[11px] md:text-xs hidden md:flex justify-between items-center tracking-wide uppercase font-medium">
-        <div className="flex gap-8 max-w-7xl mx-auto w-full justify-between items-center">
-          <div className="flex gap-6">
-            <span className="flex items-center gap-2 opacity-80 transition-all hover:opacity-100 cursor-default">
-              <Phone size={13} className="text-[#F26513]" /> +51 974 958 865
-            </span>
-            <span className="flex items-center gap-2 opacity-80 transition-all hover:opacity-100 cursor-default">
-              <Mail size={13} className="text-[#F26513]" /> pvilcapoma2022@gmail.com
-            </span>
+    <div className="min-h-screen font-sans bg-white text-slate-900 flex flex-col overflow-x-hidden relative">
+
+      {/* Top Bar - Minimalist Editorial */}
+      <div className="bg-[#0a0a0c] text-white/70 py-2 px-6 hidden md:block border-b border-white/10">
+        <div className="max-w-7xl mx-auto w-full flex justify-between items-center text-[10px] font-medium tracking-[0.1em] uppercase">
+          <div className="flex gap-8">
+            <a href="tel:+51974958865" className="flex items-center gap-2 hover:text-white transition-colors">
+              <Phone size={12} className="text-orange-500" /> +51 974 958 865
+            </a>
+            <a href="mailto:admision@crayons.edu.pe" className="flex items-center gap-2 hover:text-white transition-colors">
+              <Mail size={12} className="text-orange-500" /> admision@crayons.edu.pe
+            </a>
           </div>
-          <div className="flex gap-8 items-center">
-            <div className="flex gap-6 border-r border-white/10 pr-8">
-              <Link to="/login" className="hover:text-[#F26513] transition-colors flex items-center gap-1.5">
-                <UserCheck size={14} /> Intranet
-              </Link>
+          <div className="flex gap-6 items-center">
+            <div className="flex gap-4 pr-6 border-r border-white/10">
+              <a href="#" className="hover:text-orange-500 transition-colors"><Facebook size={12} /></a>
+              <a href="#" className="hover:text-orange-500 transition-colors"><Instagram size={12} /></a>
+              <a href="#" className="hover:text-orange-500 transition-colors"><Youtube size={12} /></a>
             </div>
-            <div className="flex gap-4">
-              <a href="#" className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center hover:bg-[#F26513] hover:border-[#F26513] transition-all duration-300"><Facebook size={12} /></a>
-              <a href="#" className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center hover:bg-[#F26513] hover:border-[#F26513] transition-all duration-300"><Instagram size={12} /></a>
-              <a href="#" className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center hover:bg-[#F26513] hover:border-[#F26513] transition-all duration-300"><Youtube size={12} /></a>
-            </div>
+            <Link to="/login" className="flex items-center gap-2 hover:text-white transition-colors">
+              <UserCheck size={12} className="text-orange-500" /> Intranet
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Header Principal */}
+      {/* Main Header */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1)] py-2" : "bg-white py-4"
+        className={`sticky top-0 z-50 transition-all duration-500 ${scrolled
+          ? "bg-white/90 backdrop-blur-lg shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] py-1.5"
+          : "bg-white py-2 md:py-3"
           }`}
       >
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-8">
-          {/* Logo */}
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-10 md:h-12">          {/* Logo */}
           <Link to="/" className="flex items-center shrink-0">
             <img
               src="https://res.cloudinary.com/dszdc6rh8/image/upload/v1747351782/image_1_vhjpzr.png"
-              alt="Logo Colegio Crayon's"
-              className={`transition-all duration-500 ${scrolled ? "h-11" : "h-14"} w-auto`}
+              alt="Crayon's Logo"
+              className={`transition-all duration-500 object-contain ${scrolled ? "h-7 md:h-8" : "h-8 md:h-10"}`}
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-2">
+          <nav className="hidden lg:flex items-center gap-8">
             {navItems.map((item, idx) => (
               <div
                 key={idx}
-                className="relative group h-full flex items-center"
+                className="relative h-full flex items-center group"
                 onMouseEnter={() => setActiveMegaMenu(item.title)}
                 onMouseLeave={() => setActiveMegaMenu(null)}
               >
-                {item.items ? (
-                  <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm text-[#1e2a5a] hover:text-[#F26513] transition-all duration-300 relative">
-                    {item.title}
-                    <ChevronDown size={14} className={`transition-transform duration-500 ${activeMegaMenu === item.title ? "rotate-180 text-[#F26513]" : ""}`} />
-                    <span className={`absolute bottom-0 left-4 right-4 h-0.5 bg-[#F26513] transform scale-x-0 transition-transform duration-300 origin-left ${activeMegaMenu === item.title ? "scale-x-100" : ""}`}></span>
-                  </button>
-                ) : (
-                  <Link
-                    to={(item as any).path || "#"}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-semibold text-sm text-[#1e2a5a] hover:text-[#F26513] transition-all duration-300 relative group"
-                  >
-                    {item.title}
-                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-[#F26513] transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 origin-left"></span>
-                  </Link>
-                )}
+                <button className="flex items-center gap-1.5 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-800 hover:text-orange-600 transition-colors">
+                  {item.title}
+                  <ChevronDown size={12} className={`transition-transform duration-300 ${activeMegaMenu === item.title ? "rotate-180 text-orange-600" : "text-slate-400"}`} />
+                </button>
 
-                {/* Dropdown Menu - Redesigned */}
-                {item.items && (
-                  <div className={`absolute top-full left-0 pt-2 transition-all duration-500 ease-out ${activeMegaMenu === item.title ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-4"
-                    }`}>
-                    <div className="bg-white/98 backdrop-blur-2xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100/50 p-3 min-w-[320px] overflow-hidden">
-                      {/* Decorative header in dropdown */}
-                      <div className="px-4 py-2 mb-2 border-b border-gray-50 flex items-center justify-between">
-                        <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">{item.title}</span>
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#F26513]"></div>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-1">
-                        {item.items.map((subItem, sIdx) => (
-                          <Link
-                            key={sIdx}
-                            to={subItem.path}
-                            className="flex items-center gap-3.5 p-3 rounded-xl hover:bg-gray-50 group/item transition-all duration-300"
-                          >
-                            <div className="w-10 h-10 rounded-xl bg-[#1e2a5a]/5 flex items-center justify-center text-[#1e2a5a] group-hover/item:bg-[#1e2a5a] group-hover/item:text-white group-hover/item:scale-110 transition-all duration-300 shadow-sm">
-                              {subItem.icon}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="font-bold text-sm text-gray-800 group-hover/item:text-[#F26513] transition-colors">
-                                {subItem.name}
-                              </span>
-                              <span className="text-[11px] text-gray-400 group-hover/item:text-gray-500 transition-colors">
-                                Explorar sección
-                              </span>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
+                {/* Dropdown Menu - Clean Editorial Style */}
+                <div
+                  className={`absolute top-full left-1/2 -translate-x-1/2 pt-4 transition-all duration-300 ease-out origin-top ${activeMegaMenu === item.title
+                    ? "opacity-100 visible scale-100 translate-y-0"
+                    : "opacity-0 invisible scale-95 -translate-y-2"
+                    }`}
+                >
+                  <div className="bg-white rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 w-[240px] overflow-hidden p-2">
+                    <div className="flex flex-col">
+                      {item.items.map((subItem, sIdx) => (
+                        <Link
+                          key={sIdx}
+                          to={subItem.path}
+                          className="px-4 py-3 text-sm font-medium text-slate-600 hover:text-orange-600 hover:bg-orange-50/50 rounded-xl transition-all flex items-center justify-between group/link"
+                        >
+                          {subItem.name}
+                          <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all" />
+                        </Link>
+                      ))}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             ))}
 
-            <div className="flex items-center gap-3 ml-6">
+            <div className="flex items-center gap-4 ml-4">
               <Link
                 to="/contacto"
-                className="px-5 py-2.5 rounded-xl font-bold text-xs text-[#1e2a5a] bg-gray-50 border border-gray-200 hover:bg-white hover:border-[#1e2a5a] hover:shadow-lg transition-all duration-300 active:scale-95"
+                className="px-5 py-2 rounded-full text-[11px] font-medium uppercase tracking-widest text-slate-900 border border-slate-200 hover:border-slate-900 transition-colors"
               >
-                CONTACTO
+                Contacto
               </Link>
               <Link
                 to="/admision"
-                className="bg-[#F26513] hover:bg-[#e05600] text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow-[0_10px_20px_-5px_rgba(242,101,19,0.3)] hover:shadow-[0_12px_25px_-5px_rgba(242,101,19,0.4)] transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95"
+                className="px-5 py-2 rounded-full text-[11px] font-medium uppercase tracking-widest text-white bg-orange-600 hover:bg-orange-700 shadow-[0_10px_20px_-10px_rgba(234,88,12,0.5)] hover:shadow-[0_10px_20px_-5px_rgba(234,88,12,0.6)] transition-all transform hover:-translate-y-0.5"
               >
-                ADMISIÓN 2026
+                Admisión
               </Link>
             </div>
           </nav>
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-3 rounded-xl bg-gray-50 text-[#1e2a5a] hover:bg-gray-100 transition-all active:scale-90"
+            className="lg:hidden p-2 -mr-2 text-slate-900 hover:text-orange-600 transition-colors"
             onClick={toggleMenu}
+            aria-label="Toggle Menu"
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
+      </header>
 
-        {/* Mobile Navigation Menu */}
-        <div className={`lg:hidden fixed inset-0 top-0 bg-white z-[100] transition-transform duration-500 ${isMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}>
-          <div className="p-6 h-full flex flex-col">
-            <div className="flex justify-between items-center mb-8">
-              <img
-                src="https://res.cloudinary.com/dszdc6rh8/image/upload/v1747351782/image_1_vhjpzr.png"
-                alt="Logo"
-                className="h-10 w-auto"
-              />
-              <button onClick={toggleMenu} className="p-3 bg-gray-50 rounded-xl"><X size={24} /></button>
-            </div>
+      {/* Mobile Navigation Overlay */}
+      <div
+        className={`lg:hidden fixed inset-0 z-[100] transition-all duration-500 ${isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
+      >
+        {/* Backdrop */}
+        <div
+          className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-500 ${isMenuOpen ? "opacity-100" : "opacity-0"
+            }`}
+          onClick={toggleMenu}
+        />
 
-            <div className="space-y-6 overflow-y-auto flex-grow pr-2">
+        {/* Menu Panel */}
+        <div
+          className={`absolute top-0 right-0 w-[85%] max-w-[400px] h-[100dvh] bg-white shadow-2xl transition-transform duration-500 ease-out flex flex-col ${isMenuOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+        >
+          <div className="flex justify-between items-center p-6 border-b border-slate-100">
+            <img
+              src="https://res.cloudinary.com/dszdc6rh8/image/upload/v1747351782/image_1_vhjpzr.png"
+              alt="Logo"
+              className="h-8 object-contain"
+            />
+            <button onClick={toggleMenu} className="p-2 -mr-2 text-slate-400 hover:text-slate-900">
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-6 py-8">
+            <div className="space-y-8">
               {navItems.map((item, idx) => (
                 <div key={idx} className="space-y-4">
-                  <div className="flex items-center gap-3 text-[#1e2a5a] font-bold text-lg">
-                    <div className="w-8 h-8 rounded-lg bg-[#1e2a5a]/5 flex items-center justify-center text-[#1e2a5a]">
-                      {item.icon}
-                    </div>
+                  <h4 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-orange-500">
                     {item.title}
+                  </h4>
+                  <div className="flex flex-col gap-3">
+                    {item.items.map((subItem, sIdx) => (
+                      <Link
+                        key={sIdx}
+                        to={subItem.path}
+                        className="text-base font-medium text-slate-600 hover:text-orange-600 transition-colors"
+                        onClick={toggleMenu}
+                      >
+                        {subItem.name}
+                      </Link>
+                    ))}
                   </div>
-                  {item.items ? (
-                    <div className="grid grid-cols-1 gap-2 pl-11">
-                      {item.items.map((subItem, sIdx) => (
-                        <Link
-                          key={sIdx}
-                          to={subItem.path}
-                          className="flex items-center gap-3 py-1 text-gray-500 hover:text-[#F26513] font-medium"
-                          onClick={toggleMenu}
-                        >
-                          {subItem.name}
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
-                    <Link
-                      to={(item as any).path || "#"}
-                      className="block pl-11 text-gray-500 hover:text-[#F26513] font-medium"
-                      onClick={toggleMenu}
-                    >
-                      Ir a {item.title}
-                    </Link>
-                  )}
                 </div>
               ))}
             </div>
+          </div>
 
-            <div className="pt-8 space-y-4 border-t border-gray-100">
-              <Link
-                to="/login"
-                className="flex items-center justify-center gap-3 bg-[#1e2a5a] text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-900/10"
-                onClick={toggleMenu}
-              >
-                <UserCheck size={20} />
-                AULA VIRTUAL
-              </Link>
-              <Link
-                to="/admision"
-                className="flex items-center justify-center bg-[#F26513] text-white py-4 rounded-2xl font-bold shadow-xl shadow-orange-500/10"
-                onClick={toggleMenu}
-              >
-                SOLICITAR ADMISIÓN
-              </Link>
-            </div>
+          <div className="p-6 bg-slate-50 space-y-4">
+            <Link
+              to="/login"
+              className="flex items-center justify-center w-full py-3 rounded-full text-xs font-semibold uppercase tracking-widest text-slate-900 border border-slate-200 hover:border-slate-900 transition-colors bg-white"
+              onClick={toggleMenu}
+            >
+              Aula Virtual
+            </Link>
+            <Link
+              to="/admision"
+              className="flex items-center justify-center w-full py-3 rounded-full text-xs font-semibold uppercase tracking-widest text-white bg-orange-600 hover:bg-orange-700 shadow-lg shadow-orange-600/20 transition-all"
+              onClick={toggleMenu}
+            >
+              Admisión 2026
+            </Link>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="flex-grow">
@@ -275,4 +258,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-

@@ -20,12 +20,14 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function AppSidebarTeacher({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   const menuItems = [
     { id: 'registro', label: 'Registro Asistencia', icon: UserCheck, url: 'registrar-asistencia' },
@@ -47,13 +49,16 @@ export function AppSidebarTeacher({
 
       if (response.ok) {
         localStorage.removeItem('token');
+        queryClient.clear();
         navigate('/login');
       } else {
         localStorage.removeItem('token');
+        queryClient.clear();
         navigate('/login');
       }
     } catch (error) {
       localStorage.removeItem('token');
+      queryClient.clear();
       navigate('/login');
     }
   };
