@@ -55,7 +55,6 @@ export default function RegistrarAsistencia() {
           setAsignaciones([]);
         }
       } catch (error) {
-        console.error("Error fetching asignaciones:", error);
         setAsignaciones([]);
       } finally {
         setLoading(false);
@@ -102,7 +101,6 @@ export default function RegistrarAsistencia() {
           setAlumnos([]);
         }
       } catch (error) {
-        console.error("Error verificando asistencia:", error);
       } finally {
         setLoading(false);
       }

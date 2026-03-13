@@ -21,7 +21,7 @@ export default function ChangePassword() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { token, logout } = useAuth(); // 🔐 token desde AuthContext
+  const { token, logout } = useAuth(); // token desde AuthContext
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,7 +77,6 @@ export default function ChangePassword() {
         navigate("/login");
       }, 2000);
     } catch (err: any) {
-      console.error("Error al cambiar la contraseña:", err);
       setError(
         err.response?.data?.message || "Error al cambiar la contraseña."
       );

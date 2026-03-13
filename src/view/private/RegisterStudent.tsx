@@ -289,7 +289,6 @@ export default function RegisterStudent() {
         throw new Error("No se pudieron extraer datos del PDF");
       }
     } catch (error) {
-      console.error("Error PDF:", error);
       setMessage({ text: "Error al procesar el PDF: " + (error instanceof Error ? error.message : "Error desconocido"), isError: true });
     } finally {
       setIsProcessingPdf(false);

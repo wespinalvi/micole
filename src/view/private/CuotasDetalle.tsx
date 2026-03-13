@@ -109,7 +109,6 @@ const CuotasDetalle = () => {
         const gradesList = await fetchGradesList();
         setGrades(gradesList);
       } catch (error) {
-        console.error("Error loading grades:", error);
       }
     };
     loadGrades();
@@ -126,7 +125,6 @@ const CuotasDetalle = () => {
       const data = await fetchDebtorsReport(selectedGrade, selectedStatus, selectedYear);
       setReportData(data);
     } catch (error) {
-      console.error("Error fetching report:", error);
     } finally {
       setIsReportLoading(false);
     }
@@ -138,7 +136,6 @@ const CuotasDetalle = () => {
       const data = await fetchDailyPayments();
       setDailyPayments(data);
     } catch (error) {
-      console.error("Error fetching daily report:", error);
     } finally {
       setIsDailyLoading(false);
     }
@@ -204,7 +201,6 @@ const CuotasDetalle = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error al descargar la constancia:', error);
       alert('Error al generar la constancia de pago');
     }
   };
@@ -228,7 +224,6 @@ const CuotasDetalle = () => {
         alert('No se encontró el estudiante con el DNI proporcionado');
       }
     } catch (error) {
-      console.error('Error al buscar estudiante:', error);
       setDatosEstudiante(null);
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 403) {
@@ -290,7 +285,6 @@ const CuotasDetalle = () => {
       // Limpiar campos
       setObservaciones('');
     } catch (error) {
-      console.error('Error al procesar pago:', error);
       if (axios.isAxiosError(error) && error.response?.data?.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
@@ -330,7 +324,6 @@ const CuotasDetalle = () => {
       // Limpiar campos
       setObservaciones('');
     } catch (error) {
-      console.error('Error al pagar matrícula:', error);
       if (axios.isAxiosError(error) && error.response?.data?.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {

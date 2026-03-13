@@ -54,7 +54,6 @@ export default function Login() {
         navigate("/");
       }
     } catch (error: unknown) {
-      console.error("Error en login:", error);
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as {
           response: {

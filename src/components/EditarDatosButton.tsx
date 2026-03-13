@@ -122,7 +122,6 @@ export default function EditarDatosButton({
         }
       }
     } catch (error) {
-      console.error("Error al cargar datos del alumno:", error);
       setMessage({ 
         text: "Error al cargar los datos del alumno", 
         isError: true 
@@ -186,7 +185,6 @@ export default function EditarDatosButton({
          setMessage({ text: "Error al actualizar los datos", isError: true });
        }
     } catch (error) {
-      console.error("Error al actualizar datos del alumno:", error);
       setMessage({ 
         text: "Error al actualizar los datos del alumno", 
         isError: true 

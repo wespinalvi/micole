@@ -51,7 +51,7 @@ for (let h = 7; h < 17; h++) {
   HORAS.push(`${String(h).padStart(2, "0")}:30`);
   HORAS.push(`${String(h).padStart(2, "0")}:45`);
 }
-// 07:00 → 17:00 boundary included
+// 07:00 - 17:00 boundary included
 const PX_PER_SLOT = 22; // Aumentado para mejor visibilidad
 const START_MIN = 7 * 60;
 
@@ -385,7 +385,6 @@ export default function ScheduleAssignment() {
     <div style={{ minHeight: "100vh", background: "#fcfcfc", fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }} onMouseUp={handleMouseUp}>
       <div style={{ display: "grid", gridTemplateColumns: "400px 1fr", minHeight: "100vh" }}>
 
-        {/* ── COLUMNA IZQUIERDA: Formulario ── */}
         <div style={{ borderRight: "1px solid #f1f5f9", padding: "40px 32px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 32 }}>
           <div>
             <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em" }}>Nuevo Horario</h1>
@@ -487,7 +486,6 @@ export default function ScheduleAssignment() {
           )}
         </div>
 
-        {/* ── COLUMNA DERECHA: Calendario ── */}
         <div style={{ padding: "40px", background: "#f8fafc" }}>
 
           <div style={{ background: "#fff", border: "1px solid #f1f5f9", borderRadius: "28px", padding: "28px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.03)" }}>

@@ -171,7 +171,6 @@ export default function CuotasProgramar() {
       }
       setIsDialogOpen(false);
     } catch (error) {
-      console.error(error);
       alert("Error al guardar");
     } finally {
       setLoading(false);

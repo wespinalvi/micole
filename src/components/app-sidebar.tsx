@@ -51,10 +51,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         queryClient.clear(); // Limpiar la caché de React Query por seguridad
         navigate('/login');
       } else {
-        console.error('Error al cerrar sesión');
       }
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
     }
   };
 

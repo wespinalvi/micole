@@ -219,7 +219,6 @@ export default function RegisterTeacher() {
         setSuccessMessage(null);
       }
     } catch (error) {
-      console.error("Error al buscar DNI:", error);
       alert("Error al buscar el DNI");
     } finally {
       setSearching(false);

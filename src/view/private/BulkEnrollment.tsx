@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
     Table,
@@ -13,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Upload, FileText, CheckCircle2, XCircle, Trash2, Download, RefreshCw, Database, Save, File } from "lucide-react";
+import { Upload, FileText, CheckCircle2, XCircle, Trash2, RefreshCw, Database, Save, File } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -143,7 +142,6 @@ export default function BulkEnrollment() {
                 });
             }
         } catch (error) {
-            console.error("Error al cargar los costos del año:", error);
         }
     };
 
@@ -253,7 +251,6 @@ export default function BulkEnrollment() {
             }
 
         } catch (error) {
-            console.error('Error al procesar archivos:', error);
             setErrorMessage(
                 error instanceof Error
                     ? `Error: ${error.message}`
@@ -322,7 +319,6 @@ export default function BulkEnrollment() {
                 throw new Error(data.error || 'Respuesta inválida del servidor');
             }
         } catch (error) {
-            console.error('Error al reprocesar archivo:', error);
             setErrorMessage(
                 error instanceof Error
                     ? `Error al reprocesar: ${error.message}`
@@ -385,60 +381,12 @@ export default function BulkEnrollment() {
             setSuccessMessage(`Estudiante ${student.nombres} registrado correctamente`);
 
         } catch (error) {
-            console.error('Error al registrar:', error);
             setErrorMessage(`Error al registrar a ${student.nombres}: ${error instanceof Error ? error.message : 'Error desconocido'}`);
             // Revertir estado a success para permitir reintento
             setStudentsData(prev => prev.map((s, i) => i === index ? { ...s, status: "success" as const } : s));
         }
     };
 
-    // Registrar todos los estudiantes exitosos
-    const handleInsertAll = async () => {
-        const studentsToRegister = studentsData.map((s, i) => ({ student: s, index: i })).filter(item => item.student.status === "success");
-
-        if (studentsToRegister.length === 0) return;
-
-        setIsProcessing(true);
-        let successCount = 0;
-        let errorCount = 0;
-
-        for (const { student, index } of studentsToRegister) {
-            try {
-                // Actualizar UI
-                setStudentsData(prev => prev.map((s, i) => i === index ? { ...s, status: "registering" as const } : s));
-
-                const response = await fetch('http://localhost:3000/api/matricula/matricula/insertar-extraidos', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ datos: student }),
-                });
-
-                if (!response.ok) throw new Error('Failed');
-
-                setStudentsData(prev => prev.map((s, i) => i === index ? { ...s, status: "registered" as const } : s));
-                successCount++;
-            } catch (error) {
-                errorCount++;
-                setStudentsData(prev => prev.map((s, i) => i === index ? { ...s, status: "success" as const } : s));
-            }
-        }
-
-        setIsProcessing(false);
-        setSuccessMessage(`Registro masivo completado: ${successCount} registrados, ${errorCount} fallidos`);
-    };
-
-    const exportData = () => {
-        const successfulData = studentsData.filter(s => s.status === "success");
-        const dataStr = JSON.stringify(successfulData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `matriculas_masivas_${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-    };
 
     const getStatusBadge = (status: StudentData["status"]) => {
         const baseClass = "px-2.5 py-0.5 rounded-md text-xs font-semibold flex items-center gap-1.5 w-fit border";

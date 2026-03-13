@@ -109,7 +109,6 @@ export default function ListTeacher() {
       link.click();
       link.remove();
     } catch (error) {
-      console.error("Error al exportar los datos:", error);
       alert("Error al exportar los datos");
     }
   };

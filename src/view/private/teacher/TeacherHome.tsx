@@ -36,7 +36,6 @@ export default function TeacherHome() {
                     setAsignaciones(data.data || []);
                 }
             } catch (err) {
-                console.error("Error cargando datos del docente:", err);
             } finally {
                 setLoading(false);
             }
@@ -116,7 +115,7 @@ export default function TeacherHome() {
                             Bienvenido
                         </p>
                         <h2 className="text-2xl font-black leading-tight mb-3">
-                            ¡Listo para hoy! 🎉
+                            ¡Listo para hoy!
                         </h2>
                         <p className="text-blue-100 text-sm">
                             Tienes{" "}

@@ -84,7 +84,6 @@ export default function JustificacionesDocente() {
         setJustificaciones([]);
       }
     } catch (err) {
-      console.error(err);
       setJustificaciones([]);
     } finally {
       setLoading(false);
@@ -115,7 +114,6 @@ export default function JustificacionesDocente() {
         setShowDialog(false);
       }
     } catch (error) {
-      console.error("Error processing justification:", error);
     } finally {
       setLoading(false);
     }

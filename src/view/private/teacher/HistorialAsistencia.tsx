@@ -106,7 +106,6 @@ export default function HistorialAsistencia() {
       link.click();
       link.remove();
     } catch (err) {
-      console.error("Error al exportar:", err);
     } finally {
       setLoading(false);
     }

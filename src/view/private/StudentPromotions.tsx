@@ -87,7 +87,6 @@ export default function PromocionAlumnos() {
           }
         }
       } catch (error) {
-        console.error("Error al cargar catálogos:", error);
       }
     };
     fetchCatalogos();
@@ -111,7 +110,6 @@ export default function PromocionAlumnos() {
         setNombreGradoActual(data.nombreGrado);
       }
     } catch (error) {
-      console.error("Error fetching alumnos:", error);
     } finally {
       setLoading(false);
     }
@@ -190,7 +188,6 @@ export default function PromocionAlumnos() {
         ]);
       }
     } catch (error) {
-      console.error("Error en promoción individual:", error);
     } finally {
       setLoading(false);
       setConfirmando(null);
@@ -225,7 +222,6 @@ export default function PromocionAlumnos() {
         ]);
       }
     } catch (error) {
-      console.error("Error en procesamiento masivo:", error);
     } finally {
       setLoading(false);
       setConfirmando(null);
@@ -285,7 +281,7 @@ export default function PromocionAlumnos() {
               </div>
               {periodoActual && (
                 <div style={{ color: "#9ca3af", fontSize: 13, fontWeight: 500 }}>
-                  {periodoSiguiente ? `→ Destino Próximo` : ""}
+                  {periodoSiguiente ? `- Destino Próximo` : ""}
                 </div>
               )}
             </div>
@@ -355,7 +351,7 @@ export default function PromocionAlumnos() {
                   </select>
                 </div>
 
-                <div style={{ color: "#9ca3af", fontSize: 18, paddingTop: 18 }}>→</div>
+                <div style={{ color: "#9ca3af", fontSize: 18, paddingTop: 18 }}>-</div>
 
                 <div>
                   <label style={{ fontSize: 12, color: "#9ca3af", fontWeight: 500, display: "block", marginBottom: 4 }}>DESTINO</label>
@@ -441,7 +437,7 @@ export default function PromocionAlumnos() {
             {/* Aviso 5to */}
             {esUltimoGrado && (
               <div style={{ background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 8, padding: "12px 16px", marginBottom: 14, display: "flex", gap: 10, alignItems: "flex-start" }}>
-                <span style={{ fontSize: 16 }}>⚠️</span>
+                <span style={{ fontSize: 16 }}>Aviso</span>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 13, color: "#9a3412" }}>{nombreGradoActual} — Egreso al finalizar {periodoActual?.anio}</div>
                   <div style={{ fontSize: 12, color: "#c2410c", marginTop: 2 }}>Al egresar, los alumnos ya no figurarán como activos para el próximo ciclo. Esta acción no se puede deshacer fácilmente.</div>
@@ -524,7 +520,7 @@ export default function PromocionAlumnos() {
                                 style={{ background: "none", border: "1px solid #bfdbfe", borderRadius: 6, padding: "5px 12px", fontSize: 12, fontWeight: 600, color: "#2563eb", cursor: "pointer" }}
                                 disabled={!a.puede_promover}
                               >
-                                Promover →
+                                Promover
                               </button>
                             )}
                           </td>
@@ -607,7 +603,7 @@ export default function PromocionAlumnos() {
                       <td style={{ padding: "12px 16px", fontWeight: 700, fontSize: 14, color: "#d97706" }}>{parseFloat(String(a.promedio || 0)).toFixed(1)}</td>
                       <td style={{ padding: "12px 16px" }}>
                         <span style={{ background: "#fce4ec", color: "#c62828", borderRadius: 4, padding: "3px 10px", fontSize: 11, fontWeight: 600 }}>
-                          🚫 Sin acceso {periodoSiguiente?.anio}
+                          Sin acceso {periodoSiguiente?.anio}
                         </span>
                       </td>
                     </tr>
@@ -625,7 +621,7 @@ export default function PromocionAlumnos() {
           <div style={{ background: "#fff", borderRadius: 12, padding: 28, width: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}>
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 18, fontWeight: 700, color: "#111827", marginBottom: 8 }}>
-                {confirmando === "egreso" || (confirmando === "individual" && esUltimoGrado) ? "⚠️ Confirmar Egreso" : "Confirmar Promoción"}
+                {confirmando === "egreso" || (confirmando === "individual" && esUltimoGrado) ? "Confirmar Egreso" : "Confirmar Promoción"}
               </div>
               <div style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.6 }}>
                 {confirmando === "egreso" || (confirmando === "individual" && esUltimoGrado) ? (

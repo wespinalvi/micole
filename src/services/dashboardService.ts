@@ -119,7 +119,6 @@ export const fetchSummaryStats = async (): Promise<DashboardSummaryData | null> 
     }
     return null;
   } catch (error) {
-    console.error("Error fetching dashboard summary stats:", error);
     return null;
   }
 };
@@ -198,7 +197,6 @@ export const fetchDebtorsReport = async (gradeFilter: string = 'Todos', statusFi
     }
     return [];
   } catch (error) {
-    console.error("Error in fetchDebtorsReport:", error);
     return [];
   }
 };
@@ -228,7 +226,6 @@ export const fetchGradesList = async (): Promise<Grade[]> => {
     }
     return [];
   } catch (error) {
-    console.error("Error in fetchGradesList:", error);
     return [];
   }
 };

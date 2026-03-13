@@ -138,7 +138,7 @@ export default function ListStudent() {
     });
 
     setUpdateMessage({
-      text: `✅ Datos actualizados: ${updatedStudent.nombre} ${updatedStudent.ap_p}`,
+      text: `Datos actualizados: ${updatedStudent.nombre} ${updatedStudent.ap_p}`,
       isSuccess: true
     });
 

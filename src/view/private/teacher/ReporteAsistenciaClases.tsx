@@ -52,7 +52,6 @@ export default function ReporteAsistenciaClases() {
                 setMensajeAPI(null);
             }
         } catch (error) {
-            console.error("Error fetching report:", error);
             setReporte([]);
             setMensajeAPI(null);
         } finally {

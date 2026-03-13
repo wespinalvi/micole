@@ -37,7 +37,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = (token: string, role: number | null | undefined) => {
     if (!token) {
-      console.error("Error: Token no proporcionado");
       return;
     }
 
@@ -48,7 +47,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem("roleId", role.toString());
       setRoleId(role);
     } else {
-      console.warn("Advertencia: roleId no definido, usando valor por defecto");
       localStorage.setItem("roleId", "1");
       setRoleId(1);
     }
